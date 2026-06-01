@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OLD FASHIONED | Personal Archive</title>
+    <style>
+        /* 기본 스타일 및 레이아웃 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Pretendard', sans-serif; display: flex; height: 100vh; overflow: hidden; }
+
+        nav {
+            width: 350px; 
+            background-color: #4a463a; 
+            color: white;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            text-align: right; 
+        }
+
+        nav h1 { font-size: 1.5rem; margin-bottom: 2.5rem; letter-spacing: 3px; }
+        nav ul { list-style: none; }
+        nav ul li { 
+            margin-bottom: 1.5rem; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            color: rgba(255,255,255,0.6); 
+            font-size: 1.1rem;
+        }
+        nav ul li:hover { color: #fff; transform: translateX(-8px); }
+        nav ul li.active { color: #fff; font-weight: bold; border-right: 3px solid #fff; padding-right: 10px; }
+
+        main {
+            flex: 1;
+            padding: 4rem;
+            overflow-y: auto;
+            background-color: #f9f2e4;
+        }
+
+        .content-section { display: none; max-width: 1000px; margin: 0 auto; }
+        .content-section.active { display: block; animation: fadeIn 0.6s ease-out; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        h2 { color: #4a463a; margin-bottom: 1rem; }
+
+        /* 다국어 프로필 및 워크 상단 행 배치 스타일 */
+        .profile-header, .work-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 1rem;
+        }
+        h2.profile-title, h2.work-title {
+            margin-bottom: 0; 
+        }
+        .lang-selector, .year-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 0;
+        }
+        .lang-btn {
+            background: none;
+            border: 1px solid #4a463a;
+            color: #4a463a;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .lang-btn:hover {
+            background-color: rgba(74, 70, 58, 0.1);
+        }
+        .lang-btn.active {
+            background-color: #4a463a;
+            color: #f9f2e4;
+        }
+
+        /* 프로필 버튼과 통일감을 준 드롭다운 메뉴 스타일 */
+        .year-select {
+            background-color: transparent;
+            border: 1px solid #4a463a;
+            color: #4a463a;
+            padding: 6px 30px 6px 14px; /* 우측 화살표 여백 확보 */
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+            outline: none;
+            font-family: 'Pretendard', sans-serif;
+            border-radius: 0; /* 각진 스타일 유지 */
+            appearance: none; /* 브라우저 기본 화살표 제거 */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a463a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+            background-repeat: no-repeat;
+            background-position: calc(100% - 10px) center;
+        }
+        .year-select:hover {
+            background-color: rgba(74, 70, 58, 0.1);
+        }
+
+        #profile-text {
+            line-height: 1.8;
+            color: #4a463a;
+            white-space: pre-line;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        /* ART 섹션 그리드 */
+        .art-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .art-item {
+            background: #ffffff;
+            border-radius: 2px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(74, 70, 58, 0.08);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .art-item:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(74, 70, 58, 0.15); }
+        .art-item img { 
+            width: 100%; 
+            height: 200px; 
+            object-fit: cover; 
+            object-position: top; /* 이미지의 상단(머리 쪽)을 기준으로 크롭 */
+            background-color: #eee; 
+        }
+        .art-item-info { padding: 18px; }
+        .art-item-info strong { display: block; margin-bottom: 6px; color: #4a463a; }
+        .art-item-info span { color: #9a9587; font-size: 0.85rem; }
+
+        /* 모달 관련 CSS */
+        #image-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+
+        #image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* 모바일 대응 */
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            nav { width: 100%; height: auto; padding: 2rem 1.5rem; text-align: center; justify-content: flex-start; }
+            nav ul { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+            nav ul li.active { border-right: none; border-bottom: 2px solid #fff; padding-right: 0; padding-bottom: 5px; }
+            
+            .profile-header, .work-header { flex-direction: column; align-items: center; gap: 15px; }
+        }
+
+        /* 프로필 이미지 컨테이너 스타일 (왼쪽 정렬) */
+        .profile-image-container {
+            display: flex;
+            justify-content: flex-start; 
+            margin-top: 1.5rem;          
+            margin-bottom: 0.5rem;       
+        }
+
+        /* 원형 프로필 이미지 스타일 */
+        .profile-image {
+            width: 130px;                
+            height: 130px;
+            border-radius: 50%;          
+            object-fit: cover;           
+            box-shadow: 0 4px 12px rgba(74, 70, 58, 0.08); 
+            background-color: #eee;
+        }
+
+        /* 모바일 대응 수정 */
+        @media (max-width: 900px) {
+            .profile-image-container { justify-content: center; margin: 1.5rem 0; }
+        }
+
+        /* 슬라이드쇼 컨테이너 전체 레이아웃 (1:1 비율 유지) */
+        .slideshow-container {
+            max-width: 100%;
+            width: 100%;
+            aspect-ratio: 1 / 1; 
+            position: relative;
+            margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(74, 70, 58, 0.08);
+            background-color: #eee;
+        }
+
+        /* 모든 슬라이드 영역 설정 */
+        .mySlides {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 슬라이드 내 이미지 크롭 기준 수정 */
+        .mySlides img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            object-position: top; 
+        }
+
+        /* 이전/다음 버튼 스타일 */
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            padding: 16px;
+            margin-top: -22px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            transition: 0.3s ease;
+            border-radius: 0 3px 3px 0;
+            user-select: none;
+            background-color: rgba(74, 70, 58, 0.3); 
+        }
+
+        .next {
+            right: 0;
+            border-radius: 3px 0 0 3px;
+        }
+
+        .prev:hover, .next:hover {
+            background-color: rgba(74, 70, 58, 0.8);
+        }
+
+        /* 하단 내비게이션 도트 영역 */
+        .dot-container {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .dot {
+            cursor: pointer;
+            height: 8px;
+            width: 8px;
+            margin: 0 5px;
+            background-color: rgba(74, 70, 58, 0.3);
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.6s ease;
+        }
+
+        .dot.active, .dot:hover {
+            background-color: #4a463a; 
+        }
+
+        /* 슬라이드 전환 애니메이션 (Fade) */
+        .fade {
+            animation-name: fade;
+            animation-duration: 1.5s;
+        }
+
+        @keyframes fade {
+            from { opacity: .4 } 
+            to { opacity: 1 }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>OLD FASHIONED</h1>
+        <ul>
+            <li onclick="showSection('TOP')" class="menu-item active">TOP</li>
+            <li onclick="showSection('PROFILE')" class="menu-item">PROFILE</li>
+            <li onclick="showSection('WORK')" class="menu-item">WORK</li>
+            <li onclick="showSection('CONTACT')" class="menu-item">CONTACT</li> 
+        </ul>
+    </nav>
+
+    <main id="content-area">
+        <section id="TOP" class="content-section active">
+            <h2>Welcome</h2>
+            <p style="font-family: 'Georgia', serif; color: #9a9587; font-size: 1.1rem; letter-spacing: 1px; margin-top: -5px;">
+                - Want to be classic, not outdated.
+            </p>
+            <hr style="margin:20px 0; border:0; border-top:1px solid rgba(74,70,58,0.1);">
+            
+            <div class="slideshow-container">
+                <div class="mySlides fade">
+                    <img src="https://pbs.twimg.com/media/HHkA5WObYAAj-qz?format=jpg&name=4096x4096" alt="Slide 1">
+                </div>
+                <div class="mySlides fade">
+                    <img src="https://pbs.twimg.com/media/HHSrBvsbIAA-FfP?format=jpg&name=4096x4096" alt="Slide 2">
+                </div>
+                <div class="mySlides fade">
+                    <img src="https://pbs.twimg.com/media/HI7gbnybkAA1VuI?format=jpg&name=4096x4096" alt="Slide 3">
+                </div>
+                <div class="mySlides fade">
+                    <img src="https://pbs.twimg.com/media/GxWk8pXagAAR4hk?format=jpg&name=4096x4096" alt="Slide 4">
+                </div>
+                <div class="mySlides fade">
+                    <img src="https://pbs.twimg.com/media/HCk0KpUawAYzLLN?format=jpg&name=4096x4096" alt="Slide 5">
+                </div>
+
+                <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+                <a class="next" onclick="plusSlides(1)">&#10095;</a>
+            </div>
+
+            <div class="dot-container">
+                <span class="dot" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+                <span class="dot" onclick="currentSlide(3)"></span>
+                <span class="dot" onclick="currentSlide(4)"></span>
+                <span class="dot" onclick="currentSlide(5)"></span>
+            </div>
+
+            <div style="padding: 20px; border-radius: 2px; margin-top: 2.5rem;">
+                <p style="font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; font-size: 0.85rem;">- CURRENT STATUS</p>
+                <p style="font-size: 1.05rem;">🟢 Commission is <strong>OPEN</strong> via <a href="https://vgen.co/imoldfashioned_/characters" target="_blank" style="color: #4a463a; text-decoration: underline;">VGen</a></p>
+            </div>
+        </section>
+        
+        <section id="PROFILE" class="content-section">
+            <div class="profile-header">
+                <h2 class="profile-title">Profile</h2>
+                <div class="lang-selector">
+                    <button class="lang-btn active" onclick="changeLang('KR')">KR</button>
+                    <button class="lang-btn" onclick="changeLang('JP')">JP</button>
+                    <button class="lang-btn" onclick="changeLang('EN')">EN</button>
+                </div>
+            </div>
+    
+            <div class="profile-image-container">
+                <img src="https://pbs.twimg.com/profile_images/1733835532680237056/D2tnbkt5_400x400.jpg" alt="OLD FASHIONED Profile" class="profile-image">
+            </div>
+
+            <hr style="margin: 25px 0 20px 0; border: 0; border-top: 1px solid rgba(74, 70, 58, 0.1);">
+            <p id="profile-text"></p>
+        </section>
+        
+        <section id="WORK" class="content-section">
+            <div class="work-header">
+                <h2 class="work-title">Gallery</h2>
+                <div class="year-selector">
+                    <select class="year-select" id="filter-year" onchange="filterByYear(this.value)">
+                        <option value="ALL">ALL</option>
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
+                    </select>
+                </div>
+            </div>
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid rgba(74, 70, 58, 0.1);">
+            <div class="art-grid" id="art-container"></div>
+        </section>
+
+        <section id="CONTACT" class="content-section">
+            <h2>Contact</h2>
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid rgba(74, 70, 58, 0.1);">
+            <ul style="list-style: none; line-height: 2;">
+                <li>E-Mail: <a href="mailto:lurker26@gmail.com" target="_blank" style="color: #4a463a; text-decoration: underline; font-weight: 500;">lurker26@gmail.com</a></li><br>
+                <li>X (Twitter): <a href="https://x.com/imoldfashioned_" target="_blank" style="color: #4a463a; text-decoration: underline; font-weight: 500;">@imoldfashioned_</a></li><br>
+                <li>Bluesky: <a href="https://bsky.app/profile/imoldfashioned.bsky.social" target="_blank" style="color: #4a463a; text-decoration: underline; font-weight: 500;">@imoldfashioned</a></li><br>
+                <li>Pixiv: <a href="https://www.pixiv.net/users/10437549" target="_blank" style="color: #4a463a; text-decoration: underline; font-weight: 500;">@imoldfashioned</a></li><br>
+                <li>Instagram: <a href="https://www.instagram.com/im0ldfashioned/" target="_blank" style="color: #4a463a; text-decoration: underline; font-weight: 500;">@im0ldfashioned</a></li><br>
+            </ul>
+        </section>
+    </main>
+
+    <div id="image-modal" onclick="closeModal()">
+        <img id="modal-img" src="" alt="Full Image">
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+                if(item.textContent === sectionId) item.classList.add('active');
+            });
+        }
+
+        const artData = [
+            { title: "Fan Art #67", date: "2026-05-24", img: "https://pbs.twimg.com/media/HJFjccIaoAAYVPZ?format=jpg&name=4096x4096" },
+            { title: "Fan Art #66", date: "2026-05-22", img: "https://pbs.twimg.com/media/HI7gbnybkAA1VuI?format=jpg&name=4096x4096" },
+            { title: "Fan Art #65", date: "2026-05-17", img: "https://pbs.twimg.com/media/HIgoH4EaMAAyNNA?format=jpg&name=4096x4096" },
+            { title: "Fan Art #64", date: "2026-05-14", img: "https://pbs.twimg.com/media/HINYTlmboAAARIg?format=jpg&name=4096x4096" },
+            { title: "Fan Art #63", date: "2026-05-05", img: "https://pbs.twimg.com/media/HHkA5WObYAAj-qz?format=jpg&name=4096x4096" },
+            { title: "Fan Art #62", date: "2026-05-02", img: "https://pbs.twimg.com/media/HHSrBvsbIAA-FfP?format=jpg&name=4096x4096" },
+            { title: "Sketch #05", date: "2026-04-27", img: "https://pbs.twimg.com/media/HG64EGxbgAE_5ZI?format=jpg&name=4096x4096" },
+            { title: "Doodle #26", date: "2026-04-27", img: "https://pbs.twimg.com/media/HG63F7WbsAAcYCe?format=jpg&name=4096x4096" },
+            { title: "Fan Art #61", date: "2026-03-22", img: "https://pbs.twimg.com/media/HEAY9APaoAAkH03?format=jpg&name=4096x4096" },
+            { title: "Fan Art #60", date: "2026-03-16", img: "https://pbs.twimg.com/media/HDdsCv6aMAAxjPl?format=jpg&name=4096x4096" },
+            { title: "Study #05", date: "2026-03-12", img: "https://pbs.twimg.com/media/HDNv7HRbQAc-O0j?format=jpg&name=4096x4096" },
+            { title: "Study #04", date: "2026-03-11", img: "https://pbs.twimg.com/media/HDIpS1UaMAAIaN6?format=jpg&name=4096x4096" },
+            { title: "Study #03", date: "2026-03-10", img: "https://pbs.twimg.com/media/HDDl4PKaMAY_oxi?format=jpg&name=4096x4096" },
+            { title: "Doodle #25", date: "2026-03-10", img: "https://pbs.twimg.com/media/HC-mVrCbkAANcaE?format=jpg&name=large" },
+            { title: "Study #02", date: "2026-03-09", img: "https://pbs.twimg.com/media/HC-PyEbbgAAB0SX?format=jpg&name=4096x4096" },
+            { title: "Study #01", date: "2026-03-08", img: "https://pbs.twimg.com/media/HC4rluhb0AAa9Kb?format=jpg&name=4096x4096" },
+            { title: "Sketch #04", date: "2026-03-08", img: "https://pbs.twimg.com/media/HC3pYXXbkAAl5rA?format=jpg&name=4096x4096" },
+            { title: "Fan Art #59", date: "2026-03-08", img: "https://pbs.twimg.com/media/HC3LQ8absAA6zWe?format=jpg&name=4096x4096" },
+            { title: "Fan Art #58", date: "2026-03-05", img: "https://pbs.twimg.com/media/HCk0KpUawAYzLLN?format=jpg&name=4096x4096" },
+            { title: "Doodle #24", date: "2026-03-03", img: "https://pbs.twimg.com/media/HCaj4zWbMAI_OGJ?format=jpg&name=4096x4096" },
+            { title: "Doodle #23", date: "2026-03-01", img: "https://pbs.twimg.com/media/HCT5s48bEAQ2BCQ?format=jpg&name=4096x4096" },
+            { title: "Fan Art #57", date: "2026-02-28", img: "https://pbs.twimg.com/media/HCO6xpvbEAQ59bS?format=jpg&name=4096x4096" },
+            { title: "Doodle #22", date: "2026-02-21", img: "https://pbs.twimg.com/media/HBr0bsqbIAA_HaR?format=jpg&name=4096x4096" },
+            { title: "Doodle #21", date: "2026-02-15", img: "https://pbs.twimg.com/media/HBIL_hhbcAAVG7J?format=jpg&name=4096x4096" },
+            { title: "Fan Art #56", date: "2026-02-11", img: "https://pbs.twimg.com/media/HA4BF0JbUAAqVBQ?format=jpg&name=4096x4096" },
+            { title: "Fan Art #55", date: "2026-02-04", img: "https://pbs.twimg.com/media/HAT_spBaMAE_p6D?format=jpg&name=4096x4096" },
+            { title: "Doodle #20", date: "2026-01-31", img: "https://pbs.twimg.com/media/G_65RqbbMAI4fQm?format=jpg&name=4096x4096" },
+            { title: "Doodle #19", date: "2026-01-30", img: "https://pbs.twimg.com/media/G_6FZQEbsAAFK9a?format=jpg&name=4096x4096" },
+            { title: "Fan Art #54", date: "2026-01-28", img: "https://pbs.twimg.com/media/G_ttExubAAElX6N?format=jpg&name=4096x4096" },
+            { title: "Fan Art #53", date: "2025-11-07", img: "https://pbs.twimg.com/media/G5KK_xnbAAAxQNN?format=jpg&name=4096x4096" },
+            { title: "Fan Art #52", date: "2025-11-01", img: "https://pbs.twimg.com/media/G4rTwTsbQAorHsc?format=jpg&name=4096x4096" },
+            { title: "Fan Art #51", date: "2025-10-26", img: "https://pbs.twimg.com/media/G4MNnZpXkAACfB4?format=jpg&name=4096x4096" },
+            { title: "Doodle #18", date: "2025-10-26", img: "https://pbs.twimg.com/media/G4Kq66FXEAAQaP-?format=jpg&name=large" },
+            { title: "Sketch #03", date: "2025-10-05", img: "https://pbs.twimg.com/media/G2gAf40aMAARxji?format=jpg&name=4096x4096" },
+            { title: "Doodle #17", date: "2025-09-21", img: "https://pbs.twimg.com/media/G1XleribMAAVTnU?format=jpg&name=medium" },
+            { title: "Sketch #02", date: "2025-08-29", img: "https://pbs.twimg.com/media/GzhoaJnbkAURfXS?format=png&name=medium" },
+            { title: "Fan Art #50", date: "2025-08-20", img: "https://pbs.twimg.com/media/GyzASujbMAA5umR?format=jpg&name=4096x4096" },
+            { title: "Fan Art #49", date: "2025-08-02", img: "https://pbs.twimg.com/media/GxWk8pXagAAR4hk?format=jpg&name=4096x4096" },
+            { title: "Commission #02", date: "2025-07-21", img: "https://pbs.twimg.com/media/GwYRyq6XIAAIvBU?format=jpg&name=4096x4096" },
+            { title: "Commission #01", date: "2025-07-12", img: "https://pbs.twimg.com/media/GvoUy1MX0AAWncq?format=jpg&name=large" },
+            { title: "Sketch #01", date: "2025-07-04", img: "https://pbs.twimg.com/media/Gu8XUxCb0AE18Nv?format=jpg&name=4096x4096" },
+            { title: "Fan Art #48", date: "2025-07-03", img: "https://pbs.twimg.com/media/Gu3U2SOXgAAlYpl?format=jpg&name=4096x4096" },
+            { title: "Doodle #16", date: "2025-06-29", img: "https://pbs.twimg.com/media/Gumlpp6WQAA9afp?format=jpg&name=4096x4096" },
+            { title: "Fan Art #47", date: "2025-06-28", img: "https://pbs.twimg.com/media/GuiYfugbkAAfLnt?format=jpg&name=4096x4096" },
+            { title: "Doodle #15", date: "2025-06-21", img: "https://pbs.twimg.com/media/Gt5YbAYWsAAFAF2?format=jpg&name=medium" },
+            { title: "Fan Art #46", date: "2025-06-07", img: "https://pbs.twimg.com/media/Gszl9GvasAAoosv?format=jpg&name=4096x4096" },
+            { title: "Fan Art #45", date: "2025-05-24", img: "https://pbs.twimg.com/media/GruLCxxWYAA4VHC?format=jpg&name=4096x4096" },
+            { title: "Fan Art #44", date: "2025-05-17", img: "https://pbs.twimg.com/media/GrJmRJUWkAAvYcy?format=jpg&name=4096x4096" },
+            { title: "Doodle #14", date: "2025-04-16", img: "https://pbs.twimg.com/media/GoqeIAAWQAAlkwv?format=jpg&name=4096x4096" },
+            { title: "Doodle #13", date: "2025-04-06", img: "https://pbs.twimg.com/media/Gn1Q5qIbYAERzZ9?format=jpg&name=4096x4096" },
+            { title: "Fan Art #43", date: "2025-04-05", img: "https://pbs.twimg.com/media/GnwwgaQbYAUdHO5?format=jpg&name=4096x4096" },
+            { title: "Doodle #12", date: "2025-03-30", img: "https://pbs.twimg.com/media/GnRYIGybUAAIrp9?format=jpg&name=4096x4096" },
+            { title: "Doodle #11", date: "2025-03-29", img: "https://pbs.twimg.com/media/GnIum70bgAIikLa?format=jpg&name=4096x4096" },
+            { title: "Fan Art #42", date: "2025-03-25", img: "https://pbs.twimg.com/media/Gm5NN2GbsAAiMh3?format=jpg&name=4096x4096" },
+            { title: "Fan Art #41", date: "2025-03-11", img: "https://pbs.twimg.com/media/Gl2OHfNbgAAMh9K?format=jpg&name=4096x4096" },
+            { title: "Fan Art #40", date: "2025-02-23", img: "https://pbs.twimg.com/media/GkekGLtaoAAoMnQ?format=jpg&name=4096x4096" },
+            { title: "Fan Art #39", date: "2024-12-11", img: "https://pbs.twimg.com/media/Gee1l9aaEAIf9O0?format=jpg&name=4096x4096" },
+            { title: "Fan Art #38", date: "2024-11-20", img: "https://pbs.twimg.com/media/Gcwg83qbcAA9KQ6?format=jpg&name=4096x4096" },
+            { title: "Fan Art #37", date: "2024-11-16", img: "https://pbs.twimg.com/media/GccC6wnboAAfUkW?format=jpg&name=4096x4096" },
+            { title: "Doodle #10", date: "2024-11-11", img: "https://pbs.twimg.com/media/GcFln-baoAAC-YE?format=jpg&name=4096x4096" },
+            { title: "Fan Art #36", date: "2024-11-10", img: "https://pbs.twimg.com/media/GcASG_racAA09dz?format=jpg&name=4096x4096" },
+            { title: "Fan Art #35", date: "2024-10-20", img: "https://pbs.twimg.com/media/GaVYUd-bQAAT7tD?format=jpg&name=4096x4096" },
+            { title: "Fan Art #34", date: "2024-10-06", img: "https://pbs.twimg.com/media/GZMIp-JaEAAzwea?format=jpg&name=4096x4096" },
+            { title: "Fan Art #33", date: "2024-10-01", img: "https://pbs.twimg.com/media/GYu_i5vakAAMqhS?format=jpg&name=4096x4096" },
+            { title: "Doodle #09", date: "2024-09-23", img: "https://pbs.twimg.com/media/GYKoyjVbYAAHADb?format=jpg&name=large" },
+            { title: "Doodle #08", date: "2024-09-23", img: "https://pbs.twimg.com/media/GYFus0nbIAAT_S0?format=jpg&name=4096x4096" },
+            { title: "Fan Art #32", date: "2024-09-21", img: "https://pbs.twimg.com/media/GX-tCCLaUAAKbYS?format=jpg&name=4096x4096" },
+            { title: "Fan Art #31", date: "2024-08-28", img: "https://pbs.twimg.com/media/GWEm9RKb0AAH4DI?format=jpg&name=4096x4096" },
+            { title: "Fan Art #30", date: "2024-08-18", img: "https://pbs.twimg.com/media/GVPadB0aEAAl9Ld?format=jpg&name=large" },
+            { title: "Fan Art #29", date: "2024-08-15", img: "https://pbs.twimg.com/media/GVA7XXFaUAA9A0g?format=jpg&name=large" },
+            { title: "Fan Art #28", date: "2024-08-03", img: "https://pbs.twimg.com/media/GUC90EjacAAKaTF?format=jpg&name=large" },
+            { title: "Fan Art #27", date: "2024-07-31", img: "https://pbs.twimg.com/media/GTvwgzIbYAEDNtO?format=jpg&name=4096x4096" },
+            { title: "Fan Art #26", date: "2024-07-23", img: "https://pbs.twimg.com/media/GTLMfGQbgAAoJmX?format=jpg&name=large" },
+            { title: "Fan Art #25", date: "2024-07-14", img: "https://pbs.twimg.com/media/GScvPF-XQAE_nzH?format=jpg&name=large" },
+            { title: "Fan Art #24", date: "2024-07-12", img: "https://pbs.twimg.com/media/GSSx2pJagAAf6mV?format=jpg&name=large" },
+            { title: "Fan Art #23", date: "2024-07-07", img: "https://pbs.twimg.com/media/GR0C-xNacAAeMfO?format=jpg&name=large" },
+            { title: "Doodle #07", date: "2024-07-02", img: "https://pbs.twimg.com/media/GRfSe5Sb0AEyIi4?format=jpg&name=large" },
+            { title: "Doodle #06", date: "2024-07-02", img: "https://pbs.twimg.com/media/GRaSAg7aYAAcovN?format=jpg&name=large" },
+            { title: "Fan Art #22", date: "2024-06-30", img: "https://pbs.twimg.com/media/GRU8dP3bcAAcbl1?format=jpg&name=large" },
+            { title: "Doodle #05", date: "2024-06-28", img: "https://pbs.twimg.com/media/GRFr6EKbkAAxu3g?format=jpg&name=4096x4096" },
+            { title: "Doodle #04", date: "2024-06-27", img: "https://pbs.twimg.com/media/GRAjhhIbIAAW5NO?format=jpg&name=large" },
+            { title: "Doodle #03", date: "2024-06-21", img: "https://pbs.twimg.com/media/GQme-MlakAclck8?format=jpg&name=4096x4096" },
+            { title: "Fan Art #21", date: "2024-06-20", img: "https://pbs.twimg.com/media/GQhlJG1acAADenP?format=jpg&name=4096x4096" },
+            { title: "Fan Art #20", date: "2024-06-12", img: "https://pbs.twimg.com/media/GP4XrhGacAEj1HV?format=jpg&name=4096x4096" },
+            { title: "Fan Art #19", date: "2024-06-08", img: "https://pbs.twimg.com/media/GPhbsvubYAA5vgA?format=jpg&name=large" },
+            { title: "Fan Art #18", date: "2024-05-30", img: "https://pbs.twimg.com/media/GOwYpdTaMAAWV9F?format=jpg&name=large" },
+            { title: "Fan Art #17", date: "2024-05-25", img: "https://pbs.twimg.com/media/GObNYniaEAA5WoZ?format=jpg&name=large" },
+            { title: "Fan Art #16", date: "2024-05-18", img: "https://pbs.twimg.com/media/GN23YzLbMAAC8TV?format=jpg&name=4096x4096" },
+            { title: "Fan Art #15", date: "2024-05-03", img: "https://pbs.twimg.com/media/GMm3o_5aYAAMv4t?format=jpg&name=4096x4096" },
+            { title: "Fan Art #14", date: "2024-05-01", img: "https://pbs.twimg.com/media/GMc1Is-bsAA6cLk?format=jpg&name=4096x4096" },
+            { title: "Fan Art #13", date: "2024-04-28", img: "https://pbs.twimg.com/media/GMNcD8hawAAnok7?format=jpg&name=large" },
+            { title: "Fan Art #12", date: "2024-04-25", img: "https://pbs.twimg.com/media/GL-FK3_bsAAKZoZ?format=jpg&name=large" },
+            { title: "Fan Art #11", date: "2024-04-21", img: "https://pbs.twimg.com/media/GLra4S9bEAE-yhY?format=jpg&name=large" },
+            { title: "Fan Art #10", date: "2024-04-20", img: "https://pbs.twimg.com/media/GLnaQdibIAAyYXK?format=jpg&name=large" },
+            { title: "Fan Art #09", date: "2024-04-14", img: "https://pbs.twimg.com/media/GLHA9fJbIAASCrn?format=jpg&name=large" },
+            { title: "Fan Art #08", date: "2024-04-10", img: "https://pbs.twimg.com/media/GKziOk8bAAAH2-V?format=jpg&name=large" },
+            { title: "Fan Art #07", date: "2024-04-09", img: "https://pbs.twimg.com/media/GKspXHPbcAAdg0P?format=jpg&name=large" },
+            { title: "Fan Art #06", date: "2024-04-07", img: "https://pbs.twimg.com/media/GKjdrRFbMAAM6xN?format=jpg&name=large" },
+            { title: "Fan Art #05", date: "2024-04-06", img: "https://pbs.twimg.com/media/GKeEki8aQAAaWZS?format=jpg&name=large" },
+            { title: "Doodle #02", date: "2024-03-31", img: "https://pbs.twimg.com/media/GKADBnSakAE6Rqa?format=jpg&name=large" },
+            { title: "Fan Art #04", date: "2024-03-31", img: "https://pbs.twimg.com/media/GJ-TCkYaIAA9GjQ?format=jpg&name=large" },
+            { title: "Doodle #01", date: "2024-03-28", img: "https://pbs.twimg.com/media/GJw2CwJXkAAvlNW?format=jpg&name=4096x4096" },
+            { title: "Fan Art #03", date: "2024-03-26", img: "https://pbs.twimg.com/media/GJmarodbIAA5OmC?format=jpg&name=large" },
+            { title: "Fan Art #02", date: "2024-02-12", img: "https://pbs.twimg.com/media/GGJFFckbAAA89ik?format=jpg&name=4096x4096" },
+            { title: "Fan Art #01", date: "2024-02-04", img: "https://pbs.twimg.com/media/GFf1q6nbcAAMZHM?format=jpg&name=4096x4096" }
+        ];
+
+        const profileData = {
+            KR: "서브컬쳐 기반의 팬아트와 개인작 일러스트를 그리는 오타쿠.\n광범위한 취향으로 인해 그리고 싶은 것도, 하고 싶은 스타일도 다양.\n작업물 퀄리티 향상과 개인적인 발전을 위해 항시 수련 중.\n\n🎨 애호 장르\n- 홀로라이브, 우마무스메, 명일방주, 니케, 호요버스 게임, 명조, 동방프로젝트, 보석의 나라, 라스트오리진, 마마마\n\n📝 작업 가능 범위\n- 개인 소장용 일러스트, 캐릭터 디자인·원화, 소설 표지·삽화, MV 일러스트, 굿즈 아트워크\n\n📝 NG\n- R18, 정치 및 종교 외 기타 논란 소지가 있는 작업, 특정 집단 비하 목적의 작업,\n- 그 외 실력 또는 성향 문제로 작업이 불가능한 경우 거절할 수 있습니다.\n\n⚠️ 활용 범위\n- 일반 커미션의 경우 개인 소장 및 게시(또는 개인소장용 굿즈 제작)까지만 가능합니다.\n- 상업적 이용 및 2차 수정/가공이 필요한 경우 별도 문의 부탁드리며\n- AI 학습 용도, 또는 AI를 활용한 수정/가공은 절대 거절합니다.",
+            JP: "サブカルチャーベース of ファンアートと個人作イラストを描くオタク。\n広範な趣味のため描きたいものも、やりたいスタイルも多様。\n作業物のクオリティ向上と個人的な発展のために常に修練中。\n\n* 日本語は初心者なので、翻訳機を多く使用する点をご了承ください。\n\n🎨 愛好ジャンル\n- ホロライブ、ウマ娘、アークナイツ、ニケ、ホヨバースゲーム、鳴潮、東方プロジェクト、宝石の国、ラストオリジン、まどマギ\n\n📝 作業可能範囲\n- 個人所蔵用イラスト、キャラクターデザイン・原画、小説表紙・挿絵、MVイラスト、グッズアートワーク\n\n📝 NG\n- R18、政治および宗教外のその他論乱の素地がある作業、特定集団を卑下する目的の作業、\n- その他、実力または傾向の問題で作業が不可能な場合はお断りすることがあります。\n\n⚠️ 活用範囲\n- 一般コミッションの場合、個人所蔵および掲示（または個人所蔵用グッズ製作）まで可能です。\n- 商業的利用および二次修正/加工が必要な場合は別途お問い合わせをお願いし、\n- AI学習用途、またはAIを活用した修正/加工は絶対に断ります。",
+            EN: "An otaku who draws subculture-based fanart and personal illustrations.\nDue to broad tastes, the things I want to draw and the styles I want to do are diverse.\nAlways training for artwork quality improvement and personal development.\n\n* Since my English is intermediate, please understand that I often use a translator.\n\n🎨 Main Interest\n- Hololive, Uma Musume, Arknights, Nikke, Hoyoverse games, Wuthering Waves, Touhou Project, Land of the Lustrous, Last Origin, Madoka Magica\n\n📝 Available Work Scope\n- Personal-use illustrations, character design/concept art, novel covers/illustrations, MV illustrations, merchandise artwork\n\n📝 NG\n- R18, political, religious, or other controversial works, works intended to demean specific groups,\n- Other than that, works may be declined if they are impossible due to skill or inclination issues.\n\n⚠️ Usage Scope\n- In the case of general commissions, only personal possession and posting (or producing personal-use merchandise) are allowed.\n- If commercial use and secondary modification/processing are required, please inquire separately,\n- Usage for AI training, or modification/processing utilizing AI, is absolutely refused."
+        };
+
+        function changeLang(langCode) {
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.textContent === langCode) btn.classList.add('active');
+            });
+
+            const pText = document.getElementById('profile-text');
+            if(pText) {
+                pText.textContent = profileData[langCode];
+                pText.style.animation = 'none';
+                pText.offsetHeight;
+                pText.style.animation = 'fadeIn 0.4s ease-out';
+            }
+        }
+
+        /* 데이터를 인자로 받아 렌더링하도록 뼈대 함수 수정 */
+        function renderArts(dataToRender) {
+            const container = document.getElementById('art-container');
+            if(!container) return;
+            
+            container.innerHTML = dataToRender.map(item => `
+                <div class="art-item" onclick="openModal('${item.img}')">
+                    <img src="${item.img}" alt="${item.title}">
+                    <div class="art-item-info">
+                        <strong>${item.title}</strong>
+                        <span>${item.date}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        /* 년도별 필터링 연산 로직 함수 추가 */
+        function filterByYear(year) {
+            if (year === 'ALL') {
+                renderArts(artData);
+            } else {
+                // date 문자열의 앞 4자리가 선택한 년도와 일치하는 데이터만 추출
+                const filtered = artData.filter(item => item.date.startsWith(year));
+                renderArts(filtered);
+            }
+        }
+
+        function openModal(imgSrc) {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-img');
+            modalImg.src = imgSrc;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-img');
+            if(modal) modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        /* 슬라이드쇼 및 5초 자동 전환 로직 */
+        let slideIndex = 1;
+        let slideTimer = null;
+
+        function startSlideTimer() {
+            clearInterval(slideTimer);
+            slideTimer = setInterval(function() {
+                plusSlides(1);
+            }, 5000);
+        }
+
+        function plusSlides(n) {
+            showSlides(slideIndex += n);
+            startSlideTimer(); 
+        }
+
+        function currentSlide(n) {
+            showSlides(slideIndex = n);
+            startSlideTimer(); 
+        }
+
+        function showSlides(n) {
+            let i;
+            let slides = document.getElementsByClassName("mySlides");
+            let dots = document.getElementsByClassName("dot");
+            
+            if (!slides.length) return; 
+            
+            if (n > slides.length) { slideIndex = 1 }    
+            if (n < 1) { slideIndex = slides.length }
+            
+            for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";  
+            }
+            for (i = 0; i < dots.length; i++) {
+                dots[i].className = dots[i].className.replace(" active", "");
+            }
+            
+            slides[slideIndex-1].style.display = "block";  
+            if(dots[slideIndex-1]) dots[slideIndex-1].className += " active";
+        }
+
+        window.onload = function() {
+            changeLang('KR');
+            renderArts(artData); // 초기 로드 시 전체 데이터 전달
+            showSlides(slideIndex); 
+            startSlideTimer(); 
+        };
+    </script>
+</body>
+</html>
