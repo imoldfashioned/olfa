@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JLPT 학습 대시보드</title>
+    <style>
+        /* 기본 스타일 리셋 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* 최상단 등급 메뉴바 */
+        .top-navbar {
+            background-color: #1e293b;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .top-navbar button {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .top-navbar button:hover {
+            color: #f8fafc;
+        }
+
+        .top-navbar button.active {
+            color: #38bdf8;
+            border-bottom: 3px solid #38bdf8;
+        }
+
+        /* 서브 영역 메뉴바 */
+        .sub-navbar {
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            border-bottom: 1px solid #e2e8f0;
+            position: fixed;
+            top: 53px;
+            width: 100%;
+            z-index: 999;
+        }
+
+        .sub-navbar button {
+            background: none;
+            border: none;
+            color: #64748b;
+            padding: 12px 25px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sub-navbar button:hover {
+            color: #1e293b;
+        }
+
+        .sub-navbar button.active {
+            color: #0f172a;
+            font-weight: 700;
+            border-bottom: 2px solid #0f172a;
+        }
+
+        /* 메인 콘텐츠 영역 */
+        .content-container {
+            margin-top: 120px;
+            padding: 30px;
+            max-width: 1200px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            flex: 1;
+        }
+
+        .content-panel {
+            display: none;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .content-panel.active {
+            display: block;
+        }
+
+        h2 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-left: 4px solid #38bdf8;
+            padding-left: 10px;
+        }
+
+        /* 테이블 스타일 정의 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        /* 준비중 메시지 스타일 */
+        .ready-msg {
+            text-align: center;
+            padding: 50px 0;
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        /* ========================================= */
+        /* 모바일 환경 대응을 위한 반응형 CSS 시작   */
+        /* ========================================= */
+        @media screen and (max-width: 768px) {
+            /* 1. 상하단 네비게이션 바 스크롤 최적화 */
+            .top-navbar, .sub-navbar {
+                justify-content: flex-start; /* 모바일에서는 왼쪽 정렬 */
+                overflow-x: auto; /* 메뉴가 많을 경우 메뉴바만 가로 스크롤 허용 */
+                -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 지원 */
+                white-space: nowrap; /* 메뉴 버튼 줄바꿈 방지 */
+            }
+            
+            .top-navbar button {
+                padding: 12px 15px;
+                font-size: 1rem;
+                flex-shrink: 0;
+            }
+
+            .sub-navbar button {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+                flex-shrink: 0;
+            }
+
+            /* 2. 본문 여백 및 위치 조정 */
+            .content-container {
+                margin-top: 105px;
+                padding: 15px 10px;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
+
+            /* 3. 테이블 영역 내부 스크롤 활성화 (핵심) */
+            .content-panel {
+                padding: 15px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* 4. 테이블 가독성 유지 */
+            table {
+                min-width: 650px; /* 테이블이 너무 찌그러지지 않도록 최소 너비 지정 */
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+        
+        /* 좁은 모바일 기기를 위한 추가 미세 조정 */
+        @media screen and (max-width: 480px) {
+            .top-navbar button {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+            .sub-navbar button {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            table {
+                min-width: 550px; 
+            }
+        }
+        /* ========================================= */
+        /* 모바일 반응형 CSS 끝                      */
+        /* ========================================= */
+
+    </style>
+</head>
+<body>
+
+    <nav class="top-navbar" id="topNav">
+        <button class="active" onclick="changeLevel('N5')">JLPT N5</button>
+        <button onclick="changeLevel('N4')">JLPT N4</button>
+        <button onclick="changeLevel('N3')">JLPT N3</button>
+    </nav>
+
+    <nav class="sub-navbar" id="subNav">
+        <button class="active" onclick="changeSection('grammar')">문법</button>
+        <button onclick="changeSection('kanji')">한자</button>
+        <button onclick="changeSection('vocab')">단어</button>
+    </nav>
+
+    <main class="content-container">
+        
+        <div id="panel-N5-grammar" class="content-panel active">
+            <h2>N5 문법 학습 (실전 필수 문형 50)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 6%;" class="center">번호</th>
+                        <th style="width: 22%;">문법 표현</th>
+                        <th style="width: 25%;">의미 및 기능</th>
+                        <th style="width: 47%;">예문 (例文)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="center">1</td><td><b>～は～です</b></td><td>~은/는 ~입니다 (단정)</td><td>私は学生です。(나는 학생입니다.)</td></tr>
+                    <tr><td class="center">2</td><td><b>～は～ではありません</b></td><td>~은/는 ~이 아닙니다 (부정)</td><td>これは本ではありません。(이것은 책이 아닙니다.)</td></tr>
+                    <tr><td class="center">3</td><td><b>～か</b></td><td>~입니까? (의문)</td><td>お元気ですか。(잘 지내십니까?)</td></tr>
+                    <tr><td class="center">4</td><td><b>～も</b></td><td>~도 (추가, 동격)</td><td>私も韓国人です。(나도 한국인입니다.)</td></tr>
+                    <tr><td class="center">5</td><td><b>～の</b></td><td>~의 (소유, 소속, 수식)</td><td>これは私のカメラです。(이것은 제 카메라입니다.)</td></tr>
+                    <tr><td class="center">6</td><td><b>～に (장소)</b></td><td>~에 (존재 장소)</td><td>部屋に猫がいます。(방에 고양이가 있습니다.)</td></tr>
+                    <tr><td class="center">7</td><td><b>～に (時間)</b></td><td>~에 (구체적인 시간 뒤)</td><td>7時に起きます。(7시에 일어납니다.)</td></tr>
+                    <tr><td class="center">8</td><td><b>～へ</b></td><td>~로/에 (이동 방향)</td><td>京都へ行きます。(교토로 갑니다.)</td></tr>
+                    <tr><td class="center">9</td><td><b>～を</b></td><td>~을/를 (동사의 목적어)</td><td>水を飲みます。(물을 마십니다.)</td></tr>
+                    <tr><td class="center">10</td><td><b>～で (장소)</b></td><td>~에서 (동작 장소)</td><td>レストランでご飯を食べます。(레스토랑에서 밥을 먹습니다.)</td></tr>
+                    <tr><td class="center">11</td><td><b>～で (수단)</b></td><td>~로 (도구, 수단, 교통)</td><td>タクシーで行きます。(タクシー로 갑니다.)</td></tr>
+                    <tr><td class="center">12</td><td><b>～と</b></td><td>~와/과 (동반, 병렬)</td><td>友達と映画を見ました。(친구와 영화를 보았습니다.)</td></tr>
+                    <tr><td class="center">13</td><td><b>～から ～まで</b></td><td>~부터 ~까지 (시간/공간)</td><td>9時から5時まで働きます。(9시부터 5시까지 일합니다.)</td></tr>
+                    <tr><td class="center">14</td><td><b>～が (주격)</b></td><td>~이/가 (주어 표기)</td><td>雨が降っています。(비가 내리고 있습니다.)</td></tr>
+                    <tr><td class="center">15</td><td><b>～が (기호/능력)</b></td><td>~을/를 (좋아함/잘함의 대상)</td><td>私は日本語が上手です。(나는 일본어를 잘합니다.)</td></tr>
+                    <tr><td class="center">16</td><td><b>～があります</b></td><td>~이 있습니다 (무생물·식물)</td><td>机の上に本があります。(책상 위에 책이 있습니다.)</td></tr>
+                    <tr><td class="center">17</td><td><b>～います</b></td><td>~이 있습니다 (사람·동물)</td><td>あそこに犬がいます。(저기에 개가 있습니다.)</td></tr>
+                    <tr><td class="center">18</td><td><b>～がいいです</b></td><td>~이 좋습니다 (선택, 기호)</td><td>私はお茶がいいです。(저는 차가 좋습니다.)</td></tr>
+                    <tr><td class="center">19</td><td><b>수량치 ＋ あります/います</b></td><td>수량만큼 있습니다</td><td>りんごが三つあります。(사과가 세 개 있습니다.)</td></tr>
+                    <tr><td class="center">20</td><td><b>～てください</b></td><td>~해 주세요 (의뢰, 권유)</td><td>ちょっと待ってください。(잠깐 기다려 주세요.)</td></tr>
+                    <tr><td class="center">21</td><td><b>～てはいけません</b></td><td>~해서는 안 됩니다 (금지)</td><td>ここで写真を撮ってはいけません。(여기서 사진을 찍으면 안 됩니다.)</td></tr>
+                    <tr><td class="center">22</td><td><b>～てもいいです</b></td><td>~해도 됩니다 (허가)</td><td>中に入ってもいいですか。(안에 들어가도 됩니까?)</td></tr>
+                    <tr><td class="center">23</td><td><b>～ています (진행)</b></td><td>~하고 있습니다 (현재 진행)</td><td>今、本を読んでいます。(지금 책을 읽고 있습니다.)</td></tr>
+                    <tr><td class="center">24</td><td><b>～ています (상태)</b></td><td>~해 있습니다 (결과 상태)</td><td>窓が閉まっています。(창문이 닫혀 있습니다.)</td></tr>
+                    <tr><td class="center">25</td><td><b>～ましょう</b></td><td>~합시다 (적극적 제안)</td><td>一緒に帰りましょう。(함께 돌아갑시다.)</td></tr>
+                    <tr><td class="center">26</td><td><b>～ましょうか</b></td><td>~할까요? (상대 의향 확인)</td><td>窓を開けましょうか。(창문을 열까요?)</td></tr>
+                    <tr><td class="center">27</td><td><b>～たいです</b></td><td>~하고 싶습니다 (희망)</td><td>日本に行きたいです。(일본에 가고 싶습니다.)</td></tr>
+                    <tr><td class="center">28</td><td><b>～ながら</b></td><td>~하면서 (동시 행동)</td><td>音楽を聞きながら勉強します。(음악을 들으면서 공부합니다.)</td></tr>
+                    <tr><td class="center">29</td><td><b>～ないでください</b></td><td>~하지 말아 주세요 (정중한 금지)</td><td>無理をしないでください。(무리하지 말아 주세요.)</td></tr>
+                    <tr><td class="center">30</td><td><b>～のが好きです</b></td><td>~하는 것을 좋아합니다</td><td>私は歌を歌うのが好きです。(나는 노래 부르는 것을 좋아합니다.)</td></tr>
+                    <tr><td class="center">31</td><td><b>～のが上手です</b></td><td>~하는 것을 잘합니다</td><td>彼は料理を作るのが上手です。(그는 요리 만드는 것을 잘합니다.)</td></tr>
+                    <tr><td class="center">32</td><td><b>～より ～ほうが～</b></td><td>~보다 ~편이 더 ~하다 (비교)</td><td>車より電車のほうが速いです。(자동차보다 전철이 더 빠릅니다.)</td></tr>
+                    <tr><td class="center">33</td><td><b>～の中で ～が一番～</b></td><td>~ 중에서 ~이 가장 ~하다</td><td>果物の中でりんごが一番好きです。(과일 중에서 사과를 가장 좋아합니다.)</td></tr>
+                    <tr><td class="center">34</td><td><b>～つもりです</b></td><td>~할 예정입니다 / 생각입니다</td><td>明日、友達に会うつもりです。(내일 친구를 만날 예정입니다.)</td></tr>
+                    <tr><td class="center">35</td><td><b>～かったです</b></td><td>~했습니다 (이형용사 과거)</td><td>昨日は寒かったです。(어제는 추웠습니다.)</td></tr>
+                    <tr><td class="center">36</td><td><b>～でした</b></td><td>~이었습니다 (명사/な형용사 과거)</td><td>昨日は雨でした。(어제는 비였습니다.)</td></tr>
+                    <tr><td class="center">37</td><td><b>～てくださいませんか</b></td><td>~해 주시지 않겠습니까?</td><td>日本語を教えてくださいませんか。(일본어를 가르쳐 주시지 않겠습니까?)</td></tr>
+                    <tr><td class="center">38</td><td><b>～前に</b></td><td>~하기 전에 (동사 원형 + 前に)</td><td>寝る前に薬を飲みます。(자기 전에 약을 마십니다.)</td></tr>
+                    <tr><td class="center">39</td><td><b>～後で</b></td><td>~한 후에 (동사 た형 + 後で)</td><td>ご飯を食べた後で、散歩します。(밥을 먹은 후에 산책합니다.)</td></tr>
+                    <tr><td class="center">40</td><td><b>～たり、～たりします</b></td><td>~하기도 하고 ~하기도 합니다</td><td>日曜日は買い物したり映画を見たりします。(일요일은 쇼핑을 하거나 영화를 보거나 합니다.)</td></tr>
+                    <tr><td class="center">41</td><td><b>～時 (とき)</b></td><td>~할 때</td><td>暇な時、本を読みます。(한가할 때 책을 읽습니다.)</td></tr>
+                    <tr><td class="center">42</td><td><b>～から (이유)</b></td><td>~하기 때문에 / ~라서</td><td>時間がありませんから、急ぎます。(시간이 없기 때문에 서두릅니다.)</td></tr>
+                    <tr><td class="center">43</td><td><b>～ね</b></td><td>~이군요 / ~네요 (공감, 확인)</td><td>今日も暑いですね。(오늘도 덥네요.)</td></tr>
+                    <tr><td class="center">44</td><td><b>～よ</b></td><td>~답니다 / ~해요 (정보 제공, 강조)</td><td>この本はとても面白いですよ。(이 책은 정말 재미있답니다.)</td></tr>
+                    <tr><td class="center">45</td><td><b>～くなります / ～になります</b></td><td>~해집니다 / ~이 됩니다 (변화)</td><td>天気が暖かくなりました。(날씨가 따뜻해졌습니다.)</td></tr>
+                    <tr><td class="center">46</td><td><b>～ほうがいいです</b></td><td>~하는 편이 좋습니다 (권고)</td><td>病院へ行ったほうがいいですよ。(병원에 가는 편이 좋아요.)</td></tr>
+                    <tr><td class="center">47</td><td><b>～ないで (부대상황)</b></td><td>~하지 않고 / ~하지 않은 채</td><td>朝ご飯を食べないで学校へ来ました。(아침밥을 먹지 않고 학교에 왔습니다.)</td></tr>
+                    <tr><td class="center">48</td><td><b>～やすいです</b></td><td>~하기 쉽습니다</td><td>このペンは書きやすいです。(이 펜은 쓰기 쉽습니다.)</td></tr>
+                    <tr><td class="center">49</td><td><b>～にくいです</b></td><td>~하기 어렵습니다</td><td>この漢字は覚えにくいです。(이 한자는 외우기 어렵습니다.)</td></tr>
+                    <tr><td class="center">50</td><td><b>～と思っています</b></td><td>~하려고 생각하고 있습니다 (의지)</td><td>来年、日本へ行こうと思っています。(내년에 일본에 가려고 생각합니다.)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="panel-N5-kanji" class="content-panel">
+            <h2>N5 필수 한자 (완벽 연동 100자)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 8%;" class="center">번호</th>
+                        <th style="width: 12%;" class="center">한자</th>
+                        <th style="width: 20%;">음독 (音読み)</th>
+                        <th style="width: 20%;">훈독 (訓読み)</th>
+                        <th style="width: 40%;">대표 의미 / 단어 예시</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="center">1</td><td class="center"><b>一</b></td><td>イチ, イツ</td><td>ひと(つ)</td><td>하나 (一人, 一つ)</td></tr>
+                    <tr><td class="center">2</td><td class="center"><b>二</b></td><td>ニ</td><td>ふた(つ)</td><td>둘 (二つ, 二人)</td></tr>
+                    <tr><td class="center">3</td><td class="center"><b>三</b></td><td>サン</td><td>み(っつ)</td><td>셋 (三つ, 三日)</td></tr>
+                    <tr><td class="center">4</td><td class="center"><b>四</b></td><td>シ</td><td>よ(っつ), よん</td><td>넷 (四つ, 四年)</td></tr>
+                    <tr><td class="center">5</td><td class="center"><b>五</b></td><td>ゴ</td><td>いつ(つ)</td><td>다섯 (五つ, 五日)</td></tr>
+                    <tr><td class="center">6</td><td class="center"><b>六</b></td><td>ロク</td><td>む(っつ)</td><td>여섯 (六つ, 六日)</td></tr>
+                    <tr><td class="center">7</td><td class="center"><b>七</b></td><td>シチ</td><td>なな(つ)</td><td>일곱 (七つ, 七日)</td></tr>
+                    <tr><td class="center">8</td><td class="center"><b>八</b></td><td>ハチ</td><td>야(っつ)</td><td>여덟 (八つ, 八日)</td></tr>
+                    <tr><td class="center">9</td><td class="center"><b>九</b></td><td>キュウ, ク</td><td>ここの(つ)</td><td>아홉 (九つ, 九日)</td></tr>
+                    <tr><td class="center">10</td><td class="center"><b>十</b></td><td>ジュウ</td><td>とお</td><td>열 (十日, 十分)</td></tr>
+                    <tr><td class="center">11</td><td class="center"><b>日</b></td><td>ニチ, ジツ</td><td>ひ, か</td><td>날 일 (日曜日, 今日)</td></tr>
+                    <tr><td class="center">12</td><td class="center"><b>月</b></td><td>ゲツ, ガツ</td><td>つき</td><td>달 월 (月曜日, 今月)</td></tr>
+                    <tr><td class="center">13</td><td class="center"><b>火</b></td><td>カ</td><td>ひ, び</td><td>불 화 (火曜日, 火山)</td></tr>
+                    <tr><td class="center">14</td><td class="center"><b>水</b></td><td>スイ</td><td>みず</td><td>물 수 (水曜日, 水)</td></tr>
+                    <tr><td class="center">15</td><td class="center"><b>木</b></td><td>モク, ボク</td><td>き</td><td>나무 목 (木曜日, 木)</td></tr>
+                    <tr><td class="center">16</td><td class="center"><b>金</b></td><td>キン, コン</td><td>かね</td><td>쇠 금 (金曜日, お金)</td></tr>
+                    <tr><td class="center">17</td><td class="center"><b>土</b></td><td>ト, ド</td><td>つち</td><td>흙 토 (土曜日, 土)</td></tr>
+                    <tr><td class="center">18</td><td class="center"><b>山</b></td><td>サン</td><td>やま</td><td>산 산 (富士山, 山)</td></tr>
+                    <tr><td class="center">19</td><td class="center"><b>川</b></td><td>セン</td><td>かわ</td><td>시내 천 (川, 小川)</td></tr>
+                    <tr><td class="center">20</td><td class="center"><b>田</b></td><td>デン</td><td>た</td><td>밭 전 (田んぼ, 水田)</td></tr>
+                    <tr><td class="center">21</td><td class="center"><b>人</b></td><td>ジン, ニン</td><td>ひと</td><td>사람 인 (日本人, 友達)</td></tr>
+                    <tr><td class="center">22</td><td class="center"><b>子</b></td><td>シ</td><td>こ</td><td>아들 자 (子供, 椅子)</td></tr>
+                    <tr><td class="center">23</td><td class="center"><b>女</b></td><td>ジョ</td><td>おんな</td><td>여자 여 (女の子, 女性)</td></tr>
+                    <tr><td class="center">24</td><td class="center"><b>男</b></td><td>ダン</td><td>おとこ</td><td>남자 남 (男の子, 男性)</td></tr>
+                    <tr><td class="center">25</td><td class="center"><b>見</b></td><td>ケン</td><td>み(る)</td><td>볼 견 (見る, 見学)</td></tr>
+                    <tr><td class="center">26</td><td class="center"><b>行</b></td><td>コウ, ギョウ</td><td>い(く)</td><td>갈 행 (行く, 銀行)</td></tr>
+                    <tr><td class="center">27</td><td class="center"><b>来</b></td><td>ライ</td><td>く(る)</td><td>올 래 (来る, 来年)</td></tr>
+                    <tr><td class="center">28</td><td class="center"><b>食</b></td><td>ショク</td><td>た(べる)</td><td>먹을 식 (食べる, 食事)</td></tr>
+                    <tr><td class="center">29</td><td class="center"><b>飲</b></td><td>イン</td><td>の(む)</td><td>마실 음 (飲む, 飲み物)</td></tr>
+                    <tr><td class="center">30</td><td class="center"><b>言</b></td><td>ゲン, ゴン</td><td>い(う)</td><td>말씀 언 (言う, 言葉)</td></tr>
+                    <tr><td class="center">31</td><td class="center"><b>話</b></td><td>ワ</td><td>はな(す)</td><td>말할 화 (話す, 電話)</td></tr>
+                    <tr><td class="center">32</td><td class="center"><b>書</b></td><td>ショ</td><td>か(く)</td><td>글 서 (書く, 辞書)</td></tr>
+                    <tr><td class="center">33</td><td class="center"><b>読</b></td><td>ドク</td><td>よ(む)</td><td>읽을 독 (読む, 読書)</td></tr>
+                    <tr><td class="center">34</td><td class="center"><b>聞</b></td><td>ブン, モン</td><td>き(く)</td><td>들을 문 (聞く, 新聞)</td></tr>
+                    <tr><td class="center">35</td><td class="center"><b>学</b></td><td>ガク</td><td>まな(ぶ)</td><td>배울 학 (学生, 大学)</td></tr>
+                    <tr><td class="center">36</td><td class="center"><b>校</b></td><td>コウ</td><td>-</td><td>학교 교 (学校, 高校)</td></tr>
+                    <tr><td class="center">37</td><td class="center"><b>先</b></td><td>セン</td><td>さき</td><td>먼저 선 (先生, 先週)</td></tr>
+                    <tr><td class="center">38</td><td class="center"><b>生</b></td><td>セイ, ショウ</td><td>う(まれる), い(きる)</td><td>날 생 (先生, 学生, 誕生)</td></tr>
+                    <tr><td class="center">39</td><td class="center"><b>本</b></td><td>ホン</td><td>もと</td><td>근본 본 (日本, 本)</td></tr>
+                    <tr><td class="center">40</td><td class="center"><b>何</b></td><td>カ</td><td>なに, なん</td><td>무엇 하 (何時, 何人)</td></tr>
+                    <tr><td class="center">41</td><td class="center"><b>大</b></td><td>ダイ, タイ</td><td>おお(きい)</td><td>큰 대 (大きい, 大好き)</td></tr>
+                    <tr><td class="center">42</td><td class="center"><b>小</b></td><td>ショウ</td><td>ちい(さい)</td><td>작을 소 (小さい, 小学校)</td></tr>
+                    <tr><td class="center">43</td><td class="center"><b>高</b></td><td>コウ</td><td>たか(い)</td><td>높을 고 (高い, 高校)</td></tr>
+                    <tr><td class="center">44</td><td class="center"><b>安</b></td><td>アン</td><td>やす(い)</td><td>편안할 안 (安い, 安心)</td></tr>
+                    <tr><td class="center">45</td><td class="center"><b>新</b></td><td>シン</td><td>あたら(しい)</td><td>새 신 (新しい, 新聞)</td></tr>
+                    <tr><td class="center">46</td><td class="center"><b>古</b></td><td>コ</td><td>ふる(い)</td><td>옛 고 (古い, 中古)</td></tr>
+                    <tr><td class="center">47</td><td class="center"><b>長</b></td><td>チョウ</td><td>なが(い)</td><td>길 장 (長い, 社長)</td></tr>
+                    <tr><td class="center">48</td><td class="center"><b>多</b></td><td>タ</td><td>おお(い)</td><td>많을 다 (多い)</td></tr>
+                    <tr><td class="center">49</td><td class="center"><b>少</b></td><td>ショウ</td><td>すく(ない), すこ(し)</td><td>적을 소 (少ない, 少し)</td></tr>
+                    <tr><td class="center">50</td><td class="center"><b>友</b></td><td>ユウ</td><td>とも</td><td>벗 우 (友達, 友人)</td></tr>
+                    <tr><td class="center">51</td><td class="center"><b>朝</b></td><td>チョウ</td><td>あさ</td><td>아침 조 (朝, 朝ご飯)</td></tr>
+                    <tr><td class="center">52</td><td class="center"><b>昼</b></td><td>チュウ</td><td>ひる</td><td>낮 주 (昼, 昼ご飯)</td></tr>
+                    <tr><td class="center">53</td><td class="center"><b>晩</b></td><td>バン</td><td>-</td><td>저녁 만 (晩ご飯, 今晩)</td></tr>
+                    <tr><td class="center">54</td><td class="center"><b>夜</b></td><td>ヤ</td><td>よる, よ</td><td>밤 야 (夜, 今夜)</td></tr>
+                    <tr><td class="center">55</td><td class="center"><b>時</b></td><td>ジ</td><td>とき</td><td>때 시 (時間, 時計, 時)</td></tr>
+                    <tr><td class="center">56</td><td class="center"><b>分</b></td><td>フン, ブン</td><td>わ(かる)</td><td>나눌 분 (10分, 分かる)</td></tr>
+                    <tr><td class="center">57</td><td class="center"><b>間</b></td><td>カン, ケン</td><td>あいだ, ま</td><td>사이 간 (時間, 間)</td></tr>
+                    <tr><td class="center">58</td><td class="center"><b>週</b></td><td>シュウ</td><td>-</td><td>주일 주 (先週, 今週, 来週)</td></tr>
+                    <tr><td class="center">59</td><td class="center"><b>年</b></td><td>ネン</td><td>とし</td><td>해 년 (今年, 来年, 毎年)</td></tr>
+                    <tr><td class="center">60</td><td class="center"><b>毎</b></td><td>マイ</td><td>-</td><td>매양 매 (毎日, 毎週, 毎年)</td></tr>
+                    <tr><td class="center">61</td><td class="center"><b>午</b></td><td>ゴ</td><td>-</td><td>낮 오 (午前, 午後)</td></tr>
+                    <tr><td class="center">62</td><td class="center"><b>前</b></td><td>ゼン</td><td>まえ</td><td>앞 전 (午前, 名前, 前)</td></tr>
+                    <tr><td class="center">63</td><td class="center"><b>後</b></td><td>ゴ, コウ</td><td>うし(ろ), あと</td><td>뒤 후 (午後, 後で, 後ろ)</td></tr>
+                    <tr><td class="center">64</td><td class="center"><b>今</b></td><td>コン, キン</td><td>いま</td><td>이제 금 (今, 今日, 今月)</td></tr>
+                    <tr><td class="center">65</td><td class="center"><b>帰</b></td><td>キ</td><td>かえ(る)</td><td>돌아갈 귀 (帰る, 帰国)</td></tr>
+                    <tr><td class="center">66</td><td class="center"><b>買</b></td><td>バイ</td><td>か(う)</td><td>살 매 (買う, 買い物)</td></tr>
+                    <tr><td class="center">67</td><td class="center"><b>出</b></td><td>シュツ</td><td>で(る), だ(す)</td><td>날 출 (出る, 出口)</td></tr>
+                    <tr><td class="center">68</td><td class="center"><b>入</b></td><td>ニュウ</td><td>はい(る), い(れる)</td><td>들 입 (入る, 入口)</td></tr>
+                    <tr><td class="center">69</td><td class="center"><b>立</b></td><td>リツ</td><td>た(つ)</td><td>설 립 (立つ)</td></tr>
+                    <tr><td class="center">70</td><td class="center"><b>休</b></td><td>キュウ</td><td>やす(む)</td><td>쉴 휴 (休み, 休日)</td></tr>
+                    <tr><td class="center">71</td><td class="center"><b>車</b></td><td>シャ</td><td>くるま</td><td>수레 거/차 (車, 電車)</td></tr>
+                    <tr><td class="center">72</td><td class="center"><b>電</b></td><td>デン</td><td>-</td><td>번개 전 (電車, 電話, 電気)</td></tr>
+                    <tr><td class="center">73</td><td class="center"><b>駅</b></td><td>エキ</td><td>-</td><td>역 역 (駅)</td></tr>
+                    <tr><td class="center">74</td><td class="center"><b>語</b></td><td>ゴ</td><td>かた(る)</td><td>말씀 어 (日本語, 英語)</td></tr>
+                    <tr><td class="center">75</td><td class="center"><b>英</b></td><td>エイ</td><td>-</td><td>꽃부리 영 (英語, 英国)</td></tr>
+                    <tr><td class="center">76</td><td class="center"><b>国</b></td><td>コク</td><td>くに</td><td>나라 국 (外国, 国)</td></tr>
+                    <tr><td class="center">77</td><td class="center"><b>外</b></td><td>ガイ</td><td>そと</td><td>바깥 외 (外国, 外, 外国人)</td></tr>
+                    <tr><td class="center">78</td><td class="center"><b>社</b></td><td>シャ</td><td>やしろ</td><td>모일 사 (会社, 社長)</td></tr>
+                    <tr><td class="center">79</td><td class="center"><b>員</b></td><td>イン</td><td>-</td><td>수효 인 (会社員, 銀行員)</td></tr>
+                    <tr><td class="center">80</td><td class="center"><b>銀</b></td><td>ギン</td><td>-</td><td>은 은 (銀行)</td></tr>
+                    <tr><td class="center">81</td><td class="center"><b>白</b></td><td>ハク</td><td>しろ(い)</td><td>흰 백 (白い, 面白い)</td></tr>
+                    <tr><td class="center">82</td><td class="center"><b>黒</b></td><td>コク</td><td>くろ(い)</td><td>검을 흑 (黒い)</td></tr>
+                    <tr><td class="center">83</td><td class="center"><b>赤</b></td><td>セキ</td><td>あか(い)</td><td>붉을 적 (赤い)</td></tr>
+                    <tr><td class="center">84</td><td class="center"><b>青</b></td><td>セイ</td><td>あお(い)</td><td>푸를 청 (青い)</td></tr>
+                    <tr><td class="center">85</td><td class="center"><b>明</b></td><td>メイ</td><td>あか(るい)</td><td>밝을 명 (明るい, 明日)</td></tr>
+                    <tr><td class="center">86</td><td class="center"><b>暗</b></td><td>アン</td><td>くら(い)</td><td>어두울 암 (暗い)</td></tr>
+                    <tr><td class="center">87</td><td class="center"><b>広</b></td><td>コウ</td><td>ひろ(い)</td><td>넓을 광 (広い)</td></tr>
+                    <tr><td class="center">88</td><td class="center"><b>右</b></td><td>ウ, ユウ</td><td>みぎ</td><td>오른 우 (右)</td></tr>
+                    <tr><td class="center">89</td><td class="center"><b>左</b></td><td>サ</td><td>ひだり</td><td>왼 좌 (左)</td></tr>
+                    <tr><td class="center">90</td><td class="center"><b>北</b></td><td>ホク</td><td>きた</td><td>북녘 북 (北, 北口)</td></tr>
+                    <tr><td class="center">91</td><td class="center"><b>南</b></td><td>ナン</td><td>みなみ</td><td>남녘 남 (南, 南口)</td></tr>
+                    <tr><td class="center">92</td><td class="center"><b>東</b></td><td>トウ</td><td>ひがし</td><td>동녘 동 (東, 東口)</td></tr>
+                    <tr><td class="center">93</td><td class="center"><b>西</b></td><td>セイ, サイ</td><td>にし</td><td>서녘 서 (西, 西口)</td></tr>
+                    <tr><td class="center">94</td><td class="center"><b>上</b></td><td>ジョウ</td><td>うえ, あ(げる)</td><td>윗 상 (上, 上げる)</td></tr>
+                    <tr><td class="center">95</td><td class="center"><b>下</b></td><td>カ, ゲ</td><td>した, くだ(る)</td><td>아래 하 (下, 地下鉄)</td></tr>
+                    <tr><td class="center">96</td><td class="center"><b>名</b></td><td>メイ, ミョウ</td><td>な</td><td>이름 명 (名前, 有名)</td></tr>
+                    <tr><td class="center">97</td><td class="center"><b>酒</b></td><td>シュ</td><td>さけ, さか</td><td>술 주 (お酒, 酒屋)</td></tr>
+                    <tr><td class="center">98</td><td class="center"><b>物</b></td><td>ブツ, モツ</td><td>もの</td><td>물건 물 (飲み物, 買い物)</td></tr>
+                    <tr><td class="center">99</td><td class="center"><b>気</b></td><td>キ, ケ</td><td>-</td><td>기운 기 (元気, 天気, 電気)</td></tr>
+                    <tr><td class="center">100</td><td class="center"><b>天</b></td><td>テン</td><td>あめ, あま</td><td>하늘 천 (天気, 天ぷら)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="panel-N5-vocab" class="content-panel">
+            <h2>N5 필수 단어 (실전 표기·한자 연동 100선)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 8%;" class="center">번호</th>
+                        <th style="width: 22%;">단어 (표기)</th>
+                        <th style="width: 25%;">요미가나 (읽기)</th>
+                        <th style="width: 15%;">품사</th>
+                        <th style="width: 30%;">한국어 뜻</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="center">1</td><td><b>今日</b></td><td>きょう</td><td>명사</td><td>오늘</td></tr>
+                    <tr><td class="center">2</td><td><b>明日</b></td><td>あした</td><td>명사</td><td>내일</td></tr>
+                    <tr><td class="center">3</td><td><b>昨日</b></td><td>きのう</td><td>명사</td><td>어제</td></tr>
+                    <tr><td class="center">4</td><td><b>今週</b></td><td>こんしゅう</td><td>명사</td><td>이번 주</td></tr>
+                    <tr><td class="center">5</td><td><b>先週</b></td><td>せんしゅう</td><td>명사</td><td>지난 주</td></tr>
+                    <tr><td class="center">6</td><td><b>来週</b></td><td>らいしゅう</td><td>명사</td><td>다음 주</td></tr>
+                    <tr><td class="center">7</td><td><b>今年</b></td><td>ことし</td><td>명사</td><td>올해</td></tr>
+                    <tr><td class="center">8</td><td><b>来年</b></td><td>らいねん</td><td>명사</td><td>내년</td></tr>
+                    <tr><td class="center">9</td><td><b>毎年</b></td><td>まいねん / まいとし</td><td>명사</td><td>매년</td></tr>
+                    <tr><td class="center">10</td><td><b>毎日</b></td><td>まいにち</td><td>명사</td><td>매일</td></tr>
+                    <tr><td class="center">11</td><td><b>午前</b></td><td>ごぜん</td><td>명사</td><td>오전</td></tr>
+                    <tr><td class="center">12</td><td><b>午後</b></td><td>ごご</td><td>명사</td><td>오후</td></tr>
+                    <tr><td class="center">13</td><td><b>時間</b></td><td>じかん</td><td>명사</td><td>시간</td></tr>
+                    <tr><td class="center">14</td><td><b>時計</b></td><td>とけい</td><td>명사</td><td>시계</td></tr>
+                    <tr><td class="center">15</td><td><b>名前</b></td><td>なまえ</td><td>명사</td><td>이름</td></tr>
+                    <tr><td class="center">16</td><td><b>朝</b></td><td>あさ</td><td>명사</td><td>아침</td></tr>
+                    <tr><td class="center">17</td><td><b>昼</b></td><td>ひる</td><td>명사</td><td>낮, 점심</td></tr>
+                    <tr><td class="center">18</td><td><b>晩</b></td><td>ばん</td><td>명사</td><td>저녁</td></tr>
+                    <tr><td class="center">19</td><td><b>夜</b></td><td>よる</td><td>명사</td><td>밤</td></tr>
+                    <tr><td class="center">20</td><td><b>朝ご飯</b></td><td>あさごはん</td><td>명사</td><td>아침 식사</td></tr>
+                    <tr><td class="center">21</td><td><b>昼ご飯</b></td><td>ひるごはん</td><td>명사</td><td>점심 식사</td></tr>
+                    <tr><td class="center">22</td><td><b>晩ご飯</b></td><td>ばんごはん</td><td>명사</td><td>저녁 식사</td></tr>
+                    <tr><td class="center">23</td><td><b>先生</b></td><td>せんせい</td><td>명사</td><td>선생님</td></tr>
+                    <tr><td class="center">24</td><td><b>学生</b></td><td>がくせい</td><td>명사</td><td>학생</td></tr>
+                    <tr><td class="center">25</td><td><b>学校</b></td><td>がっこう</td><td>명사</td><td>학교</td></tr>
+                    <tr><td class="center">26</td><td><b>高校</b></td><td>こうこう</td><td>명사</td><td>고등학교</td></tr>
+                    <tr><td class="center">27</td><td><b>大学</b></td><td>だいがく</td><td>명사</td><td>대학교</td></tr>
+                    <tr><td class="center">28</td><td><b>会社</b></td><td>かいしゃ</td><td>명사</td><td>회사</td></tr>
+                    <tr><td class="center">29</td><td><b>会社員</b></td><td>かいしゃいん</td><td>명사</td><td>회사원</td></tr>
+                    <tr><td class="center">30</td><td><b>銀行</b></td><td>ぎんこう</td><td>명사</td><td>은행</td></tr>
+                    <tr><td class="center">31</td><td><b>友達</b></td><td>ともだち</td><td>명사</td><td>친구</td></tr>
+                    <tr><td class="center">32</td><td><b>子供</b></td><td>こども</td><td>명사</td><td>아이, 어린이</td></tr>
+                    <tr><td class="center">33</td><td><b>車</b></td><td>くるま</td><td>명사</td><td>자동차</td></tr>
+                    <tr><td class="center">34</td><td><b>電車</b></td><td>でんしゃ</td><td>명사</td><td>전철</td></tr>
+                    <tr><td class="center">35</td><td><b>駅</b></td><td>えき</td><td>명사</td><td>역</td></tr>
+                    <tr><td class="center">36</td><td><b>電話</b></td><td>でんわ</td><td>명사</td><td>전화</td></tr>
+                    <tr><td class="center">37</td><td><b>日本語</b></td><td>にほんご</td><td>명사</td><td>일본어</td></tr>
+                    <tr><td class="center">38</td><td><b>英語</b></td><td>えいご</td><td>명사</td><td>영어</td></tr>
+                    <tr><td class="center">39</td><td><b>外国</b></td><td>がいこく</td><td>명사</td><td>외국</td></tr>
+                    <tr><td class="center">40</td><td><b>お酒</b></td><td>おさけ</td><td>명사</td><td>술</td></tr>
+                    <tr><td class="center">41</td><td><b>飲み物</b></td><td>のみもの</td><td>명사</td><td>음료수</td></tr>
+                    <tr><td class="center">42</td><td><b>買い物</b></td><td>かいもの</td><td>명사</td><td>쇼핑, 물건 사기</td></tr>
+                    <tr><td class="center">43</td><td><b>天気</b></td><td>てんき</td><td>명사</td><td>날씨</td></tr>
+                    <tr><td class="center">44</td><td><b>元気</b></td><td>げんき</td><td>명사 / な형용사</td><td>건강함, 잘 지냄</td></tr>
+                    <tr><td class="center">45</td><td><b>行く</b></td><td>いく</td><td>동사 (그룹1)</td><td>가다</td></tr>
+                    <tr><td class="center">46</td><td><b>来る</b></td><td>くる</td><td>동사 (그룹3)</td><td>오다</td></tr>
+                    <tr><td class="center">47</td><td><b>帰る</b></td><td>かえる</td><td>동사 (그룹1)</td><td>돌아가다/오다</td></tr>
+                    <tr><td class="center">48</td><td><b>食べる</b></td><td>たべる</td><td>동사 (그룹2)</td><td>먹다</td></tr>
+                    <tr><td class="center">49</td><td><b>飲む</b></td><td>のむ</td><td>동사 (그룹1)</td><td>마시다</td></tr>
+                    <tr><td class="center">50</td><td><b>買う</b></td><td>かう</td><td>동사 (그룹1)</td><td>사다</td></tr>
+                    <tr><td class="center">51</td><td><b>見る</b></td><td>みる</td><td>동사 (그룹2)</td><td>보다</td></tr>
+                    <tr><td class="center">52</td><td><b>聞く</b></td><td>きく</td><td>동사 (그룹1)</td><td>듣다 / 묻다</td></tr>
+                    <tr><td class="center">53</td><td><b>書く</b></td><td>かく</td><td>동사 (그룹1)</td><td>쓰다</td></tr>
+                    <tr><td class="center">54</td><td><b>読む</b></td><td>よむ</td><td>동사 (그룹1)</td><td>읽다</td></tr>
+                    <tr><td class="center">55</td><td><b>話す</b></td><td>はなす</td><td>동사 (그룹1)</td><td>말하다</td></tr>
+                    <tr><td class="center">56</td><td><b>言う</b></td><td>いう</td><td>동사 (그룹1)</td><td>말하다(의견 등)</td></tr>
+                    <tr><td class="center">57</td><td><b>寝る</b></td><td>ねる</td><td>동사 (그룹2)</td><td>자다</td></tr>
+                    <tr><td class="center">58</td><td><b>起きる</b></td><td>おきる</td><td>동사 (그룹2)</td><td>일어나다</td></tr>
+                    <tr><td class="center">59</td><td><b>出る</b></td><td>でる</td><td>동사 (그룹2)</td><td>나가다/나오다</td></tr>
+                    <tr><td class="center">60</td><td><b>入る</b></td><td>はいる</td><td>동사 (그룹1)</td><td>들어가다/오다</td></tr>
+                    <tr><td class="center">61</td><td><b>立つ</b></td><td>たつ</td><td>동사 (그룹1)</td><td>서다, 일어서다</td></tr>
+                    <tr><td class="center">62</td><td><b>休む</b></td><td>やすむ</td><td>동사 (그룹1)</td><td>쉬다</td></tr>
+                    <tr><td class="center">63</td><td><b>勉強する</b></td><td>べんきょうする</td><td>동사 (그룹3)</td><td>공부하다</td></tr>
+                    <tr><td class="center">64</td><td><b>大きい</b></td><td>おおきい</td><td>い형용사</td><td>크다</td></tr>
+                    <tr><td class="center">65</td><td><b>小さい</b></td><td>ちいさい</td><td>い형용사</td><td>작다</td></tr>
+                    <tr><td class="center">66</td><td><b>高い</b></td><td>たかい</td><td>い형용사</td><td>높다 / 비싸다</td></tr>
+                    <tr><td class="center">67</td><td><b>安い</b></td><td>やすい</td><td>い형용사</td><td>싸다</td></tr>
+                    <tr><td class="center">68</td><td><b>新しい</b></td><td>あたらしい</td><td>い형용사</td><td>새롭다</td></tr>
+                    <tr><td class="center">69</td><td><b>古い</b></td><td>ふるい</td><td>い형용사</td><td>낡다, 오래되다</td></tr>
+                    <tr><td class="center">70</td><td><b>長い</b></td><td>ながい</td><td>い형용사</td><td>길다</td></tr>
+                    <tr><td class="center">71</td><td><b>多い</b></td><td>おおい</td><td>い형용사</td><td>많다</td></tr>
+                    <tr><td class="center">72</td><td><b>少ない</b></td><td>すくない</td><td>い형용사</td><td>적다</td></tr>
+                    <tr><td class="center">73</td><td><b>暑い</b></td><td>あつい</td><td>い형용사</td><td>덥다 (날씨)</td></tr>
+                    <tr><td class="center">74</td><td><b>寒い</b></td><td>さむい</td><td>い형용사</td><td>춥다 (날씨)</td></tr>
+                    <tr><td class="center">75</td><td><b>明るい</b></td><td>あかるい</td><td>い형용사</td><td>밝다</td></tr>
+                    <tr><td class="center">76</td><td><b>暗い</b></td><td>くらい</td><td>い형용사</td><td>어두울 암</td></tr>
+                    <tr><td class="center">77</td><td><b>広い</b></td><td>ひろい</td><td>い형용사</td><td>넓다</td></tr>
+                    <tr><td class="center">78</td><td><b>面白い</b></td><td>おもしろい</td><td>い형용사</td><td>재미있다</td></tr>
+                    <tr><td class="center">79</td><td><b>赤い</b></td><td>あかい</td><td>い형용사</td><td>빨갛다</td></tr>
+                    <tr><td class="center">80</td><td><b>青い</b></td><td>あおい</td><td>い형용사</td><td>파랗다</td></tr>
+                    <tr><td class="center">81</td><td><b>白い</b></td><td>しろい</td><td>い형용사</td><td>하얗다</td></tr>
+                    <tr><td class="center">82</td><td><b>黒い</b></td><td>くろい</td><td>い형용사</td><td>까맣다</td></tr>
+                    <tr><td class="center">83</td><td><b>好き</b></td><td>すき</td><td>な형용사</td><td>좋아함</td></tr>
+                    <tr><td class="center">84</td><td><b>嫌い</b></td><td>きらい</td><td>な형용사</td><td>싫어함</td></tr>
+                    <tr><td class="center">85</td><td><b>綺麗</b></td><td>きれい</td><td>な형용사</td><td>예쁘다, 깨끗하다</td></tr>
+                    <tr><td class="center">86</td><td><b>賑やか</b></td><td>にぎやか</td><td>な형용사</td><td>번화함, 활기참</td></tr>
+                    <tr><td class="center">87</td><td><b>静か</b></td><td>しずか</td><td>な형용사</td><td>조용함</td></tr>
+                    <tr><td class="center">88</td><td><b>暇</b></td><td>ひま</td><td>な형용사</td><td>한가함</td></tr>
+                    <tr><td class="center">89</td><td><b>上手</b></td><td>じょうず</td><td>な형용사</td><td>능숙함, 잘함</td></tr>
+                    <tr><td class="center">90</td><td><b>下手</b></td><td>へた</td><td>な형용사</td><td>서툼, 못함</td></tr>
+                    <tr><td class="center">91</td><td><b>右</b></td><td>みぎ</td><td>명사</td><td>오른쪽</td></tr>
+                    <tr><td class="center">92</td><td><b>左</b></td><td>ひだり</td><td>명사</td><td>왼쪽</td></tr>
+                    <tr><td class="center">93</td><td><b>前</b></td><td>まえ</td><td>명사</td><td>앞</td></tr>
+                    <tr><td class="center">94</td><td><b>後ろ</b></td><td>うしろ</td><td>명사</td><td>뒤</td></tr>
+                    <tr><td class="center">95</td><td><b>上</b></td><td>うえ</td><td>명사</td><td>위</td></tr>
+                    <tr><td class="center">96</td><td><b>下</b></td><td>した</td><td>명사</td><td>아래</td></tr>
+                    <tr><td class="center">97</td><td><b>とても</b></td><td>とても</td><td>부사</td><td>매우, 아주</td></tr>
+                    <tr><td class="center">98</td><td><b>少し</b></td><td>すこし</td><td>부사</td><td>조금</td></tr>
+                    <tr><td class="center">99</td><td><b>いつも</b></td><td>いつも</td><td>부사</td><td>언제나, 항상</td></tr>
+                    <tr><td class="center">100</td><td><b>一緒に</b></td><td>いっしょに</td><td>부사</td><td>함께, 같이</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="panel-N4-grammar" class="content-panel">
+            <h2>N4 문법 학습 (실전 핵심 문형 50)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 6%;" class="center">번호</th>
+                        <th style="width: 22%;">문법 표현</th>
+                        <th style="width: 25%;">의미 및 기능</th>
+                        <th style="width: 47%;">예문 (例文)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="center">1</td><td><b>～（ら）れる (수동)</b></td><td>~함을 당하다 (수동 표현)</td><td>泥棒に財布を盗まれました。(도둑에게 지갑을 도둑맞았습니다.)</td></tr>
+                    <tr><td class="center">2</td><td><b>～（さ）せる (사역)</b></td><td>~하게 하다 / 시키다</td><td>先生は学生に作文を書かせました。(선생님은 학생에게 작문을 쓰게 했습니다.)</td></tr>
+                    <tr><td class="center">3</td><td><b>～（さ）せられる</b></td><td>~함을 강요당하다 (사역수동)</td><td>母に部屋を掃除させられました。(어머니 때문에 억지로 방 청소를 당했습니다.)</td></tr>
+                    <tr><td class="center">4</td><td><b>～（ら）れる (가능)</b></td><td>~할 수 있다 (가능형 동사)</td><td>私は刺身が食べられます。(나는 회를 먹을 수 있습니다.)</td></tr>
+                    <tr><td class="center">5</td><td><b>お～ください</b></td><td>~해 주십시오 (존경 표현)</td><td>少々お待ちください。(잠시만 기다려 주십시오.)</td></tr>
+                    <tr><td class="center">6</td><td><b>～てあげる</b></td><td>~해 주다 (내가 남에게 행위 제공)</td><td>友達に本を貸してあげました。(친구에게 책을 빌려 주었습니다.)</td></tr>
+                    <tr><td class="center">7</td><td><b>～てもらう</b></td><td>~함을 받다 (남이 내게 해줌)</td><td>鈴木さんに日本語を教えてもらいました。(스즈키 씨가 일본어를 가르쳐 주었습니다.)</td></tr>
+                    <tr><td class="center">8</td><td><b>～てくれる</b></td><td>~해주다 (남이 나와 내 가족에게)</td><td>田中さんがお菓子をくれました。(다나카 씨가 과자를 주었습니다.)</td></tr>
+                    <tr><td class="center">9</td><td><b>～そうだ (양태)</b></td><td>~인 것 같다 / ~할 것 같다</td><td>今にも雨が降りそうです。(당장이라도 비가 올 것 같습니다.)</td></tr>
+                    <tr><td class="center">10</td><td><b>～そうだ (전언)</b></td><td>~라고 한다 (소문, 전해 들음)</td><td>明日は天気がいいそうです。(내일은 날씨가 좋다고 합니다.)</td></tr>
+                    <tr><td class="center">11</td><td><b>～らしい</b></td><td>~답다 / ~인 것 같다 (추측)</td><td>彼は男らしい人ですね。(그는 남자다운 사람이네요.)</td></tr>
+                    <tr><td class="center">12</td><td><b>～のようだ / ～ように</b></td><td>~와 같다 / ~처럼</td><td>彼女は人形のようです。(그녀는 인형 같습니다.)</td></tr>
+                    <tr><td class="center">13</td><td><b>～ことになる</b></td><td>~하게 되다 (결정의 주체가 외부)</td><td>来月、日本へ出張することになりました。(다음 달에 일본으로 출장 가게 되었습니다.)</td></tr>
+                    <tr><td class="center">14</td><td><b>～ことにする</b></td><td>~하기로 하다 (자신의 의지 결정)</td><td>毎日、運動することにしました。(매일 운동하기로 했습니다.)</td></tr>
+                    <tr><td class="center">15</td><td><b>～ようと思う</b></td><td>~하려고 생각하다 (의지형)</td><td>週末に映画を見ようと思っています。(주말에 영화를 보려고 생각 중입니다.)</td></tr>
+                    <tr><td class="center">16</td><td><b>～たら</b></td><td>~하면 / ~했더니 (조건/가정)</td><td>安かったら、買います。(싸다면 사겠습니다.)</td></tr>
+                    <tr><td class="center">17</td><td><b>～ば</b></td><td>~하면 (가정형 조건)</td><td>春になれば、桜が咲きます。(봄이 되면 벚꽃이 핍니다.)</td></tr>
+                    <tr><td class="center">18</td><td><b>～と (조건)</b></td><td>~하면 (자연 법칙, 필연적 결과)</td><td>このボタンを押すと、水が出ます。(이 버튼을 누르면 물이 나옵니다.)</td></tr>
+                    <tr><td class="center">19</td><td><b>～なら</b></td><td>~라면 (상대방의 의견 수용 가정)</td><td>京都へ行くなら、秋がいいですよ。(교토에 갈 거라면 가을이 좋아요.)</td></tr>
+                    <tr><td class="center">20</td><td><b>～てみる</b></td><td>~해 보다 (시도)</td><td>日本語で話してみます。(일본어로 말해 보겠습니다.)</td></tr>
+                    <tr><td class="center">21</td><td><b>～てしまう</b></td><td>~해 버리다 (완료 / 유감)</td><td>宿題を忘れてしまいました。(숙제를 잊어버렸습니다.)</td></tr>
+                    <tr><td class="center">22</td><td><b>～ておく</b></td><td>~해 두다 (사전 준비)</td><td>旅行の前にホテルを予約しておきます。(여행 전에 호텔을 예약해 둡니다.)</td></tr>
+                    <tr><td class="center">23</td><td><b>～てある</b></td><td>~해져 있다 (목적 있는 타동사 상태)</td><td>壁にカレンダーが掛けてあります。(벽에 달력이 걸려 있습니다.)</td></tr>
+                    <tr><td class="center">24</td><td><b>～ていく / ～てくる</b></td><td>~해 가다 / ~해 오다 (시간·공간 이동)</td><td>これからも日本語を勉強していきます。(앞으로도 일본어를 공부하러 가겠습니다.)</td></tr>
+                    <tr><td class="center">25</td><td><b>～やすい / ～にくい</b></td><td>~하기 쉽다 / ~하기 어렵다</td><td>この本は読みやすいです。(이 책은 읽기 쉽습니다.)</td></tr>
+                    <tr><td class="center">26</td><td><b>～すぎる</b></td><td>너무 ~하다 (과도함)</td><td>夕べはお酒を飲みすぎました。(어젯밤에는 술을 너무 많이 마셨습니다.)</td></tr>
+                    <tr><td class="center">27</td><td><b>～はずだ</b></td><td>~할 것이다 / ~임이 틀림없다</td><td>彼は今日、来るはずです。(그는 오늘 올 것입니다.)</td></tr>
+                    <tr><td class="center">28</td><td><b>～かもしれない</b></td><td>~일지도 모른다 (낮은 불확실 추측)</td><td>午後は雨が降るかもしれません。(오후에는 비가 올지도 모릅니다.)</td></tr>
+                    <tr><td class="center">29</td><td><b>～ために</b></td><td>~을 위해서 (목적) / ~ 때문에 (이유)</td><td>留学のために、貯金しています。(유학을 위해서 저금하고 있습니다.)</td></tr>
+                    <tr><td class="center">30</td><td><b>～ように（목적）</b></td><td>~하도록 (목적, 상태의 변화 지향)</td><td>後ろの人にも聞こえるように大きな声で話してください。(뒷사람에게도 들리도록 큰 소리로 말해주세요.)</td></tr>
+                    <tr><td class="center">31</td><td><b>～ようになる</b></td><td>~하게 되다 (능력·상태의 변화)</td><td>日本新聞が読めるようになりました。(일본 신문을 읽을 수 있게 되었습니다.)</td></tr>
+                    <tr><td class="center">32</td><td><b>～ようになっている</b></td><td>~하도록 되어 있다 (기계의 구조 등)</td><td>このドアは自動で開くようになっています。(이 문은 자동으로 열리게끔 되어 있습니다.)</td></tr>
+                    <tr><td class="center">33</td><td><b>～ところです</b></td><td>막 ~하려는 참이다 (직전/진행/직후)</td><td>今からご飯を食べるところです。(지금부터 밥을 먹으려던 참입니다.)</td></tr>
+                    <tr><td class="center">34</td><td><b>～ばかり</b></td><td>~한 지 얼마 안 됨 / ~만 (한정)</td><td>先月、日本に来たばかりです。(지난달에 일본에 막 온 참입니다.)</td></tr>
+                    <tr><td class="center">35</td><td><b>～はずがない</b></td><td>~일 리가 없다</td><td>そんなはずはありません。(그럴 리가 없습니다.)</td></tr>
+                    <tr><td class="center">36</td><td><b>～によって</b></td><td>~에 의해서 / ~에 따라</td><td>人によって考え方が違います。(사람에 따라 생각하는 법이 다릅니다.)</td></tr>
+                    <tr><td class="center">37</td><td><b>～をはじめ</b></td><td>~을 비롯하여</td><td>校長先生をはじめ、多くの先生が集まりました。(교장 선생님을 비롯해 많은 선생님이 모였습니다.)</td></tr>
+                    <tr><td class="center">38</td><td><b>～に関して</b></td><td>~에 관해서</td><td>その問題に関して、話し合いましょう。(그 문제에 관해서 이야기합시다.)</td></tr>
+                    <tr><td class="center">39</td><td><b>～にとって</b></td><td>~에게 있어서</td><td>私にとって、家族が一番大切です。(나에게 있어 가족이 가장 소중합니다.)</td></tr>
+                    <tr><td class="center">40</td><td><b>～命令形・禁止形</b></td><td>~해라 / ~하지 마라 (강한 명령)</td><td>早く走れ！(빨리 뛰어!) / 動くな！(움직이지 마!)</td></tr>
+                    <tr><td class="center">41</td><td><b>～なさい</b></td><td>~하시오 / ~하거라 (가벼운 명령)</td><td>早く起きなさい。(빨리 일어나거라.)</td></tr>
+                    <tr><td class="center">42</td><td><b>～ても</b></td><td>~해도 (역접 조건)</td><td>雨が降っても行きます。(비가 와도 갑니다.)</td></tr>
+                    <tr><td class="center">43</td><td><b>～のに</b></td><td>~인데도 (역접, 불만, 의외)</td><td>勉強したのに、テストの点数が悪かったです。(공부했는데도 시험 점수가 나빴습니다.)</td></tr>
+                    <tr><td class="center">44</td><td><b>～まま</b></td><td>~한 채로 (상태 유지)</td><td>靴を履いたまま部屋に入りました。(구두를 신은 채로 방에 들어갔습니다.)</td></tr>
+                    <tr><td class="center">45</td><td><b>～おかげで</b></td><td>~덕분에 (긍정적 원인)</td><td>先生のおかげで合格できました。(선생님 덕분에 합격할 수 있었습니다.)</td></tr>
+                    <tr><td class="center">46</td><td><b>～せいで</b></td><td>~탓에 (부정적 원인)</td><td>風邪のせいで、学校を休みました。(감기 탓에 학교를 쉬었습니다.)</td></tr>
+                    <tr><td class="center">47</td><td><b>～について</b></td><td>~에 대하여 (대상)</td><td>日本の歴史について調べます。(일본의 역사에 대해 조사합니다.)</td></tr>
+                    <tr><td class="center">48</td><td><b>～ば～ほど</b></td><td>~하면 할수록 (비례 변화)</td><td>日本語は勉強すればするほど面白いです。(일본어는 공부하면 할수록 재미있습니다.)</td></tr>
+                    <tr><td class="center">49</td><td><b>～てよかった</b></td><td>~해서 다행이다 (안도)</td><td>この本を読んでよかったです。(이 책을 읽어서 다행입니다.)</td></tr>
+                    <tr><td class="center">50</td><td><b>お / ご ～ する</b></td><td>~해 드리다 (자신을 낮추는 겸양표현)</td><td>私がお荷物をお持ちします。(제가 짐을 들어 드리겠습니다.)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="panel-N4-kanji" class="content-panel">
+            <h2>N4 필수 한자 (완벽 연동 100자)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 8%;" class="center">번호</th>
+                        <th style="width: 12%;" class="center">한자</th>
+                        <th style="width: 20%;">음독 (音読み)</th>
+                        <th style="width: 20%;">훈독 (訓読み)</th>
+                        <th style="width: 40%;">대표 의미 / 단어 예시</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="center">1</td><td class="center"><b>会</b></td><td>カイ</td><td>あ(う)</td><td>모일 회 (会社, 会う)</td></tr>
+                    <tr><td class="center">2</td><td class="center"><b>同</b></td><td>ドウ</td><td>おな(じ)</td><td>같을 동 (同じ, 同時)</td></tr>
+                    <tr><td class="center">3</td><td class="center"><b>事</b></td><td>ジ</td><td>こと</td><td>일 사 (仕事, 事実)</td></tr>
+                    <tr><td class="center">4</td><td class="center"><b>自</b></td><td>ジ, シ</td><td>みずか(ら)</td><td>스스로 자 (自分, 自転車)</td></tr>
+                    <tr><td class="center">5</td><td class="center"><b>社</b></td><td>シャ</td><td>やしろ</td><td>모일 사 (会社, 社会)</td></tr>
+                    <tr><td class="center">6</td><td class="center"><b>発</b></td><td>ハツ</td><td>-</td><td>발할 발 (出発, 発表)</td></tr>
+                    <tr><td class="center">7</td><td class="center"><b>者</b></td><td>シャ</td><td>もの</td><td>놈 자 / 사람 자 (医者, 科学者)</td></tr>
+                    <tr><td class="center">8</td><td class="center"><b>地</b></td><td>チ, ジ</td><td>-</td><td>땅 지 (地図, 地下鉄)</td></tr>
+                    <tr><td class="center">9</td><td class="center"><b>業</b></td><td>ギョウ</td><td>わざ</td><td>업 업 (工業, 授業)</td></tr>
+                    <tr><td class="center">10</td><td class="center"><b>方</b></td><td>ホウ</td><td>かた</td><td>모 방 / 방법 방 (味方, 読み方)</td></tr>
+                    <tr><td class="center">11</td><td class="center"><b>新</b></td><td>シン</td><td>あたら(しい)</td><td>새 신 (新しい, 新聞)</td></tr>
+                    <tr><td class="center">12</td><td class="center"><b>場</b></td><td>ジョウ</td><td>ば</td><td>마당 장 (場所, 工場)</td></tr>
+                    <tr><td class="center">13</td><td class="center"><b>員</b></td><td>イン</td><td>-</td><td>인원 인 (会員, 会社員)</td></tr>
+                    <tr><td class="center">14</td><td class="center"><b>立</b></td><td>リツ</td><td>た(つ)</td><td>설 립 (立つ, 国立)</td></tr>
+                    <tr><td class="center">15</td><td class="center"><b>開</b></td><td>カイ</td><td>あ(ける), ひら(く)</td><td>열 개 (開ける, 開会)</td></tr>
+                    <tr><td class="center">16</td><td class="center"><b>手</b></td><td>シュ</td><td>て</td><td>손 수 (上手, 下手, 手紙)</td></tr>
+                    <tr><td class="center">17</td><td class="center"><b>力</b></td><td>リョク, リキ</td><td>ちから</td><td>힘 력 (力, 協力)</td></tr>
+                    <tr><td class="center">18</td><td class="center"><b>問</b></td><td>モン</td><td>と(う)</td><td>물을 문 (問題, 質問)</td></tr>
+                    <tr><td class="center">19</td><td class="center"><b>代</b></td><td>ダイ</td><td>か(わる)</td><td>대신할 대 (代わりに, 時代)</td></tr>
+                    <tr><td class="center">20</td><td class="center"><b>明</b></td><td>メイ</td><td>あか(るい)</td><td>밝을 명 (明るい, 説明)</td></tr>
+                    <tr><td class="center">21</td><td class="center"><b>動</b></td><td>ドウ</td><td>うご(く)</td><td>움직일 동 (動く, 自動車)</td></tr>
+                    <tr><td class="center">22</td><td class="center"><b>京</b></td><td>キョウ, ケイ</td><td>-</td><td>서울 경 (東京, 京都)</td></tr>
+                    <tr><td class="center">23</td><td class="center"><b>目</b></td><td>モク</td><td>め</td><td>눈 목 (目, 目的)</td></tr>
+                    <tr><td class="center">24</td><td class="center"><b>通</b></td><td>ツウ</td><td>とお(る), かよ(う)</td><td>통할 통 (通る, 通う)</td></tr>
+                    <tr><td class="center">25</td><td class="center"><b>言</b></td><td>ゲン, ゴン</td><td>い(う)</td><td>말씀 언 (言う, 言葉)</td></tr>
+                    <tr><td class="center">26</td><td class="center"><b>理</b></td><td>リ</td><td>-</td><td>다스릴 리 (理由, 料理)</td></tr>
+                    <tr><td class="center">27</td><td class="center"><b>体</b></td><td>タイ</td><td>からだ</td><td>몸 체 (体, 体重)</td></tr>
+                    <tr><td class="center">28</td><td class="center"><b>田</b></td><td>デン</td><td>た</td><td>밭 전 (田んぼ, 成田)</td></tr>
+                    <tr><td class="center">29</td><td class="center"><b>主</b></td><td>シュ</td><td>ぬし, おも</td><td>주인 주 (主人, 主に)</td></tr>
+                    <tr><td class="center">30</td><td class="center"><b>題</b></td><td>ダイ</td><td>-</td><td>제목 제 (問題, 宿題)</td></tr>
+                    <tr><td class="center">31</td><td class="center"><b>意</b></td><td>イ</td><td>-</td><td>뜻 의 (意味, 意見)</td></tr>
+                    <tr><td class="center">32</td><td class="center"><b>不</b></td><td>フ, ブ</td><td>-</td><td>아니 불 (不便, 不足)</td></tr>
+                    <tr><td class="center">33</td><td class="center"><b>作</b></td><td>サク, サ</td><td>つく(る)</td><td>지을 작 (作る, 作文)</td></tr>
+                    <tr><td class="center">34</td><td class="center"><b>用</b></td><td>ヨウ</td><td>もち(いる)</td><td>쓸 용 (用意, 用事)</td></tr>
+                    <tr><td class="center">35</td><td class="center"><b>度</b></td><td>ド</td><td>たび</td><td>법도 도 (一度, 今度)</td></tr>
+                    <tr><td class="center">36</td><td class="center"><b>強</b></td><td>キョウ</td><td>つよ(い)</td><td>강할 강 (強い, 勉強)</td></tr>
+                    <tr><td class="center">37</td><td class="center"><b>公</b></td><td>コウ</td><td>おおやけ</td><td>공평할 공 (公園, 公立)</td></tr>
+                    <tr><td class="center">38</td><td class="center"><b>持</b></td><td>ジ</td><td>も(つ)</td><td>가질 지 (持つ, 気持ち)</td></tr>
+                    <tr><td class="center">39</td><td class="center"><b>野</b></td><td>ヤ</td><td>の</td><td>들 야 (野菜, 分野)</td></tr>
+                    <tr><td class="center">40</td><td class="center"><b>以</b></td><td>イ</td><td>-</td><td>써 이 (以後, 以外)</td></tr>
+                    <tr><td class="center">41</td><td class="center"><b>思</b></td><td>シ</td><td>おも(う)</td><td>생각할 사 (思う, 思い出す)</td></tr>
+                    <tr><td class="center">42</td><td class="center"><b>家</b></td><td>カ, ケ</td><td>いえ, うち</td><td>집 가 (家, 家族)</td></tr>
+                    <tr><td class="center">43</td><td class="center"><b>世</b></td><td>セ, セイ</td><td>よ</td><td>대 세 (世界, 世話)</td></tr>
+                    <tr><td class="center">44</td><td class="center"><b>多</b></td><td>タ</td><td>おお(い)</td><td>많을 다 (多い, 多分)</td></tr>
+                    <tr><td class="center">45</td><td class="center"><b>正</b></td><td>セイ, ショウ</td><td>ただ(しい)</td><td>바를 정 (正しい, 正月)</td></tr>
+                    <tr><td class="center">46</td><td class="center"><b>院</b></td><td>イン</td><td>-</td><td>집 원 (病院, 入院)</td></tr>
+                    <tr><td class="center">47</td><td class="center"><b>心</b></td><td>シン</td><td>こころ</td><td>마음 심 (心, 安心)</td></tr>
+                    <tr><td class="center">48</td><td class="center"><b>界</b></td><td>カイ</td><td>-</td><td>지경 계 (世界)</td></tr>
+                    <tr><td class="center">49</td><td class="center"><b>教</b></td><td>キョウ</td><td>おし(える)</td><td>가르칠 교 (教える, 教室)</td></tr>
+                    <tr><td class="center">50</td><td class="center"><b>文</b></td><td>ブン, モン</td><td>ふみ</td><td>글월 문 (作文, 文学)</td></tr>
+                    <tr><td class="center">51</td><td class="center"><b>建</b></td><td>ケン</td><td>た(てる)</td><td>세울 건 (建物, 建てる)</td></tr>
+                    <tr><td class="center">52</td><td class="center"><b>物</b></td><td>ブツ, モツ</td><td>もの</td><td>물건 물 (建物, 荷物)</td></tr>
+                    <tr><td class="center">53</td><td class="center"><b>旅</b></td><td>リョ</td><td>たび</td><td>나그네 여 (旅行, 旅)</td></tr>
+                    <tr><td class="center">54</td><td class="center"><b>館</b></td><td>カン</td><td>-</td><td>집 관 (旅館, 図書館)</td></tr>
+                    <tr><td class="center">55</td><td class="center"><b>春</b></td><td>シュン</td><td>はる</td><td>봄 춘 (春, 青春)</td></tr>
+                    <tr><td class="center">56</td><td class="center"><b>夏</b></td><td>カ</td><td>なつ</td><td>여름 하 (夏, 夏休み)</td></tr>
+                    <tr><td class="center">57</td><td class="center"><b>秋</b></td><td>シュウ</td><td>あき</td><td>가을 추 (秋)</td></tr>
+                    <tr><td class="center">58</td><td class="center"><b>冬</b></td><td>トウ</td><td>ふゆ</td><td>겨울 동 (冬)</td></tr>
+                    <tr><td class="center">59</td><td class="center"><b>海</b></td><td>カイ</td><td>うみ</td><td>바다 해 (海, 海外)</td></tr>
+                    <tr><td class="center">60</td><td class="center"><b>洋</b></td><td>ヨウ</td><td>-</td><td>큰바다 양 (洋服, 西洋)</td></tr>
+                    <tr><td class="center">61</td><td class="center"><b>服</b></td><td>フク</td><td>-</td><td>옷 복 (洋服, 制服)</td></tr>
+                    <tr><td class="center">62</td><td class="center"><b>着</b></td><td>チャク</td><td>き(る), つ(く)</td><td>붙을 착 (着る, 到着)</td></tr>
+                    <tr><td class="center">63</td><td class="center"><b>品</b></td><td>ヒン</td><td>しな</td><td>물건 품 (品物, 作品)</td></tr>
+                    <tr><td class="center">64</td><td class="center"><b>質</b></td><td>シツ, チ</td><td>-</td><td>바탕 질 (質問, 品質)</td></tr>
+                    <tr><td class="center">65</td><td class="center"><b>答</b></td><td>トウ</td><td>こた(える)</td><td>대답 답 (答える, 返答)</td></tr>
+                    <tr><td class="center">66</td><td class="center"><b>漢</b></td><td>カン</td><td>-</td><td>한수 한 (漢字)</td></tr>
+                    <tr><td class="center">67</td><td class="center"><b>字</b></td><td>ジ</td><td>-</td><td>글자 자 (漢字, 文字)</td></tr>
+                    <tr><td class="center">68</td><td class="center"><b>試</b></td><td>シ</td><td>こころ(みる)</td><td>시험 시 (試合, 試す)</td></tr>
+                    <tr><td class="center">69</td><td class="center"><b>験</b></td><td>ケン</td><td>-</td><td>시험 험 (試験, 経験)</td></tr>
+                    <tr><td class="center">70</td><td class="center"><b>町</b></td><td>チョウ</td><td>まち</td><td>마을 정 (町)</td></tr>
+                    <tr><td class="center">71</td><td class="center"><b>村</b></td><td>ソン</td><td>むら</td><td>마을 촌 (村)</td></tr>
+                    <tr><td class="center">72</td><td class="center"><b>兄</b></td><td>キョウ, ケイ</td><td>あに</td><td>맏 형 (兄, 兄弟)</td></tr>
+                    <tr><td class="center">73</td><td class="center"><b>弟</b></td><td>テイ, ダイ</td><td>おとうと</td><td>아우 제 (弟, 兄弟)</td></tr>
+                    <tr><td class="center">74</td><td class="center"><b>姉</b></td><td>シ</td><td>あね</td><td>손윗누이 자 (姉, 姉妹)</td></tr>
+                    <tr><td class="center">75</td><td class="center"><b>妹</b></td><td>マイ</td><td>いもうと</td><td>손아랫누이 매 (妹, 姉妹)</td></tr>
+                    <tr><td class="center">76</td><td class="center"><b>族</b></td><td>ゾク</td><td>-</td><td>겨레 족 (家族, 民族)</td></tr>
+                    <tr><td class="center">77</td><td class="center"><b>親</b></td><td>シン</td><td>おや, した(しい)</td><td>친할 친 (親, 親切)</td></tr>
+                    <tr><td class="center">78</td><td class="center"><b>病</b></td><td>ビョウ</td><td>-</td><td>병 병 (病気, 病院)</td></tr>
+                    <tr><td class="center">79</td><td class="center"><b>医</b></td><td>イ</td><td>-</td><td>의원 의 (医者, 医学)</td></tr>
+                    <tr><td class="center">80</td><td class="center"><b>薬</b></td><td>ヤク</td><td>くすり</td><td>약 약 (薬, 薬局)</td></tr>
+                    <tr><td class="center">81</td><td class="center"><b>局</b></td><td>キョク</td><td>-</td><td>판 국 (薬局, 郵便局)</td></tr>
+                    <tr><td class="center">82</td><td class="center"><b>音</b></td><td>オン</td><td>おと, ね</td><td>소리 음 (音楽, 音)</td></tr>
+                    <tr><td class="center">83</td><td class="center"><b>楽</b></td><td>ガク, ラク</td><td>たの(しい)</td><td>즐길 락 (音楽, 楽しい)</td></tr>
+                    <tr><td class="center">84</td><td class="center"><b>歌</b></td><td>カ</td><td>うた, うた(う)</td><td>노래 가 (歌, 歌う)</td></tr>
+                    <tr><td class="center">85</td><td class="center"><b>写</b></td><td>シャ</td><td>うつ(す)</td><td>베낄 사 (写真, 写す)</td></tr>
+                    <tr><td class="center">86</td><td class="center"><b>真</b></td><td>シン</td><td>ま</td><td>참 진 (写真, 真ん中)</td></tr>
+                    <tr><td class="center">87</td><td class="center"><b>映</b></td><td>エイ</td><td>うつ(す)</td><td>비칠 영 (映画)</td></tr>
+                    <tr><td class="center">88</td><td class="center"><b>画</b></td><td>ガ, カク</td><td>-</td><td>그림 화 (映画, 計画)</td></tr>
+                    <tr><td class="center">89</td><td class="center"><b>歩</b></td><td>ホ</td><td>ある(く)</td><td>걸음 보 (歩く, 散歩)</td></tr>
+                    <tr><td class="center">90</td><td class="center"><b>走</b></td><td>ソウ</td><td>はし(る)</td><td>달릴 주 (走る)</td></tr>
+                    <tr><td class="center">91</td><td class="center"><b>急</b></td><td>キュウ</td><td>いそ(ぐ)</td><td>급할 급 (急ぐ, 特急)</td></tr>
+                    <tr><td class="center">92</td><td class="center"><b>止</b></td><td>シ</td><td>と(まる)</td><td>그칠 지 (止まる, 中止)</td></tr>
+                    <tr><td class="center">93</td><td class="center"><b>乗</b></td><td>ジョウ</td><td>の(る)</td><td>탈 승 (乗る, 乗車)</td></tr>
+                    <tr><td class="center">94</td><td class="center"><b>降</b></td><td>コウ</td><td>お(りる), ふ(る)</td><td>내릴 강 (降りる, 降る)</td></tr>
+                    <tr><td class="center">95</td><td class="center"><b>転</b></td><td>テン</td><td>ころ(ぶ)</td><td>구를 전 (自転車, 運転)</td></tr>
+                    <tr><td class="center">96</td><td class="center"><b>特</b></td><td>トク</td><td>-</td><td>특별할 특 (特別, 特急)</td></tr>
+                    <tr><td class="center">97</td><td class="center"><b>別</b></td><td>ベツ</td><td>わか(れる)</td><td>나눌 별 (特別, 別れる)</td></tr>
+                    <tr><td class="center">98</td><td class="center"><b>有</b></td><td>ユウ</td><td>あ(る)</td><td>있을 유 (有名, 有る)</td></tr>
+                    <tr><td class="center">99</td><td class="center"><b>便</b></td><td>ベン, ビン</td><td>-</td><td>편할 편 (便利, 郵便)</td></tr>
+                    <tr><td class="center">100</td><td class="center"><b>利</b></td><td>リ</td><td>-</td><td>이로울 리 (便利, 利用)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="panel-N4-vocab" class="content-panel">
+            <h2>N4 필수 단어 (실전 표기·한자 연동 100선)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 8%;" class="center">번호</th>
+                        <th style="width: 22%;">단어 (표기)</th>
+                        <th style="width: 25%;">요미가나 (읽기)</th>
+                        <th style="width: 15%;">품사</th>
+                        <th style="width: 30%;">한국어 뜻</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="center">1</td><td><b>挨拶</b></td><td>あいさつ</td><td>명사</td><td>인사</td></tr>
+                    <tr><td class="center">2</td><td><b>案内</b></td><td>あんない</td><td>명사</td><td>안내</td></tr>
+                    <tr><td class="center">3</td><td><b>安心</b></td><td>あんしん</td><td>명사 / な형용사</td><td>안심</td></tr>
+                    <tr><td class="center">4</td><td><b>安全</b></td><td>あんぜん</td><td>명사 / な형용사</td><td>안전</td></tr>
+                    <tr><td class="center">5</td><td><b>以下</b></td><td>いか</td><td>명사</td><td>이하</td></tr>
+                    <tr><td class="center">6</td><td><b>以上</b></td><td>いじょう</td><td>명사</td><td>이상</td></tr>
+                    <tr><td class="center">7</td><td><b>以外</b></td><td>いがい</td><td>명사</td><td>이외</td></tr>
+                    <tr><td class="center">8</td><td><b>意見</b></td><td>いけん</td><td>명사</td><td>의견</td></tr>
+                    <tr><td class="center">9</td><td><b>石</b></td><td>いし</td><td>명사</td><td>돌</td></tr>
+                    <tr><td class="center">10</td><td><b>糸</b></td><td>いと</td><td>명사</td><td>실</td></tr>
+                    <tr><td class="center">11</td><td><b>田舎</b></td><td>いなか</td><td>명사</td><td>시골</td></tr>
+                    <tr><td class="center">12</td><td><b>嘘</b></td><td>うそ</td><td>명사</td><td>거짓말</td></tr>
+                    <tr><td class="center">13</td><td><b>運転</b></td><td>うんてん</td><td>명사</td><td>운전</td></tr>
+                    <tr><td class="center">14</td><td><b>運動</b></td><td>うんどう</td><td>명사</td><td>운동</td></tr>
+                    <tr><td class="center">15</td><td><b>お祝い</b></td><td>おいわい</td><td>명사</td><td>축하</td></tr>
+                    <tr><td class="center">16</td><td><b>お客</b></td><td>おきゃく</td><td>명사</td><td>손님</td></tr>
+                    <tr><td class="center">17</td><td><b>屋上</b></td><td>おくじょう</td><td>명사</td><td>옥상</td></tr>
+                    <tr><td class="center">18</td><td><b>贈り物</b></td><td>おくりもの</td><td>명사</td><td>선물</td></tr>
+                    <tr><td class="center">19</td><td><b>お祭り</b></td><td>おまつり</td><td>명사</td><td>축제</td></tr>
+                    <tr><td class="center">20</td><td><b>海岸</b></td><td>かいがん</td><td>명사</td><td>해안</td></tr>
+                    <tr><td class="center">21</td><td><b>会議</b></td><td>かいぎ</td><td>명사</td><td>회의</td></tr>
+                    <tr><td class="center">22</td><td><b>会場</b></td><td>かいじょう</td><td>명사</td><td>회장 (모임 장소)</td></tr>
+                    <tr><td class="center">23</td><td><b>科学</b></td><td>かがく</td><td>명사</td><td>과학</td></tr>
+                    <tr><td class="center">24</td><td><b>鏡</b></td><td>かがみ</td><td>명사</td><td>거울</td></tr>
+                    <tr><td class="center">25</td><td><b>飾り</b></td><td>かざり</td><td>명사</td><td>장식</td></tr>
+                    <tr><td class="center">26</td><td><b>火事</b></td><td>かじ</td><td>명사</td><td>화재</td></tr>
+                    <tr><td class="center">27</td><td><b>悲しみ</b></td><td>かなしみ</td><td>명사</td><td>슬픔</td></tr>
+                    <tr><td class="center">28</td><td><b>髪</b></td><td>かみ</td><td>명사</td><td>머리카락</td></tr>
+                    <tr><td class="center">29</td><td><b>季節</b></td><td>きせつ</td><td>명사</td><td>계절</td></tr>
+                    <tr><td class="center">30</td><td><b>規則</b></td><td>きそく</td><td>명사</td><td>규칙</td></tr>
+                    <tr><td class="center">31</td><td><b>気分</b></td><td>きぶん</td><td>명사</td><td>기분</td></tr>
+                    <tr><td class="center">32</td><td><b>急行</b></td><td>きゅうこう</td><td>명사</td><td>급행</td></tr>
+                    <tr><td class="center">33</td><td><b>教育</b></td><td>きょういく</td><td>명사</td><td>교육</td></tr>
+                    <tr><td class="center">34</td><td><b>興味</b></td><td>きょうみ</td><td>명사</td><td>흥미</td></tr>
+                    <tr><td class="center">35</td><td><b>具合</b></td><td>ぐあい</td><td>명사</td><td>상태, 형편</td></tr>
+                    <tr><td class="center">36</td><td><b>雲</b></td><td>くも</td><td>명사</td><td>구름</td></tr>
+                    <tr><td class="center">37</td><td><b>計画</b></td><td>けいかく</td><td>명사</td><td>계획</td></tr>
+                    <tr><td class="center">38</td><td><b>経験</b></td><td>けいけん</td><td>명사</td><td>경험</td></tr>
+                    <tr><td class="center">39</td><td><b>警察</b></td><td>けいさつ</td><td>명사</td><td>경찰</td></tr>
+                    <tr><td class="center">40</td><td><b>景色</b></td><td>けしき</td><td>명사</td><td>경치</td></tr>
+                    <tr><td class="center">41</td><td><b>祈る</b></td><td>いのる</td><td>동사 (그룹1)</td><td>기도하다</td></tr>
+                    <tr><td class="center">42</td><td><b>植える</b></td><td>うえる</td><td>동사 (그룹2)</td><td>심다</td></tr>
+                    <tr><td class="center">43</td><td><b>選ぶ</b></td><td>えらぶ</td><td>동사 (그룹1)</td><td>고르다, 선택하다</td></tr>
+                    <tr><td class="center">44</td><td><b>送る</b></td><td>おくる</td><td>동사 (그룹1)</td><td>보내다</td></tr>
+                    <tr><td class="center">45</td><td><b>落とす</b></td><td>おとす</td><td>동사 (그룹1)</td><td>떨어뜨리다</td></tr>
+                    <tr><td class="center">46</td><td><b>思い出す</b></td><td>おもいだす</td><td>동사 (그룹1)</td><td>생각해 내다</td></tr>
+                    <tr><td class="center">47</td><td><b>泳ぐ</b></td><td>およぐ</td><td>동사 (그룹1)</td><td>헤엄치다</td></tr>
+                    <tr><td class="center">48</td><td><b>終わる</b></td><td>おわる</td><td>동사 (그룹1)</td><td>끝나다</td></tr>
+                    <tr><td class="center">49</td><td><b>変わる</b></td><td>かわる</td><td>동사 (그룹1)</td><td>변하다</td></tr>
+                    <tr><td class="center">50</td><td><b>頑張る</b></td><td>がんばる</td><td>동사 (그룹1)</td><td>힘내다, 노력하다</td></tr>
+                    <tr><td class="center">51</td><td><b>決める</b></td><td>きめる</td><td>동사 (그룹2)</td><td>결정하다</td></tr>
+                    <tr><td class="center">52</td><td><b>比べる</b></td><td>くらべる</td><td>동사 (그룹2)</td><td>비교하다</td></tr>
+                    <tr><td class="center">53</td><td><b>暮らす</b></td><td>くらす</td><td>동사 (그룹1)</td><td>생활하다, 살다</td></tr>
+                    <tr><td class="center">54</td><td><b>答える</b></td><td>こたえる</td><td>동사 (그룹2)</td><td>대답하다</td></tr>
+                    <tr><td class="center">55</td><td><b>探す</b></td><td>さがす</td><td>동사 (그룹1)</td><td>찾다</td></tr>
+                    <tr><td class="center">56</td><td><b>下がる</b></td><td>さがる</td><td>동사 (그룹1)</td><td>내려가다</td></tr>
+                    <tr><td class="center">57</td><td><b>触る</b></td><td>さわる</td><td>동사 (그룹1)</td><td>만지다, 닿다</td></tr>
+                    <tr><td class="center">58</td><td><b>叱る</b></td><td>しかる</td><td>동사 (그룹1)</td><td>꾸짖다</td></tr>
+                    <tr><td class="center">59</td><td><b>調べる</b></td><td>しらべる</td><td>동사 (그룹2)</td><td>조사하다</td></tr>
+                    <tr><td class="center">60</td><td><b>過ぎる</b></td><td>すぎる</td><td>동사 (그룹2)</td><td>지나다, 통과하다</td></tr>
+                    <tr><td class="center">61</td><td><b>育てる</b></td><td>そだてる</td><td>동사 (그룹2)</td><td>기르다, 키우다</td></tr>
+                    <tr><td class="center">62</td><td><b>倒れる</b></td><td>たおれる</td><td>동사 (그룹2)</td><td>쓰러지다</td></tr>
+                    <tr><td class="center">63</td><td><b>足す</b></td><td>たす</td><td>동사 (그룹1)</td><td>더하다, 보태다</td></tr>
+                    <tr><td class="center">64</td><td><b>頼む</b></td><td>たのむ</td><td>동사 (그룹1)</td><td>부탁하다</td></tr>
+                    <tr><td class="center">65</td><td><b>違う</b></td><td>ちがう</td><td>동사 (그룹1)</td><td>다르다, 틀리다</td></tr>
+                    <tr><td class="center">66</td><td><b>疲れる</b></td><td>つかれる</td><td>동사 (그룹2)</td><td>지치다, 피곤하다</td></tr>
+                    <tr><td class="center">67</td><td><b>伝える</b></td><td>つたえる</td><td>동사 (그룹2)</td><td>전하다</td></tr>
+                    <tr><td class="center">68</td><td><b>続ける</b></td><td>つづける</td><td>동사 (그룹2)</td><td>계속하다</td></tr>
+                    <tr><td class="center">69</td><td><b>包む</b></td><td>つつむ</td><td>동사 (그룹1)</td><td>싸다, 포장하다</td></tr>
+                    <tr><td class="center">70</td><td><b>連れる</b></td><td>つれる</td><td>동사 (그룹2)</td><td>데리고 가다</td></tr>
+                    <tr><td class="center">71</td><td><b>丁寧</b></td><td>ていねい</td><td>な형용사</td><td>정중함, 친절함</td></tr>
+                    <tr><td class="center">72</td><td><b>複雑</b></td><td>ふくざつ</td><td>な형용사</td><td>복잡함</td></tr>
+                    <tr><td class="center">73</td><td><b>特別</b></td><td>とくべつ</td><td>な형용사</td><td>특별함</td></tr>
+                    <tr><td class="center">74</td><td><b>不便</b></td><td>ふべん</td><td>な형용사</td><td>불편함</td></tr>
+                    <tr><td class="center">75</td><td><b>柔らかい</b></td><td>やわらかい</td><td>い형용사</td><td>부드럽다</td></tr>
+                    <tr><td class="center">76</td><td><b>厳しい</b></td><td>きびしい</td><td>い형용사</td><td>엄격하다</td></tr>
+                    <tr><td class="center">77</td><td><b>苦しい</b></td><td>くるしい</td><td>い형용사</td><td>괴롭다, 답답하다</td></tr>
+                    <tr><td class="center">78</td><td><b>細かい</b></td><td>こまかい</td><td>い형용사</td><td>가늘다, 작다, 자세하다</td></tr>
+                    <tr><td class="center">79</td><td><b>寂しい</b></td><td>さびしい</td><td>い형용사</td><td>외롭다, 쓸쓸하다</td></tr>
+                    <tr><td class="center">80</td><td><b>浅い</b></td><td>あさい</td><td>い형용사</td><td>얕다</td></tr>
+                    <tr><td class="center">81</td><td><b>深い</b></td><td>ふかい</td><td>い형용사</td><td>깊다</td></tr>
+                    <tr><td class="center">82</td><td><b>恥ずかしい</b></td><td>はずかしい</td><td>い형용사</td><td>부끄럽다</td></tr>
+                    <tr><td class="center">83</td><td><b>美しい</b></td><td>うつくしい</td><td>い형용사</td><td>아름답다</td></tr>
+                    <tr><td class="center">84</td><td><b>珍しい</b></td><td>めずらしい</td><td>い형용사</td><td>드물다, 진귀하다</td></tr>
+                    <tr><td class="center">85</td><td><b>優しい</b></td><td>やさしい</td><td>い형용사</td><td>다정하다, 상냥하다</td></tr>
+                    <tr><td class="center">86</td><td><b>随分</b></td><td>ずいぶん</td><td>부사</td><td>몹시, 대단히, 꽤</td></tr>
+                    <tr><td class="center">87</td><td><b>ぜひ</b></td><td>ぜひ</td><td>부사</td><td>꼭, 부디</td></tr>
+                    <tr><td class="center">88</td><td><b>ちっとも</b></td><td>ちっとも</td><td>부사</td><td>조금도 (주로 부정문)</td></tr>
+                    <tr><td class="center">89</td><td><b>ついに</b></td><td>ついに</td><td>부사</td><td>드디어, 마침내</td></tr>
+                    <tr><td class="center">90</td><td><b>なるべく</b></td><td>なるべく</td><td>부사</td><td>가능한 한</td></tr>
+                    <tr><td class="center">91</td><td><b>ほとんど</b></td><td>ほとんど</td><td>부사</td><td>거의</td></tr>
+                    <tr><td class="center">92</td><td><b>まず</b></td><td>まず</td><td>부사</td><td>먼저, 우선</td></tr>
+                    <tr><td class="center">93</td><td><b>または</b></td><td>または</td><td>접속사</td><td>또는, 혹은</td></tr>
+                    <tr><td class="center">94</td><td><b>もちろん</b></td><td>もちろん</td><td>부사</td><td>물론</td></tr>
+                    <tr><td class="center">95</td><td><b>やっと</b></td><td>やっと</td><td>부사</td><td>겨우, 간신히</td></tr>
+                    <tr><td class="center">96</td><td><b>沸かす</b></td><td>わかす</td><td>동사 (그룹1)</td><td>끓이다</td></tr>
+                    <tr><td class="center">97</td><td><b>笑う</b></td><td>わらう</td><td>동사 (그룹1)</td><td>웃다</td></tr>
+                    <tr><td class="center">98</td><td><b>割れる</b></td><td>われる</td><td>동사 (그룹2)</td><td>깨지다, 갈라지다</td></tr>
+                    <tr><td class="center">99</td><td><b>喜ぶ</b></td><td>よろこぶ</td><td>동사 (그룹1)</td><td>기뻐하다</td></tr>
+                    <tr><td class="center">100</td><td><b>急ぐ</b></td><td>いそぐ</td><td>동사 (그룹1)</td><td>서두르다</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="panel-N3-grammar" class="content-panel">
+            <h2>N3 문법 학습 (실전 핵심 문형 50)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 6%;" class="center">번호</th>
+                        <th style="width: 22%;">문법 표현</th>
+                        <th style="width: 25%;">의미 및 기능</th>
+                        <th style="width: 47%;">예문 (例文)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="center">1</td><td><b>～について</b></td><td>~에 대하여 (대상)</td><td>日本の経済について調べました。(일본 경제에 대해 조사했습니다.)</td></tr>
+                    <tr><td class="center">2</td><td><b>～に対して</b></td><td>~에 대하여 / ~에 반해 (대조, 대상)</td><td>お客様に対して失礼なことをしてはいけない。(손님에 대해 무례한 짓을 하면 안 된다.)</td></tr>
+                    <tr><td class="center">3</td><td><b>～に比べて</b></td><td>~에 비해 (비교)</td><td>今年は去年に比べて雨が多い。(올해는 작년에 비해 비가 많다.)</td></tr>
+                    <tr><td class="center">4</td><td><b>～に加えて</b></td><td>~에 더하여 (첨가)</td><td>熱があるのに加えて、頭も痛い。(열이 있는 데다가 머리도 아프다.)</td></tr>
+                    <tr><td class="center">5</td><td><b>～にとって</b></td><td>~에게 있어서 (입장, 평가의 기준)</td><td>私にとって家族は一番大切だ。(나에게 있어 가족은 가장 소중하다.)</td></tr>
+                    <tr><td class="center">6</td><td><b>～として</b></td><td>~로서 (자격, 입장, 명목)</td><td>彼は留学生として日本に来た。(그는 유학생으로서 일본에 왔다.)</td></tr>
+                    <tr><td class="center">7</td><td><b>～によって</b></td><td>~에 의해 / ~에 따라 (수단, 원인, 차이)</td><td>人によって考え方が違う。(사람에 따라 생각하는 방식이 다르다.)</td></tr>
+                    <tr><td class="center">8</td><td><b>～によると</b></td><td>~에 의하면 (정보의 출처)</td><td>天気予報によると、明日は雨だそうだ。(일기예보에 의하면 내일은 비라고 한다.)</td></tr>
+                    <tr><td class="center">9</td><td><b>～を中心に</b></td><td>~을 중심으로</td><td>東京を中心に地震が起きた。(도쿄를 중심으로 지진이 일어났다.)</td></tr>
+                    <tr><td class="center">10</td><td><b>～を問わず</b></td><td>~을 불문하고 / 상관없이</td><td>このスポーツは年齢を問わず楽しめる。(이 스포츠는 연령을 불문하고 즐길 수 있다.)</td></tr>
+                    <tr><td class="center">11</td><td><b>～をはじめ</b></td><td>~을 비롯하여 (대표 예시)</td><td>社長をはじめ、社員全員が参加した。(사장을 비롯해 사원 전원이 참가했다.)</td></tr>
+                    <tr><td class="center">12</td><td><b>～にわたって</b></td><td>~에 걸쳐 (시간, 공간의 범위)</td><td>会議は３時間にわたって行われた。(회의는 3시간에 걸쳐 진행되었다.)</td></tr>
+                    <tr><td class="center">13</td><td><b>～に違いない</b></td><td>~임에 틀림없다 (강한 확신)</td><td>犯人はあの人に違いない。(범인은 저 사람임에 틀림없다.)</td></tr>
+                    <tr><td class="center">14</td><td><b>～はずがない</b></td><td>~일 리가 없다 (강한 부정)</td><td>彼がそんなことをするはずがない。(그가 그런 짓을 할 리가 없다.)</td></tr>
+                    <tr><td class="center">15</td><td><b>～わけがない</b></td><td>~일 리가 없다 (이유상 불가능)</td><td>こんな難しい問題、私に分かるわけがない。(이런 어려운 문제, 내가 알 리가 없다.)</td></tr>
+                    <tr><td class="center">16</td><td><b>～わけではない</b></td><td>~인 것은 아니다 (부분 부정)</td><td>肉が嫌いなわけではないが、あまり食べない。(고기를 싫어하는 건 아니지만, 별로 안 먹는다.)</td></tr>
+                    <tr><td class="center">17</td><td><b>～ないことはない</b></td><td>~하지 않는 것은 아니다 (소극적 긍정)</td><td>納豆は食べられないことはないが、好きではない。(낫토는 못 먹는 건 아니지만 좋아하지 않는다.)</td></tr>
+                    <tr><td class="center">18</td><td><b>～とは限らない</b></td><td>~라고は 할 수 없다 (예외 존재)</td><td>高いものがいつも良いものだとは限らない。(비싼 것이 항상 좋은 것이라고는 할 수 없다.)</td></tr>
+                    <tr><td class="center">19</td><td><b>～に決まっている</b></td><td>~하기 마련이다 / ~임에 틀림없다</td><td>そんなことをしたら、怒られるに決まっている。(그런 짓을 하면 혼날 게 뻔하다.)</td></tr>
+                    <tr><td class="center">20</td><td><b>～たびに</b></td><td>~할 때마다</td><td>この曲を聞くたびに、学生時代を思い出す。(이 곡을 들을 때마다 학창 시절이 떠오른다.)</td></tr>
+                    <tr><td class="center">21</td><td><b>～ついでに</b></td><td>~하는 김에 (부가적 행위)</td><td>散歩のついでに、手紙を出してきた。(산책하는 김에 편지를 부치고 왔다.)</td></tr>
+                    <tr><td class="center">22</td><td><b>～最中に</b></td><td>~하는 한창때에 / 도중에</td><td>会議の最中に携帯電話が鳴った。(회의가 한창일 때 휴대전화가 울렸다.)</td></tr>
+                    <tr><td class="center">23</td><td><b>～うちに</b></td><td>~하는 동안에 (상태 변화 전)</td><td>スープが冷めないうちに飲んでください。(스프가 식기 전에 드세요.)</td></tr>
+                    <tr><td class="center">24</td><td><b>～からいうと / ～からすると</b></td><td>~에서 보면 (판단의 근거/입장)</td><td>現状からいうと、計画の変更が必要だ。(현 상황에서 보면 계획 변경이 필요하다.)</td></tr>
+                    <tr><td class="center">25</td><td><b>～からして</b></td><td>~부터가 (판단의 단서, 보통 부정적)</td><td>彼は態度からして生意気だ。(그는 태도부터가 건방지다.)</td></tr>
+                    <tr><td class="center">26</td><td><b>～て以来</b></td><td>~한 이래 (계속된 상태)</td><td>日本に来て以来、毎日日本語を勉強している。(일본에 온 이래 매일 일본어를 공부하고 있다.)</td></tr>
+                    <tr><td class="center">27</td><td><b>～てからでないと</b></td><td>~하고 나서가 아니면 (~할 수 없다)</td><td>上司に相談してからでないと、決められません。(상사에게 상의하고 나서가 아니면 결정할 수 없습니다.)</td></tr>
+                    <tr><td class="center">28</td><td><b>～一方だ</b></td><td>~하기만 하다 (한 방향으로만 변화)</td><td>物価は上がる一方だ。(물가는 오르기만 한다.)</td></tr>
+                    <tr><td class="center">29</td><td><b>～ばかりだ</b></td><td>~하기만 하다 (주로 나쁜 쪽으로 변화)</td><td>祖父の病気は悪くなるばかりだ。(할아버지의 병은 나빠지기만 한다.)</td></tr>
+                    <tr><td class="center">30</td><td><b>～つつある</b></td><td>~하고 있다 (변화가 진행 중임)</td><td>日本の人口は減りつつある。(일본의 인구는 줄어들고 있다.)</td></tr>
+                    <tr><td class="center">31</td><td><b>～つつ</b></td><td>~하면서 (동시 진행, ながら의 문어체)</td><td>景色を楽しみつつ、ゆっくり歩いた。(경치를 즐기면서 천천히 걸었다.)</td></tr>
+                    <tr><td class="center">32</td><td><b>～ながら（も）</b></td><td>~하면서도 / ~임에도 불구하고</td><td>狭いながらも楽しい我が家。(좁지만 즐거운 우리 집.)</td></tr>
+                    <tr><td class="center">33</td><td><b>～ものの</b></td><td>~이기는 하지만</td><td>タバコは体に悪いと分かっているものの、やめられない。(담배는 몸에 나쁘다는 걸 알면서도 끊을 수 없다.)</td></tr>
+                    <tr><td class="center">34</td><td><b>～くせに</b></td><td>~인 주제에 (비난, 불만)</td><td>彼は何も知らないくせに、文句ばかり言う。(그는 아무것도 모르는 주제에 불만만 말한다.)</td></tr>
+                    <tr><td class="center">35</td><td><b>～わりに（は）</b></td><td>~에 비해서는 (예상외)</td><td>このレストランは安いわりに美味しい。(이 레스토랑은 싼 것에 비해 맛있다.)</td></tr>
+                    <tr><td class="center">36</td><td><b>～とともに</b></td><td>~와 함께 / ~와 동시에</td><td>家族とともに日本へ行きます。(가족과 함께 일본에 갑니다.)</td></tr>
+                    <tr><td class="center">37</td><td><b>～に伴って (ともなって)</b></td><td>~에 수반하여 (원인과 결과의 동시진행)</td><td>経済の発展に伴って、環境問題が深刻化した。(경제 발전에 수반하여 환경 문제가 심각해졌다.)</td></tr>
+                    <tr><td class="center">38</td><td><b>～につれて</b></td><td>~함에 따라 (비례적 변화)</td><td>年を取るにつれて、体力が落ちてきた。(나이를 먹음에 따라 체력이 떨어졌다.)</td></tr>
+                    <tr><td class="center">39</td><td><b>～にしたがって</b></td><td>~함에 따라 / ~에 순응하여</td><td>予定表にしたがって旅行します。(예정표에 따라 여행합니다.)</td></tr>
+                    <tr><td class="center">40</td><td><b>～次第 (しだい)</b></td><td>~하는 대로 (즉시 다음 행동)</td><td>分かり次第、すぐにお知らせします。(아는 대로 바로 알려드리겠습니다.)</td></tr>
+                    <tr><td class="center">41</td><td><b>～としたら / ～とすれば</b></td><td>~라고 한다면 (가정)</td><td>生まれ変われるとしたら、鳥になりたい。(다시 태어날 수 있다면 새가 되고 싶다.)</td></tr>
+                    <tr><td class="center">42</td><td><b>～にしても</b></td><td>~라고 하더라도 (양보)</td><td>遅れるにしても、電話くらいするべきだ。(늦는다고 하더라도 전화 정도는 해야 한다.)</td></tr>
+                    <tr><td class="center">43</td><td><b>～はもちろん</b></td><td>~은 물론</td><td>彼は英語はもちろん、フランス語も話せる。(그는 영어는 물론 프랑스어도 할 줄 안다.)</td></tr>
+                    <tr><td class="center">44</td><td><b>～ばかりか / ～ばかりでなく</b></td><td>~뿐만 아니라</td><td>このアパートは狭いばかりか、暗いです。(이 아파트는 좁을 뿐만 아니라 어둡습니다.)</td></tr>
+                    <tr><td class="center">45</td><td><b>～のみならず</b></td><td>~뿐만 아니라 (문어체)</td><td>あの映画は日本のみならず、海外でも人気だ。(저 영화는 일본뿐만 아니라 해외에서도 인기다.)</td></tr>
+                    <tr><td class="center">46</td><td><b>～上（に） (うえに)</b></td><td>~인 데다가 (첨가)</td><td>今日は涼しいうえに、天気も良くて散歩日和だ。(오늘은 시원한 데다가 날씨도 좋아서 산책하기 딱 좋다.)</td></tr>
+                    <tr><td class="center">47</td><td><b>～かけだ / ～かける</b></td><td>~하다 만 상태다 / 막 ~하기 시작하다</td><td>テーブルの上に飲みかけのコーヒーがある。(테이블 위에 마시다 만 커피가 있다.)</td></tr>
+                    <tr><td class="center">48</td><td><b>～抜く (ぬく)</b></td><td>끝까지 ~해내다 (고난 극복)</td><td>最後まで走り抜くことができた。(끝까지 달려낼 수 있었다.)</td></tr>
+                    <tr><td class="center">49</td><td><b>～得る / ～得ない (うる/えない)</b></td><td>~할 수 있다 / ~할 수 없다 (가능성)</td><td>それは起こり得ることだ。(그것은 일어날 수 있는 일이다.)</td></tr>
+                    <tr><td class="center">50</td><td><b>～がちだ</b></td><td>~하기 쉽다 / ~하는 경향이 있다 (부정적)</td><td>最近、彼は病気がちでよく休む。(요즘 그는 병에 걸리기 쉬워서 자주 쉰다.)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="panel-N3-kanji" class="content-panel">
+            <h2>N3 필수 한자 (실전 핵심 100자)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 8%;" class="center">번호</th>
+                        <th style="width: 12%;" class="center">한자</th>
+                        <th style="width: 20%;">음독 (音読み)</th>
+                        <th style="width: 20%;">훈독 (訓読み)</th>
+                        <th style="width: 40%;">대표 의미 / 단어 예시</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="center">1</td><td class="center"><b>政</b></td><td>セイ, ショウ</td><td>まつりごと</td><td>정사 정 (政治, 政府)</td></tr>
+                    <tr><td class="center">2</td><td class="center"><b>議</b></td><td>ギ</td><td>-</td><td>의논할 의 (会議, 議員)</td></tr>
+                    <tr><td class="center">3</td><td class="center"><b>民</b></td><td>ミン</td><td>たみ</td><td>백성 민 (国民, 市民)</td></tr>
+                    <tr><td class="center">4</td><td class="center"><b>連</b></td><td>レン</td><td>つら(なる), つ(れる)</td><td>잇닿을 련 (連絡, 連れる)</td></tr>
+                    <tr><td class="center">5</td><td class="center"><b>対</b></td><td>タイ, ツイ</td><td>-</td><td>대할 대 (反対, 絶対)</td></tr>
+                    <tr><td class="center">6</td><td class="center"><b>部</b></td><td>ブ</td><td>-</td><td>떼 부 (部屋, 一部)</td></tr>
+                    <tr><td class="center">7</td><td class="center"><b>合</b></td><td>ゴウ, ガッ</td><td>あ(う), あ(わせる)</td><td>합할 합 (試合, 間に合う)</td></tr>
+                    <tr><td class="center">8</td><td class="center"><b>市</b></td><td>シ</td><td>いち</td><td>저자 시 (市民, 市場)</td></tr>
+                    <tr><td class="center">9</td><td class="center"><b>内</b></td><td>ナイ, ダイ</td><td>うち</td><td>안 내 (案内, 国内)</td></tr>
+                    <tr><td class="center">10</td><td class="center"><b>相</b></td><td>ソウ, ショウ</td><td>あい</td><td>서로 상 (相談, 相手)</td></tr>
+                    <tr><td class="center">11</td><td class="center"><b>定</b></td><td>テイ, ジョウ</td><td>さだ(める)</td><td>정할 정 (予定, 決定)</td></tr>
+                    <tr><td class="center">12</td><td class="center"><b>回</b></td><td>カイ, エ</td><td>まわ(る)</td><td>돌 회 (今回, 回す)</td></tr>
+                    <tr><td class="center">13</td><td class="center"><b>選</b></td><td>セン</td><td>えら(ぶ)</td><td>가릴 선 (選手, 選ぶ)</td></tr>
+                    <tr><td class="center">14</td><td class="center"><b>米</b></td><td>ベイ, マイ</td><td>こめ</td><td>쌀 미 (米国, お米)</td></tr>
+                    <tr><td class="center">15</td><td class="center"><b>実</b></td><td>ジツ</td><td>みの(る)</td><td>열매 실 (事実, 実際)</td></tr>
+                    <tr><td class="center">16</td><td class="center"><b>関</b></td><td>カン</td><td>せき</td><td>관계할 관 (関係, 関心)</td></tr>
+                    <tr><td class="center">17</td><td class="center"><b>決</b></td><td>ケツ</td><td>き(める)</td><td>결단할 결 (決める, 決定)</td></tr>
+                    <tr><td class="center">18</td><td class="center"><b>全</b></td><td>ゼン</td><td>まった(く)</td><td>온전 전 (全部, 全く)</td></tr>
+                    <tr><td class="center">19</td><td class="center"><b>表</b></td><td>ヒョウ</td><td>おもて, あらわ(す)</td><td>겉 표 (発表, 表面)</td></tr>
+                    <tr><td class="center">20</td><td class="center"><b>戦</b></td><td>セン</td><td>たたか(う)</td><td>싸울 전 (戦争, 戦う)</td></tr>
+                    <tr><td class="center">21</td><td class="center"><b>経</b></td><td>ケイ, キョウ</td><td>へ(る)</td><td>지날 경 (経済, 経験)</td></tr>
+                    <tr><td class="center">22</td><td class="center"><b>最</b></td><td>サイ</td><td>もっと(も)</td><td>가장 최 (最近, 最高)</td></tr>
+                    <tr><td class="center">23</td><td class="center"><b>現</b></td><td>ゲン</td><td>あらわ(れる)</td><td>나타날 현 (現在, 表現)</td></tr>
+                    <tr><td class="center">24</td><td class="center"><b>調</b></td><td>チョウ</td><td>しら(べる)</td><td>고를 조 (調査, 調べる)</td></tr>
+                    <tr><td class="center">25</td><td class="center"><b>化</b></td><td>カ, ケ</td><td>ば(ける)</td><td>될 화 (文化, 変化)</td></tr>
+                    <tr><td class="center">26</td><td class="center"><b>当</b></td><td>トウ</td><td>あ(たる)</td><td>마땅 당 (本当, 当たる)</td></tr>
+                    <tr><td class="center">27</td><td class="center"><b>約</b></td><td>ヤク</td><td>-</td><td>맺을 약 (約束, 予約)</td></tr>
+                    <tr><td class="center">28</td><td class="center"><b>首</b></td><td>シュ</td><td>くび</td><td>머리 수 (首相, 首)</td></tr>
+                    <tr><td class="center">29</td><td class="center"><b>法</b></td><td>ホウ, ハッ</td><td>-</td><td>법 법 (法律, 方法)</td></tr>
+                    <tr><td class="center">30</td><td class="center"><b>性</b></td><td>セイ, ショウ</td><td>-</td><td>성품 성 (性格, 女性)</td></tr>
+                    <tr><td class="center">31</td><td class="center"><b>要</b></td><td>ヨウ</td><td>い(る)</td><td>요긴할 요 (必要, 重要)</td></tr>
+                    <tr><td class="center">32</td><td class="center"><b>制</b></td><td>セイ</td><td>-</td><td>절제할 제 (制度, 制作)</td></tr>
+                    <tr><td class="center">33</td><td class="center"><b>治</b></td><td>ジ, チ</td><td>なお(る), おさ(める)</td><td>다스릴 치 (政治, 治る)</td></tr>
+                    <tr><td class="center">34</td><td class="center"><b>務</b></td><td>ム</td><td>つと(める)</td><td>힘쓸 무 (事務所, 義務)</td></tr>
+                    <tr><td class="center">35</td><td class="center"><b>成</b></td><td>セイ, ジョウ</td><td>な(る)</td><td>이룰 성 (成功, 完成)</td></tr>
+                    <tr><td class="center">36</td><td class="center"><b>期</b></td><td>キ, ゴ</td><td>-</td><td>기약할 기 (期間, 期待)</td></tr>
+                    <tr><td class="center">37</td><td class="center"><b>取</b></td><td>シュ</td><td>と(る)</td><td>취할 취 (取る, 受け取る)</td></tr>
+                    <tr><td class="center">38</td><td class="center"><b>都</b></td><td>ト, ツ</td><td>みやこ</td><td>도읍 도 (都会, 京都)</td></tr>
+                    <tr><td class="center">39</td><td class="center"><b>和</b></td><td>ワ, オ</td><td>やわ(らぐ)</td><td>화할 화 (平和, 和食)</td></tr>
+                    <tr><td class="center">40</td><td class="center"><b>機</b></td><td>キ</td><td>はた</td><td>틀 기 (機械, 飛行機)</td></tr>
+                    <tr><td class="center">41</td><td class="center"><b>平</b></td><td>ヘイ, ビョウ</td><td>たい(ら), ひら</td><td>평평할 평 (平和, 平日)</td></tr>
+                    <tr><td class="center">42</td><td class="center"><b>加</b></td><td>カ</td><td>くわ(える)</td><td>더할 가 (参加, 加える)</td></tr>
+                    <tr><td class="center">43</td><td class="center"><b>受</b></td><td>ジュ</td><td>う(ける)</td><td>받을 수 (受ける, 受付)</td></tr>
+                    <tr><td class="center">44</td><td class="center"><b>続</b></td><td>ゾク</td><td>つづ(く)</td><td>이을 속 (続く, 連続)</td></tr>
+                    <tr><td class="center">45</td><td class="center"><b>進</b></td><td>シン</td><td>すす(む)</td><td>나아갈 진 (進む, 進学)</td></tr>
+                    <tr><td class="center">46</td><td class="center"><b>数</b></td><td>スウ, ス</td><td>かず, かぞ(える)</td><td>셈 수 (数学, 数える)</td></tr>
+                    <tr><td class="center">47</td><td class="center"><b>記</b></td><td>キ</td><td>しる(す)</td><td>기록할 기 (日記, 記事)</td></tr>
+                    <tr><td class="center">48</td><td class="center"><b>初</b></td><td>ショ</td><td>はじ(め), はつ</td><td>처음 초 (初めて, 最初)</td></tr>
+                    <tr><td class="center">49</td><td class="center"><b>指</b></td><td>シ</td><td>ゆび, さ(す)</td><td>손가락 지 (指, 指定)</td></tr>
+                    <tr><td class="center">50</td><td class="center"><b>権</b></td><td>ケン, ゴン</td><td>-</td><td>권세 권 (権利)</td></tr>
+                    <tr><td class="center">51</td><td class="center"><b>支</b></td><td>シ</td><td>ささ(える)</td><td>지탱할 지 (支店, 支える)</td></tr>
+                    <tr><td class="center">52</td><td class="center"><b>産</b></td><td>サン</td><td>う(む)</td><td>낳을 산 (産業, 生産)</td></tr>
+                    <tr><td class="center">53</td><td class="center"><b>点</b></td><td>テン</td><td>-</td><td>점 점 (点数, 交差点)</td></tr>
+                    <tr><td class="center">54</td><td class="center"><b>報</b></td><td>ホウ</td><td>むく(いる)</td><td>갚을 보 (情報, 報告)</td></tr>
+                    <tr><td class="center">55</td><td class="center"><b>済</b></td><td>サイ, ザイ</td><td>す(む)</td><td>건널 제 (経済, 済む)</td></tr>
+                    <tr><td class="center">56</td><td class="center"><b>活</b></td><td>カツ</td><td>-</td><td>살 활 (生活, 活動)</td></tr>
+                    <tr><td class="center">57</td><td class="center"><b>原</b></td><td>ゲン</td><td>はら</td><td>근원 원 (原因, 野原)</td></tr>
+                    <tr><td class="center">58</td><td class="center"><b>共</b></td><td>キョウ</td><td>とも</td><td>함께 공 (共通, 共に)</td></tr>
+                    <tr><td class="center">59</td><td class="center"><b>得</b></td><td>トク</td><td>え(る)</td><td>얻을 得 (得意, 得る)</td></tr>
+                    <tr><td class="center">60</td><td class="center"><b>解</b></td><td>カイ, ゲ</td><td>と(く)</td><td>풀 해 (解決, 理解)</td></tr>
+                    <tr><td class="center">61</td><td class="center"><b>交</b></td><td>コウ</td><td>まじ(わる)</td><td>사귈 교 (交通, 交番)</td></tr>
+                    <tr><td class="center">62</td><td class="center"><b>資</b></td><td>シ</td><td>-</td><td>재물 자 (資料, 資格)</td></tr>
+                    <tr><td class="center">63</td><td class="center"><b>予</b></td><td>ヨ</td><td>あらかじ(め)</td><td>미리 예 (予定, 予約)</td></tr>
+                    <tr><td class="center">64</td><td class="center"><b>向</b></td><td>コウ</td><td>む(かう)</td><td>향할 향 (向かう, 方向)</td></tr>
+                    <tr><td class="center">65</td><td class="center"><b>際</b></td><td>サイ</td><td>きわ</td><td>즈음 제 (国際, 実際)</td></tr>
+                    <tr><td class="center">66</td><td class="center"><b>勝</b></td><td>ショウ</td><td>か(つ)</td><td>이길 승 (勝つ, 優勝)</td></tr>
+                    <tr><td class="center">67</td><td class="center"><b>面</b></td><td>メン</td><td>おも, つら</td><td>낯 면 (表面, 真面目)</td></tr>
+                    <tr><td class="center">68</td><td class="center"><b>告</b></td><td>コク</td><td>つ(げる)</td><td>알릴 고 (報告, 広告)</td></tr>
+                    <tr><td class="center">69</td><td class="center"><b>反</b></td><td>ハン, ホン</td><td>そ(る)</td><td>돌이킬 반 (反対, 違反)</td></tr>
+                    <tr><td class="center">70</td><td class="center"><b>判</b></td><td>ハン, バン</td><td>-</td><td>판단할 판 (判断, 裁判)</td></tr>
+                    <tr><td class="center">71</td><td class="center"><b>認</b></td><td>ニン</td><td>みと(める)</td><td>알 인 (確認, 認める)</td></tr>
+                    <tr><td class="center">72</td><td class="center"><b>参</b></td><td>サン</td><td>まい(る)</td><td>참여할 참 (参加, 参る)</td></tr>
+                    <tr><td class="center">73</td><td class="center"><b>信</b></td><td>シン</td><td>-</td><td>믿을 신 (自信, 信用)</td></tr>
+                    <tr><td class="center">74</td><td class="center"><b>在</b></td><td>ザイ</td><td>あ(る)</td><td>있을 재 (現在, 存在)</td></tr>
+                    <tr><td class="center">75</td><td class="center"><b>件</b></td><td>ケン</td><td>-</td><td>물건 건 (事件, 条件)</td></tr>
+                    <tr><td class="center">76</td><td class="center"><b>側</b></td><td>ソク</td><td>かわ, がわ</td><td>곁 측 (右側, 側面)</td></tr>
+                    <tr><td class="center">77</td><td class="center"><b>任</b></td><td>ニン</td><td>まか(せる)</td><td>맡길 임 (責任, 任せる)</td></tr>
+                    <tr><td class="center">78</td><td class="center"><b>引</b></td><td>イン</td><td>ひ(く)</td><td>끌 인 (引く, 引き出し)</td></tr>
+                    <tr><td class="center">79</td><td class="center"><b>求</b></td><td>キュウ</td><td>もと(める)</td><td>구할 구 (要求, 求める)</td></tr>
+                    <tr><td class="center">80</td><td class="center"><b>所</b></td><td>ショ</td><td>ところ</td><td>바 소 (場所, 住所)</td></tr>
+                    <tr><td class="center">81</td><td class="center"><b>次</b></td><td>ジ, シ</td><td>つぎ</td><td>버금 차 (次, 目次)</td></tr>
+                    <tr><td class="center">82</td><td class="center"><b>昨</b></td><td>サク</td><td>-</td><td>어제 작 (昨日, 昨年)</td></tr>
+                    <tr><td class="center">83</td><td class="center"><b>論</b></td><td>ロン</td><td>-</td><td>논할 논 (論文, 議論)</td></tr>
+                    <tr><td class="center">84</td><td class="center"><b>官</b></td><td>カン</td><td>-</td><td>벼슬 관 (警官, 官僚)</td></tr>
+                    <tr><td class="center">85</td><td class="center"><b>増</b></td><td>ゾウ</td><td>ふ(える), ま(す)</td><td>더할 증 (増える, 増加)</td></tr>
+                    <tr><td class="center">86</td><td class="center"><b>係</b></td><td>ケイ</td><td>かかり</td><td>맬 계 (関係, 係)</td></tr>
+                    <tr><td class="center">87</td><td class="center"><b>感</b></td><td>カン</td><td>-</td><td>느낄 감 (感情, 感動)</td></tr>
+                    <tr><td class="center">88</td><td class="center"><b>情</b></td><td>ジョウ, セイ</td><td>なさ(け)</td><td>뜻 정 (情報, 感情)</td></tr>
+                    <tr><td class="center">89</td><td class="center"><b>投</b></td><td>トウ</td><td>な(げる)</td><td>던질 투 (投げる, 投資)</td></tr>
+                    <tr><td class="center">90</td><td class="center"><b>示</b></td><td>ジ, シ</td><td>しめ(す)</td><td>보일 시 (指示, 示す)</td></tr>
+                    <tr><td class="center">91</td><td class="center"><b>変</b></td><td>ヘン</td><td>か(わる)</td><td>변할 변 (変化, 変わる)</td></tr>
+                    <tr><td class="center">92</td><td class="center"><b>打</b></td><td>ダ</td><td>う(つ)</td><td>칠 타 (打つ, 打ち合わせ)</td></tr>
+                    <tr><td class="center">93</td><td class="center"><b>直</b></td><td>チョク, ジキ</td><td>なお(す)</td><td>곧을 직 (直す, 直接)</td></tr>
+                    <tr><td class="center">94</td><td class="center"><b>両</b></td><td>リョウ</td><td>-</td><td>두 량 (両親, 両方)</td></tr>
+                    <tr><td class="center">95</td><td class="center"><b>式</b></td><td>シキ</td><td>-</td><td>법 식 (結婚式, 形式)</td></tr>
+                    <tr><td class="center">96</td><td class="center"><b>確</b></td><td>カク</td><td>たし(か)</td><td>굳을 확 (確認, 確か)</td></tr>
+                    <tr><td class="center">97</td><td class="center"><b>果</b></td><td>カ</td><td>は(たす)</td><td>열매 과 (結果, 果物)</td></tr>
+                    <tr><td class="center">98</td><td class="center"><b>容</b></td><td>ヨウ</td><td>-</td><td>얼굴 용 (内容, 美容)</td></tr>
+                    <tr><td class="center">99</td><td class="center"><b>必</b></td><td>ヒツ</td><td>かなら(ず)</td><td>반드시 필 (必要, 必ず)</td></tr>
+                    <tr><td class="center">100</td><td class="center"><b>演</b></td><td>エン</td><td>-</td><td>펼 연 (講演, 演技)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="panel-N3-vocab" class="content-panel">
+            <h2>N3 필수 단어 (실전 표기·한자 연동 100선)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 8%;" class="center">번호</th>
+                        <th style="width: 22%;">단어 (표기)</th>
+                        <th style="width: 25%;">요미가나 (읽기)</th>
+                        <th style="width: 15%;">품사</th>
+                        <th style="width: 30%;">한국어 뜻</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="center">1</td><td><b>愛情</b></td><td>あいじょう</td><td>명사</td><td>애정</td></tr>
+                    <tr><td class="center">2</td><td><b>合図</b></td><td>あいず</td><td>명사</td><td>신호</td></tr>
+                    <tr><td class="center">3</td><td><b>相手</b></td><td>あいて</td><td>명사</td><td>상대</td></tr>
+                    <tr><td class="center">4</td><td><b>明かり</b></td><td>あかり</td><td>명사</td><td>빛, 불빛</td></tr>
+                    <tr><td class="center">5</td><td><b>悪魔</b></td><td>あくま</td><td>명사</td><td>악마</td></tr>
+                    <tr><td class="center">6</td><td><b>足跡</b></td><td>あしあと</td><td>명사</td><td>발자국</td></tr>
+                    <tr><td class="center">7</td><td><b>宛名</b></td><td>あてな</td><td>명사</td><td>수신인 이름</td></tr>
+                    <tr><td class="center">8</td><td><b>誤り</b></td><td>あやまり</td><td>명사</td><td>잘못, 실수</td></tr>
+                    <tr><td class="center">9</td><td><b>嵐</b></td><td>あらし</td><td>명사</td><td>폭풍우</td></tr>
+                    <tr><td class="center">10</td><td><b>泡</b></td><td>あわ</td><td>명사</td><td>거품</td></tr>
+                    <tr><td class="center">11</td><td><b>怒り</b></td><td>いかり</td><td>명사</td><td>분노</td></tr>
+                    <tr><td class="center">12</td><td><b>息</b></td><td>いき</td><td>명사</td><td>숨, 호흡</td></tr>
+                    <tr><td class="center">13</td><td><b>勢い</b></td><td>いきおい</td><td>명사</td><td>기세, 힘</td></tr>
+                    <tr><td class="center">14</td><td><b>医師</b></td><td>いし</td><td>명사</td><td>의사</td></tr>
+                    <tr><td class="center">15</td><td><b>意志</b></td><td>いし</td><td>명사</td><td>의지</td></tr>
+                    <tr><td class="center">16</td><td><b>意識</b></td><td>いしき</td><td>명사</td><td>의식</td></tr>
+                    <tr><td class="center">17</td><td><b>異常</b></td><td>いじょう</td><td>명사 / な형용사</td><td>이상함</td></tr>
+                    <tr><td class="center">18</td><td><b>泉</b></td><td>いずみ</td><td>명사</td><td>샘</td></tr>
+                    <tr><td class="center">19</td><td><b>板</b></td><td>いた</td><td>명사</td><td>판자, 널빤지</td></tr>
+                    <tr><td class="center">20</td><td><b>痛み</b></td><td>いたみ</td><td>명사</td><td>아픔, 통증</td></tr>
+                    <tr><td class="center">21</td><td><b>位置</b></td><td>いち</td><td>명사</td><td>위치</td></tr>
+                    <tr><td class="center">22</td><td><b>市場</b></td><td>いちば</td><td>명사</td><td>시장</td></tr>
+                    <tr><td class="center">23</td><td><b>印象</b></td><td>いんしょう</td><td>명사</td><td>인상</td></tr>
+                    <tr><td class="center">24</td><td><b>引退</b></td><td>いんたい</td><td>명사</td><td>은퇴</td></tr>
+                    <tr><td class="center">25</td><td><b>伺う</b></td><td>うかがう</td><td>동사 (그룹1)</td><td>여쭙다, 방문하다 (겸양)</td></tr>
+                    <tr><td class="center">26</td><td><b>受け取る</b></td><td>うけとる</td><td>동사 (그룹1)</td><td>받다, 수취하다</td></tr>
+                    <tr><td class="center">27</td><td><b>動かす</b></td><td>うごかす</td><td>동사 (그룹1)</td><td>움직이게 하다</td></tr>
+                    <tr><td class="center">28</td><td><b>失う</b></td><td>うしなう</td><td>동사 (그룹1)</td><td>잃다, 상실하다</td></tr>
+                    <tr><td class="center">29</td><td><b>疑う</b></td><td>うたがう</td><td>동사 (그룹1)</td><td>의심하다</td></tr>
+                    <tr><td class="center">30</td><td><b>打ち合わせ</b></td><td>うちあわせ</td><td>명사</td><td>사전 협의, 미팅</td></tr>
+                    <tr><td class="center">31</td><td><b>奪う</b></td><td>うばう</td><td>동사 (그룹1)</td><td>빼앗다</td></tr>
+                    <tr><td class="center">32</td><td><b>裏切る</b></td><td>うらぎる</td><td>동사 (그룹1)</td><td>배신하다</td></tr>
+                    <tr><td class="center">33</td><td><b>得る</b></td><td>える / うる</td><td>동사 (그룹2)</td><td>얻다, 획득하다</td></tr>
+                    <tr><td class="center">34</td><td><b>影響</b></td><td>えいきょう</td><td>명사</td><td>영향</td></tr>
+                    <tr><td class="center">35</td><td><b>営業</b></td><td>えいぎょう</td><td>명사</td><td>영업</td></tr>
+                    <tr><td class="center">36</td><td><b>援助</b></td><td>えんじょ</td><td>명사</td><td>원조, 지원</td></tr>
+                    <tr><td class="center">37</td><td><b>演説</b></td><td>えんぜつ</td><td>명사</td><td>연설</td></tr>
+                    <tr><td class="center">38</td><td><b>追い越す</b></td><td>おいこす</td><td>동사 (그룹1)</td><td>앞지르다, 추월하다</td></tr>
+                    <tr><td class="center">39</td><td><b>追いつく</b></td><td>おいつく</td><td>동사 (그룹1)</td><td>따라붙다, 따라잡다</td></tr>
+                    <tr><td class="center">40</td><td><b>王子</b></td><td>おうじ</td><td>명사</td><td>왕자</td></tr>
+                    <tr><td class="center">41</td><td><b>横断</b></td><td>おうだん</td><td>명사</td><td>횡단</td></tr>
+                    <tr><td class="center">42</td><td><b>終える</b></td><td>おえる</td><td>동사 (그룹2)</td><td>끝내다, 마치다</td></tr>
+                    <tr><td class="center">43</td><td><b>大いに</b></td><td>おおいに</td><td>부사</td><td>매우, 대단히</td></tr>
+                    <tr><td class="center">44</td><td><b>大通り</b></td><td>おおどおり</td><td>명사</td><td>큰길, 대로</td></tr>
+                    <tr><td class="center">45</td><td><b>お互いに</b></td><td>おたがいに</td><td>부사</td><td>서로</td></tr>
+                    <tr><td class="center">46</td><td><b>穏やか</b></td><td>おだやか</td><td>な형용사</td><td>온화함, 평온함</td></tr>
+                    <tr><td class="center">47</td><td><b>思い込む</b></td><td>おもいこむ</td><td>동사 (그룹1)</td><td>굳게 믿다, 착각하다</td></tr>
+                    <tr><td class="center">48</td><td><b>思いやり</b></td><td>おもいやり</td><td>명사</td><td>배려</td></tr>
+                    <tr><td class="center">49</td><td><b>下ろす</b></td><td>おろす</td><td>동사 (그룹1)</td><td>내리다</td></tr>
+                    <tr><td class="center">50</td><td><b>恩</b></td><td>おん</td><td>명사</td><td>은혜</td></tr>
+                    <tr><td class="center">51</td><td><b>温度</b></td><td>おんど</td><td>명사</td><td>온도</td></tr>
+                    <tr><td class="center">52</td><td><b>解決</b></td><td>かいけつ</td><td>명사</td><td>해결</td></tr>
+                    <tr><td class="center">53</td><td><b>外交</b></td><td>がいこう</td><td>명사</td><td>외교</td></tr>
+                    <tr><td class="center">54</td><td><b>外出</b></td><td>がいしゅつ</td><td>명사</td><td>외출</td></tr>
+                    <tr><td class="center">55</td><td><b>回復</b></td><td>かいふく</td><td>명사</td><td>회복</td></tr>
+                    <tr><td class="center">56</td><td><b>香り</b></td><td>かおり</td><td>명사</td><td>향기</td></tr>
+                    <tr><td class="center">57</td><td><b>抱える</b></td><td>かかえる</td><td>동사 (그룹2)</td><td>안다, 떠안다</td></tr>
+                    <tr><td class="center">58</td><td><b>価格</b></td><td>かかく</td><td>명사</td><td>가격</td></tr>
+                    <tr><td class="center">59</td><td><b>化学</b></td><td>かがく</td><td>명사</td><td>화학</td></tr>
+                    <tr><td class="center">60</td><td><b>輝く</b></td><td>かがやく</td><td>동사 (그룹1)</td><td>빛나다</td></tr>
+                    <tr><td class="center">61</td><td><b>限る</b></td><td>かぎる</td><td>동사 (그룹1)</td><td>제한하다, 한정하다</td></tr>
+                    <tr><td class="center">62</td><td><b>隠れる</b></td><td>かくれる</td><td>동사 (그룹2)</td><td>숨다</td></tr>
+                    <tr><td class="center">63</td><td><b>家事</b></td><td>かじ</td><td>명사</td><td>가사, 집안일</td></tr>
+                    <tr><td class="center">64</td><td><b>賢い</b></td><td>かしこい</td><td>い형용사</td><td>현명하다, 영리하다</td></tr>
+                    <tr><td class="center">65</td><td><b>稼ぐ</b></td><td>かせぐ</td><td>동사 (그룹1)</td><td>돈을 벌다</td></tr>
+                    <tr><td class="center">66</td><td><b>硬い</b></td><td>かたい</td><td>い형용사</td><td>단단하다, 딱딱하다</td></tr>
+                    <tr><td class="center">67</td><td><b>語る</b></td><td>かたる</td><td>동사 (그룹1)</td><td>말하다, 이야기하다</td></tr>
+                    <tr><td class="center">68</td><td><b>価値</b></td><td>かち</td><td>명사</td><td>가치</td></tr>
+                    <tr><td class="center">69</td><td><b>悲しむ</b></td><td>かなしむ</td><td>동사 (그룹1)</td><td>슬퍼하다</td></tr>
+                    <tr><td class="center">70</td><td><b>必ずしも</b></td><td>かならずしも</td><td>부사</td><td>반드시 ~인 것은 (아니다)</td></tr>
+                    <tr><td class="center">71</td><td><b>我慢</b></td><td>がまん</td><td>명사</td><td>참음, 인내</td></tr>
+                    <tr><td class="center">72</td><td><b>神様</b></td><td>かみさま</td><td>명사</td><td>신</td></tr>
+                    <tr><td class="center">73</td><td><b>辛い</b></td><td>からい</td><td>い형용사</td><td>맵다</td></tr>
+                    <tr><td class="center">74</td><td><b>かわいそう</b></td><td>かわいそう</td><td>な형용사</td><td>불쌍함, 가엾음</td></tr>
+                    <tr><td class="center">75</td><td><b>完成</b></td><td>かんせい</td><td>명사</td><td>완성</td></tr>
+                    <tr><td class="center">76</td><td><b>完全</b></td><td>かんぜん</td><td>명사 / な형용사</td><td>완전함</td></tr>
+                    <tr><td class="center">77</td><td><b>感動</b></td><td>かんどう</td><td>명사</td><td>감동</td></tr>
+                    <tr><td class="center">78</td><td><b>管理</b></td><td>かんり</td><td>명사</td><td>관리</td></tr>
+                    <tr><td class="center">79</td><td><b>完了</b></td><td>かんりょう</td><td>명사</td><td>완료</td></tr>
+                    <tr><td class="center">80</td><td><b>関連</b></td><td>かんれん</td><td>명사</td><td>관련</td></tr>
+                    <tr><td class="center">81</td><td><b>機会</b></td><td>きかい</td><td>명사</td><td>기회</td></tr>
+                    <tr><td class="center">82</td><td><b>効く</b></td><td>きく</td><td>동사 (그룹1)</td><td>효과가 있다, 잘 듣다</td></tr>
+                    <tr><td class="center">83</td><td><b>気候</b></td><td>きこう</td><td>명사</td><td>기후</td></tr>
+                    <tr><td class="center">84</td><td><b>記事</b></td><td>きじ</td><td>명사</td><td>기사</td></tr>
+                    <tr><td class="center">85</td><td><b>期待</b></td><td>きたい</td><td>명사</td><td>기대</td></tr>
+                    <tr><td class="center">86</td><td><b>帰宅</b></td><td>きたく</td><td>명사</td><td>귀택, 귀가</td></tr>
+                    <tr><td class="center">87</td><td><b>貴重</b></td><td>きちょう</td><td>な형용사</td><td>귀중함</td></tr>
+                    <tr><td class="center">88</td><td><b>気づく</b></td><td>きづく</td><td>동사 (그룹1)</td><td>눈치채다, 깨닫다</td></tr>
+                    <tr><td class="center">89</td><td><b>気に入る</b></td><td>きにいる</td><td>동사 (그룹1)</td><td>마음에 들다</td></tr>
+                    <tr><td class="center">90</td><td><b>記入</b></td><td>きにゅう</td><td>명사</td><td>기입</td></tr>
+                    <tr><td class="center">91</td><td><b>記念</b></td><td>きねん</td><td>명사</td><td>기념</td></tr>
+                    <tr><td class="center">92</td><td><b>希望</b></td><td>きぼう</td><td>명사</td><td>희망</td></tr>
+                    <tr><td class="center">93</td><td><b>基本</b></td><td>きほん</td><td>명사</td><td>기본</td></tr>
+                    <tr><td class="center">94</td><td><b>疑問</b></td><td>ぎもん</td><td>명사</td><td>의문</td></tr>
+                    <tr><td class="center">95</td><td><b>客席</b></td><td>きゃくせき</td><td>명사</td><td>객석</td></tr>
+                    <tr><td class="center">96</td><td><b>休暇</b></td><td>きゅうか</td><td>명사</td><td>휴가</td></tr>
+                    <tr><td class="center">97</td><td><b>急激</b></td><td>きゅうげき</td><td>な형용사</td><td>급격함</td></tr>
+                    <tr><td class="center">98</td><td><b>吸収</b></td><td>きゅうしゅう</td><td>명사</td><td>흡수</td></tr>
+                    <tr><td class="center">99</td><td><b>救助</b></td><td>きゅうじょ</td><td>명사</td><td>구조</td></tr>
+                    <tr><td class="center">100</td><td><b>急速</b></td><td>きゅうそく</td><td>な형용사</td><td>급속함</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <script>
+        let currentLevel = 'N5';
+        let currentSection = 'grammar';
+
+        function changeLevel(level) {
+            currentLevel = level;
+            const topButtons = document.querySelectorAll('#topNav button');
+            topButtons.forEach(btn => {
+                if(btn.innerText.includes(level)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            updateDisplay();
+        }
+
+        function changeSection(section) {
+            currentSection = section;
+            const subButtons = document.querySelectorAll('#subNav button');
+            const sections = ['grammar', 'kanji', 'vocab'];
+            subButtons.forEach((btn, index) => {
+                if(sections[index] === section) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const panels = document.querySelectorAll('.content-panel');
+            panels.forEach(panel => panel.classList.remove('active'));
+            const targetId = `panel-${currentLevel}-${currentSection}`;
+            const targetPanel = document.getElementById(targetId);
+            if(targetPanel) {
+                targetPanel.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
