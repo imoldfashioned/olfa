@@ -1014,143 +1014,395 @@
         </div>
     </main>
 
-    <script>
-        let currentLevel = 'N5';
-        let currentSection = 'grammar';
-        let showOnlyFavorites = false;
-        let bookmarkedIds = JSON.parse(localStorage.getItem('jlptBookmarks')) || [];
+<script>
+        /**
+         * JLPT 학습 플랫폼 Ver 3.1 Final
+         * 아키텍처: Parser -> Store (Data Model) -> Renderer
+         */
 
-        // 네비게이션 제어
-        function changeLevel(level) {
-            currentLevel = level;
-            document.querySelectorAll('#topNav button').forEach(btn => btn.classList.toggle('active', btn.innerText.includes(level)));
-            updateDisplay();
-        }
+        // --------------------------------------------------
+        // 1. Store (상태 관리 및 순수 데이터 모델)
+        // --------------------------------------------------
+        const Store = {
+            state: {
+                level: 'N5',
+                section: 'grammar',
+                filters: { query: '', bookmarkOnly: false, todayReviewOnly: false },
+                items: [],        // 순수 데이터 객체 배열 (DOM 미포함)
+                progress: {}      // 로컬 스토리지 연동 데이터
+            },
+            
+            STATUS_ORDER: ['new', 'learning', 'review', 'mastered'],
+            STATUS_LABELS: { new: '🌱 미학습', learning: '⏳ 학습중', review: '🔄 복습대상', mastered: '✅ 암기완료' },
 
-        function changeSection(section) {
-            currentSection = section;
-            const sectionsMap = { 'grammar': 0, 'kanji': 1, 'vocab': 2 };
-            document.querySelectorAll('#subNav button').forEach((btn, index) => btn.classList.toggle('active', index === sectionsMap[section]));
-            updateDisplay();
-        }
+            init() {
+                const data = localStorage.getItem('jlpt_v3_progress');
+                if (data) {
+                    try { this.state.progress = JSON.parse(data); } 
+                    catch (e) { this.state.progress = {}; }
+                }
+            },
+            
+            save() {
+                localStorage.setItem('jlpt_v3_progress', JSON.stringify(this.state.progress));
+            },
 
-        // 학습 모드(가리기) 토글
+            getProgress(id) {
+                if (!this.state.progress[id]) {
+                    this.state.progress[id] = { status: 'new', isBookmarked: false, nextReview: 0 };
+                }
+                return this.state.progress[id];
+            },
+
+            cycleStatus(id) {
+                const pData = this.getProgress(id);
+                let currIdx = this.STATUS_ORDER.indexOf(pData.status);
+                pData.status = this.STATUS_ORDER[(currIdx + 1) % this.STATUS_ORDER.length];
+                
+                if (pData.status === 'review') pData.nextReview = Date.now() + 1 * 24 * 60 * 60 * 1000;
+                else if (pData.status === 'mastered') pData.nextReview = Date.now() + 30 * 24 * 60 * 60 * 1000;
+                else pData.nextReview = 0;
+                
+                this.save();
+            },
+
+            toggleBookmark(id) {
+                const pData = this.getProgress(id);
+                pData.isBookmarked = !pData.isBookmarked;
+                this.save();
+            }
+        };
+
+        // --------------------------------------------------
+        // 2. Parser (HTML 스크래핑 및 순수 데이터화)
+        // --------------------------------------------------
+        const Parser = {
+            init() {
+                const levels = ['N5', 'N4', 'N3'];
+                const sections = ['grammar', 'kanji', 'vocab'];
+                
+                levels.forEach(level => {
+                    sections.forEach(section => {
+                        const tbody = document.querySelector(`#panel-${level}-${section} tbody`);
+                        if (!tbody) return;
+
+                        const rows = Array.from(tbody.querySelectorAll('tr'));
+                        rows.forEach((row, index) => {
+                            const cells = Array.from(row.cells);
+                            if (cells.length < 2) return;
+
+                            const rowId = `${level}-${section}-row-${index}`;
+                            
+                            // 1열(관리자 번호셀) 제외한 순수 데이터 열만 추출
+                            const dataCells = cells.slice(1);
+                            const columnsHTML = dataCells.map(td => td.outerHTML).join('');
+                            const searchKey = dataCells.map(td => td.innerText).join('').toLowerCase().replace(/\s+/g, '');
+
+                            Store.state.items.push({
+                                id: rowId,
+                                level: level,
+                                section: section,
+                                originalIndex: index + 1,
+                                columnsHTML: columnsHTML,
+                                searchKey: searchKey
+                            });
+                        });
+                        // 데이터 추출 완료 후 기존 원본 HTML 하드코딩 테이블 내용은 삭제
+                        tbody.innerHTML = '';
+                    });
+                });
+            }
+        };
+
+        // --------------------------------------------------
+        // 3. Renderer (화면 렌더링 및 UI 통제)
+        // --------------------------------------------------
+        const Renderer = {
+            rowCache: {}, // DOM 요소 참조 캐시 (DOM 조작 최적화)
+            domBuilt: false,
+
+            init() {
+                // 확장 동적 스타일 주입
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .status-badge { display: inline-block; padding: 2px 6px; font-size: 0.75rem; font-weight: 500; border-radius: 4px; margin-top: 3px; cursor: pointer; user-select: none; }
+                    .badge-new { background-color: #e2e8f0; color: #475569; }
+                    .badge-learning { background-color: #fef3c7; color: #d97706; }
+                    .badge-review { background-color: #fee2e2; color: #dc2626; animation: pulse 2s infinite; }
+                    .badge-mastered { background-color: #dcfce7; color: #15803d; }
+                    .admin-cell { line-height: 1.4; font-size: 0.85rem; position: relative; }
+                    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+                `;
+                document.head.appendChild(style);
+                
+                this.injectControls();
+                this.buildDOMTree();
+            },
+
+            injectControls() {
+                const container = document.querySelector('.controls-container');
+                if (!container) return;
+
+                const btnFav = document.getElementById('btn-fav');
+                btnFav.onclick = () => {
+                    Store.state.filters.bookmarkOnly = !Store.state.filters.bookmarkOnly;
+                    btnFav.classList.toggle('active', Store.state.filters.bookmarkOnly);
+                    this.render();
+                };
+
+                const btnToday = document.createElement('button');
+                btnToday.className = 'control-btn';
+                btnToday.innerText = '📅 오늘 복습 대상';
+                btnToday.onclick = () => {
+                    Store.state.filters.todayReviewOnly = !Store.state.filters.todayReviewOnly;
+                    btnToday.classList.toggle('active', Store.state.filters.todayReviewOnly);
+                    this.render();
+                };
+
+                const btnBackup = document.createElement('button');
+                btnBackup.className = 'control-btn';
+                btnBackup.innerText = '💾 백업/복구 (JSON)';
+                btnBackup.onclick = () => FileManager.triggerDownload();
+                
+                const btnRestore = document.createElement('button');
+                btnRestore.className = 'control-btn';
+                btnRestore.innerText = '📂 불러오기';
+                btnRestore.onclick = () => document.getElementById('jsonUpload').click();
+
+                // 숨겨진 파일 업로드 인풋
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.id = 'jsonUpload';
+                fileInput.accept = '.json';
+                fileInput.style.display = 'none';
+                fileInput.onchange = (e) => FileManager.triggerUpload(e);
+
+                container.appendChild(btnToday);
+                container.appendChild(btnBackup);
+                container.appendChild(btnRestore);
+                container.appendChild(fileInput);
+            },
+
+            // 초기 1회 순수 데이터를 기반으로 DOM 트리 생성 (가리기 기능 등 바인딩)
+            buildDOMTree() {
+                Store.state.items.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.rowId = item.id;
+                    
+                    const pData = Store.getProgress(item.id);
+                    
+                    const tdAdmin = document.createElement('td');
+                    tdAdmin.className = 'center admin-cell';
+                    tdAdmin.innerHTML = `
+                        <span style="font-weight:700;">${item.originalIndex}</span><br>
+                        <span class="bookmark-icon ${pData.isBookmarked ? 'active' : ''}" data-action="toggle-star">★</span>
+                        <span class="status-badge badge-${pData.status}" data-action="toggle-status">${Store.STATUS_LABELS[pData.status]}</span>
+                    `;
+                    
+                    tr.innerHTML = tdAdmin.outerHTML + item.columnsHTML;
+                    
+                    if (item.section === 'grammar' && tr.cells[2]) tr.cells[2].classList.add('hideable-meaning');
+                    if (item.section === 'kanji') {
+                        if(tr.cells[2]) tr.cells[2].classList.add('hideable-reading');
+                        if(tr.cells[3]) tr.cells[3].classList.add('hideable-reading');
+                        if(tr.cells[4]) tr.cells[4].classList.add('hideable-meaning');
+                    }
+                    if (item.section === 'vocab') {
+                        if(tr.cells[2]) tr.cells[2].classList.add('hideable-reading');
+                        if(tr.cells[4]) tr.cells[4].classList.add('hideable-meaning');
+                    }
+
+                    this.rowCache[item.id] = tr;
+                    document.querySelector(`#panel-${item.level}-${item.section} tbody`).appendChild(tr);
+                });
+                this.domBuilt = true;
+            },
+
+            // 옵션에 따라 라이트 렌더링(UI상태만)과 풀 렌더링을 구분
+            render(options = { light: false }) {
+                if (!options.light) {
+                    this.renderPanels();
+                    this.renderItems();
+                }
+                this.renderUIState();
+            },
+
+            renderPanels() {
+                const s = Store.state;
+                const isGlobal = s.filters.query.length > 0 || s.filters.bookmarkOnly || s.filters.todayReviewOnly;
+                
+                document.querySelectorAll('.content-panel').forEach(panel => {
+                    if (isGlobal) {
+                        panel.style.display = 'block'; 
+                        panel.classList.remove('active');
+                    } else {
+                        panel.style.display = '';
+                        panel.classList.toggle('active', panel.id === `panel-${s.level}-${s.section}`);
+                    }
+                });
+            },
+
+            renderItems() {
+                const s = Store.state;
+                const isGlobal = s.filters.query.length > 0 || s.filters.bookmarkOnly || s.filters.todayReviewOnly;
+
+                s.items.forEach(item => {
+                    const tr = this.rowCache[item.id];
+                    const pData = Store.getProgress(item.id);
+                    let isVisible = true;
+                    
+                    if (s.filters.bookmarkOnly && !pData.isBookmarked) isVisible = false;
+                    
+                    if (s.filters.todayReviewOnly) {
+                        const isTarget = pData.status === 'review' || (pData.nextReview && pData.nextReview <= Date.now());
+                        if (!isTarget) isVisible = false;
+                    }
+                    
+                    if (s.filters.query && !item.searchKey.includes(s.filters.query)) isVisible = false;
+                    
+                    if (!isGlobal && (item.level !== s.level || item.section !== s.section)) isVisible = false;
+
+                    tr.style.display = isVisible ? '' : 'none';
+                });
+
+                // 글로벌 검색 시 결과가 없는 패널은 숨김 처리
+                if (isGlobal) {
+                    document.querySelectorAll('.content-panel').forEach(panel => {
+                        const hasVisibleRow = Array.from(panel.querySelectorAll('tbody tr')).some(tr => tr.style.display !== 'none');
+                        panel.style.display = hasVisibleRow ? 'block' : 'none';
+                    });
+                }
+            },
+
+            renderUIState() {
+                Store.state.items.forEach(item => {
+                    const tr = this.rowCache[item.id];
+                    if(tr.style.display === 'none') return; // 안보이는 요소는 DOM업데이트 스킵 (성능 최적화)
+                    
+                    const pData = Store.getProgress(item.id);
+                    const star = tr.querySelector('.bookmark-icon');
+                    const badge = tr.querySelector('.status-badge');
+                    
+                    if(star) star.className = `bookmark-icon ${pData.isBookmarked ? 'active' : ''}`;
+                    if(badge) {
+                        badge.className = `status-badge badge-${pData.status}`;
+                        badge.innerText = Store.STATUS_LABELS[pData.status];
+                    }
+                });
+            }
+        };
+
+        // --------------------------------------------------
+        // 4. FileManager (파일 기반 JSON I/O)
+        // --------------------------------------------------
+        const FileManager = {
+            triggerDownload() {
+                const dataStr = JSON.stringify(Store.state.progress, null, 2);
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const date = new Date().toISOString().slice(0,10);
+                a.download = `jlpt_progress_${date}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            },
+            triggerUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        localStorage.setItem('jlpt_v3_progress', JSON.stringify(data));
+                        alert("진도 데이터 복구가 성공적으로 완료되었습니다.");
+                        window.location.reload();
+                    } catch(err) {
+                        alert("올바르지 않은 JSON 파일입니다.");
+                    }
+                };
+                reader.readAsText(file);
+            }
+        };
+
+        // --------------------------------------------------
+        // 5. Events (이벤트 위임 및 글로벌 리스너)
+        // --------------------------------------------------
+        const Events = {
+            init() {
+                document.getElementById('topNav').addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON') {
+                        Store.state.level = e.target.innerText.split(' ')[1];
+                        this.updateTabUI('#topNav', e.target);
+                        Renderer.render();
+                    }
+                });
+
+                document.getElementById('subNav').addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON') {
+                        const text = e.target.innerText;
+                        Store.state.section = text === '문법' ? 'grammar' : text === '한자' ? 'kanji' : 'vocab';
+                        this.updateTabUI('#subNav', e.target);
+                        Renderer.render();
+                    }
+                });
+
+                document.getElementById('searchInput').addEventListener('input', (e) => {
+                    Store.state.filters.query = e.target.value.toLowerCase().replace(/\s+/g, '');
+                    Renderer.render();
+                });
+
+                // 글로벌 이벤트 위임 (테이블 내 배지, 별, 플래시카드 클릭 통합 처리)
+                document.querySelectorAll('.content-panel tbody').forEach(tbody => {
+                    tbody.addEventListener('click', (e) => {
+                        const row = e.target.closest('tr');
+                        if (!row) return;
+                        const rowId = row.dataset.rowId;
+
+                        if (e.target.dataset.action === 'toggle-star') {
+                            Store.toggleBookmark(rowId);
+                            Renderer.render({ light: true }); // 라이트 렌더링으로 부하 최소화
+                        } else if (e.target.dataset.action === 'toggle-status') {
+                            Store.cycleStatus(rowId);
+                            Renderer.render({ light: true });
+                        } else if (e.target.classList.contains('hideable-meaning') || e.target.classList.contains('hideable-reading')) {
+                            e.target.classList.toggle('revealed');
+                        }
+                    });
+                });
+            },
+            
+            updateTabUI(selector, activeBtn) {
+                document.querySelectorAll(`${selector} button`).forEach(btn => btn.classList.remove('active'));
+                activeBtn.classList.add('active');
+            }
+        };
+
+        // 가리기 모드 글로벌 토글 (기존 호환)
         function toggleStudyMode(type) {
             document.body.classList.toggle(`mode-hide-${type}`);
             document.getElementById(`btn-${type}`).classList.toggle('active');
-            
-            // 모드가 꺼질 때 모든 revealed 상태 초기화
             if (!document.body.classList.contains(`mode-hide-${type}`)) {
                 document.querySelectorAll(`.hideable-${type}`).forEach(el => el.classList.remove('revealed'));
             }
         }
 
-        // 즐겨찾기 토글 및 스토리지 저장
-        function toggleBookmark(rowId, event) {
-            event.stopPropagation();
-            const index = bookmarkedIds.indexOf(rowId);
-            if (index > -1) bookmarkedIds.splice(index, 1);
-            else bookmarkedIds.push(rowId);
-            
-            localStorage.setItem('jlptBookmarks', JSON.stringify(bookmarkedIds));
-            const icon = document.getElementById(`star-${rowId}`);
-            if (icon) icon.classList.toggle('active');
-            if (showOnlyFavorites) filterTable();
-        }
-
-        function toggleFavorites() {
-            showOnlyFavorites = !showOnlyFavorites;
-            document.getElementById('btn-fav').classList.toggle('active');
-            filterTable();
-        }
-
-        // 화면 갱신 및 전체 통합 검색 로직 (Ver 2.1 개선)
-        function updateDisplay() {
-            // 검색어나 즐겨찾기 모드가 아닐 때만 탭 전환 로직 수행
-            const query = document.getElementById('searchInput').value.trim();
-            if (!query && !showOnlyFavorites) {
-                document.querySelectorAll('.content-panel').forEach(panel => {
-                    const isActive = panel.id === `panel-${currentLevel}-${currentSection}`;
-                    panel.style.display = '';
-                    panel.classList.toggle('active', isActive);
-                });
+        // --------------------------------------------------
+        // 6. App (메인 컨트롤러)
+        // --------------------------------------------------
+        const App = {
+            init() {
+                Store.init();
+                Parser.init();
+                Renderer.init();
+                Events.init();
+                Renderer.render();
             }
-            filterTable();
-        }
+        };
 
-        function filterTable() {
-            const rawQuery = document.getElementById('searchInput').value.toLowerCase();
-            const query = rawQuery.replace(/\s+/g, ''); // 띄어쓰기 무시
-            const isGlobalSearch = query.length > 0 || showOnlyFavorites;
+        // 애플리케이션 시동
+        document.addEventListener('DOMContentLoaded', () => App.init());
 
-            document.querySelectorAll('.content-panel').forEach(panel => {
-                let hasVisibleRow = false;
-                
-                panel.querySelectorAll('tbody tr').forEach(row => {
-                    const text = row.innerText.toLowerCase().replace(/\s+/g, '');
-                    const isBookmarked = bookmarkedIds.includes(row.id);
-                    
-                    let display = true;
-                    if (query && !text.includes(query)) display = false;
-                    if (showOnlyFavorites && !isBookmarked) display = false;
-                    
-                    row.style.display = display ? '' : 'none';
-                    if (display) hasVisibleRow = true;
-                });
-
-                // 글로벌 검색/즐겨찾기 중일 경우, 데이터가 있는 패널은 전부 표시 (탭 제약 해제)
-                if (isGlobalSearch) {
-                    panel.style.display = hasVisibleRow ? 'block' : 'none';
-                    panel.classList.remove('active'); // 애니메이션 충돌 방지
-                } else {
-                    // 검색이 해제되면 다시 원래 탭 로직으로 복귀
-                    panel.style.display = '';
-                    panel.classList.toggle('active', panel.id === `panel-${currentLevel}-${currentSection}`);
-                }
-            });
-        }
-
-        // 초기화 (ID 부여, 플래시카드 클릭 이벤트 연결)
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.content-panel').forEach(panel => {
-                const isGrammar = panel.id.includes('grammar');
-                const isKanji = panel.id.includes('kanji');
-                const isVocab = panel.id.includes('vocab');
-
-                panel.querySelectorAll('tbody tr').forEach((row, index) => {
-                    const rowId = `${panel.id}-row-${index}`;
-                    row.id = rowId;
-
-                    const isBookmarked = bookmarkedIds.includes(rowId);
-                    const firstCell = row.cells[0];
-                    const starSpan = document.createElement('span');
-                    starSpan.id = `star-${rowId}`;
-                    starSpan.className = `bookmark-icon ${isBookmarked ? 'active' : ''}`;
-                    starSpan.innerText = '★';
-                    starSpan.onclick = (e) => toggleBookmark(rowId, e);
-                    firstCell.insertBefore(starSpan, firstCell.firstChild);
-
-                    // 셀 클릭 시 정답 공개 로직 연결
-                    const attachReveal = (cell, type) => {
-                        if(cell) {
-                            cell.classList.add(`hideable-${type}`);
-                            cell.onclick = function() { this.classList.toggle('revealed'); };
-                        }
-                    };
-
-                    if (isGrammar) {
-                        attachReveal(row.cells[2], 'meaning'); // 의미
-                    } else if (isKanji) {
-                        attachReveal(row.cells[2], 'reading'); // 음독
-                        attachReveal(row.cells[3], 'reading'); // 훈독
-                        attachReveal(row.cells[4], 'meaning'); // 대표 의미
-                    } else if (isVocab) {
-                        attachReveal(row.cells[2], 'reading'); // 요미가나
-                        attachReveal(row.cells[4], 'meaning'); // 뜻
-                    }
-                });
-            });
-        });
     </script>
 </body>
 </html>
