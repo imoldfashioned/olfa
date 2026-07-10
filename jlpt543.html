@@ -3,19 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JLPT 학습 대시보드</title>
+    <title>JLPT 학습 대시보드 Ver 2.1</title>
     <style>
-        /* 기본 스타일 리셋 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-      @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
-body {
-    font-family: 'Noto Sans KR', 'Noto Sans JP', sans-serif;
-}
-
+        /* 기본 스타일 리셋 및 폰트 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        
         body {
+            font-family: 'Noto Sans KR', 'Noto Sans JP', sans-serif;
             background-color: #f5f7fa;
             color: #333;
             display: flex;
@@ -34,26 +29,13 @@ body {
             width: 100%;
             z-index: 1000;
         }
-
         .top-navbar button {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            background: none; border: none; color: #94a3b8;
+            padding: 15px 30px; font-size: 1.1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease;
         }
-
-        .top-navbar button:hover {
-            color: #f8fafc;
-        }
-
-        .top-navbar button.active {
-            color: #38bdf8;
-            border-bottom: 3px solid #38bdf8;
-        }
+        .top-navbar button:hover { color: #f8fafc; }
+        .top-navbar button.active { color: #38bdf8; border-bottom: 3px solid #38bdf8; }
 
         /* 서브 영역 메뉴바 */
         .sub-navbar {
@@ -66,166 +48,122 @@ body {
             width: 100%;
             z-index: 999;
         }
-
         .sub-navbar button {
-            background: none;
-            border: none;
-            color: #64748b;
-            padding: 12px 25px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            background: none; border: none; color: #64748b;
+            padding: 12px 25px; font-size: 0.95rem; font-weight: 500;
+            cursor: pointer; transition: all 0.3s ease;
         }
+        .sub-navbar button:hover { color: #1e293b; }
+        .sub-navbar button.active { color: #0f172a; font-weight: 700; border-bottom: 2px solid #0f172a; }
 
-        .sub-navbar button:hover {
-            color: #1e293b;
+        /* 학습 컨트롤 패널 */
+        .controls-container {
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            position: fixed;
+            top: 96px;
+            width: 100%;
+            z-index: 998;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            flex-wrap: wrap;
         }
-
-        .sub-navbar button.active {
-            color: #0f172a;
-            font-weight: 700;
-            border-bottom: 2px solid #0f172a;
+        .controls-container input {
+            padding: 8px 15px; border: 1px solid #cbd5e1; border-radius: 6px;
+            font-size: 0.9rem; width: 250px; outline: none; transition: border-color 0.3s;
         }
+        .controls-container input:focus { border-color: #38bdf8; }
+        
+        .control-btn {
+            padding: 8px 15px; border: 1px solid #cbd5e1; background: #ffffff;
+            color: #475569; border-radius: 6px; cursor: pointer;
+            font-size: 0.9rem; font-weight: 500; transition: all 0.2s;
+        }
+        .control-btn:hover { background: #f1f5f9; }
+        .control-btn.active { background: #0f172a; color: #ffffff; border-color: #0f172a; }
 
         /* 메인 콘텐츠 영역 */
         .content-container {
-            margin-top: 120px;
+            margin-top: 170px;
             padding: 30px;
             max-width: 1200px;
             width: 100%;
-            margin-left: auto;
-            margin-right: auto;
-            flex: 1;
+            margin-left: auto; margin-right: auto; flex: 1;
         }
-
         .content-panel {
-            display: none;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-
-        .content-panel.active {
-            display: block;
-        }
-
-        h2 {
-            color: #1e293b;
+            display: none; background: #ffffff; padding: 30px;
+            border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-            font-size: 1.5rem;
-            border-left: 4px solid #38bdf8;
-            padding-left: 10px;
         }
+        .content-panel.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 테이블 스타일 정의 */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 0.95rem;
-        }
+        h2 { color: #1e293b; margin-bottom: 20px; font-size: 1.5rem; border-left: 4px solid #38bdf8; padding-left: 10px; }
 
-        th, td {
-            border: 1px solid #e2e8f0;
-            padding: 12px 15px;
-            text-align: left;
-        }
+        /* 테이블 스타일 */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95rem; }
+        th, td { border: 1px solid #e2e8f0; padding: 12px 15px; text-align: left; vertical-align: middle; }
+        th { position: sticky; top: 153px; z-index: 10; background-color: #f1f5f9; color: #334155; font-weight: 700; }
+        tr:hover { background-color: #f8fafc; }
+        .center { text-align: center; }
 
-        th {
-            background-color: #f8fafc;
-            color: #475569;
-            font-weight: 600;
-        }
+        /* 즐겨찾기 별 아이콘 */
+        .bookmark-icon { cursor: pointer; color: #cbd5e1; font-size: 1.2rem; margin-right: 8px; transition: color 0.2s; user-select: none; }
+        .bookmark-icon.active { color: #f59e0b; }
 
-        tr:hover {
-            background-color: #f1f5f9;
-        }
-
-        .center {
-            text-align: center;
-        }
-
-        /* 준비중 메시지 스타일 */
-        .ready-msg {
-            text-align: center;
-            padding: 50px 0;
-            color: #94a3b8;
-            font-style: italic;
-        }
-
-        /* ========================================= */
-        /* 모바일 환경 대응을 위한 반응형 CSS 시작   */
-        /* ========================================= */
-        @media screen and (max-width: 768px) {
-            /* 1. 상하단 네비게이션 바 스크롤 최적화 */
-            .top-navbar, .sub-navbar {
-                justify-content: flex-start; /* 모바일에서는 왼쪽 정렬 */
-                overflow-x: auto; /* 메뉴가 많을 경우 메뉴바만 가로 스크롤 허용 */
-                -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 지원 */
-                white-space: nowrap; /* 메뉴 버튼 줄바꿈 방지 */
-            }
-            
-            .top-navbar button {
-                padding: 12px 15px;
-                font-size: 1rem;
-                flex-shrink: 0;
-            }
-
-            .sub-navbar button {
-                padding: 10px 15px;
-                font-size: 0.85rem;
-                flex-shrink: 0;
-            }
-
-            /* 2. 본문 여백 및 위치 조정 */
-            .content-container {
-                margin-top: 105px;
-                padding: 15px 10px;
-            }
-
-            h2 {
-                font-size: 1.2rem;
-                margin-bottom: 15px;
-            }
-
-            /* 3. 테이블 영역 내부 스크롤 활성화 (핵심) */
-            .content-panel {
-                padding: 15px;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            /* 4. 테이블 가독성 유지 */
-            table {
-                min-width: 650px; /* 테이블이 너무 찌그러지지 않도록 최소 너비 지정 */
-                font-size: 0.85rem;
-            }
-
-            th, td {
-                padding: 10px;
-            }
+        /* 터치/클릭형 플래시카드 블러 처리 (Ver 2.1 개선) */
+        body.mode-hide-meaning .hideable-meaning,
+        body.mode-hide-reading .hideable-reading {
+            background-color: #e2e8f0;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(0,0,0,0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
         }
         
-        /* 좁은 모바일 기기를 위한 추가 미세 조정 */
-        @media screen and (max-width: 480px) {
-            .top-navbar button {
-                padding: 10px 12px;
-                font-size: 0.9rem;
-            }
-            .sub-navbar button {
-                padding: 8px 12px;
-                font-size: 0.8rem;
-            }
-            table {
-                min-width: 550px; 
-            }
+        /* 터치/클릭 시 보여주기 */
+        body.mode-hide-meaning .hideable-meaning.revealed,
+        body.mode-hide-reading .hideable-reading.revealed {
+            background-color: transparent;
+            color: inherit;
+            text-shadow: none;
         }
-        /* ========================================= */
-        /* 모바일 반응형 CSS 끝                      */
-        /* ========================================= */
 
+        /* 모바일 반응형 */
+        @media screen and (max-width: 768px) {
+            .controls-container { top: 96px; padding: 10px; }
+            .controls-container input { width: 100%; }
+            .content-container { margin-top: 200px; padding: 15px; }
+            th { display: none; }
+            table, tbody, tr, td { display: block; }
+            tr { border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px; padding: 10px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            td { border: none; border-bottom: 1px solid #f1f5f9; position: relative; padding-left: 35%; min-height: 40px; }
+            td:last-child { border-bottom: 0; }
+            td::before { position: absolute; top: 12px; left: 10px; width: 30%; font-weight: 600; color: #64748b; }
+            
+            [id*="grammar"] td:nth-of-type(1)::before { content: "번호"; }
+            [id*="grammar"] td:nth-of-type(2)::before { content: "문법 표현"; }
+            [id*="grammar"] td:nth-of-type(3)::before { content: "의미/기능"; }
+            [id*="grammar"] td:nth-of-type(4)::before { content: "예문"; }
+            
+            [id*="kanji"] td:nth-of-type(1)::before { content: "번호"; }
+            [id*="kanji"] td:nth-of-type(2)::before { content: "한자"; }
+            [id*="kanji"] td:nth-of-type(3)::before { content: "음독"; }
+            [id*="kanji"] td:nth-of-type(4)::before { content: "훈독"; }
+            [id*="kanji"] td:nth-of-type(5)::before { content: "의미/단어"; }
+            
+            [id*="vocab"] td:nth-of-type(1)::before { content: "번호"; }
+            [id*="vocab"] td:nth-of-type(2)::before { content: "단어"; }
+            [id*="vocab"] td:nth-of-type(3)::before { content: "요미가나"; }
+            [id*="vocab"] td:nth-of-type(4)::before { content: "품사"; }
+            [id*="vocab"] td:nth-of-type(5)::before { content: "뜻"; }
+        }
     </style>
 </head>
 <body>
@@ -242,19 +180,18 @@ body {
         <button onclick="changeSection('vocab')">단어</button>
     </nav>
 
+    <div class="controls-container">
+        <input type="text" id="searchInput" placeholder="전체 검색 (띄어쓰기 무시)" oninput="filterTable()">
+        <button id="btn-meaning" class="control-btn" onclick="toggleStudyMode('meaning')">뜻 가리기</button>
+        <button id="btn-reading" class="control-btn" onclick="toggleStudyMode('reading')">독음 가리기</button>
+        <button id="btn-fav" class="control-btn" onclick="toggleFavorites()">⭐ 즐겨찾기 모아보기</button>
+    </div>
+
     <main class="content-container">
-        
         <div id="panel-N5-grammar" class="content-panel active">
-            <h2>N5 문법 학습 (실전 필수 문형 50)</h2>
+            <h2>N5 문법</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 6%;" class="center">번호</th>
-                        <th style="width: 22%;">문법 표현</th>
-                        <th style="width: 25%;">의미 및 기능</th>
-                        <th style="width: 47%;">예문 (例文)</th>
-                    </tr>
-                </thead>
+                <thead><tr><th class="center" style="width: 8%;">번호</th><th style="width: 22%;">문법 표현</th><th style="width: 25%;">의미 및 기능</th><th style="width: 45%;">예문</th></tr></thead>
                 <tbody>
                     <tr><td class="center">1</td><td><b>～は～です</b></td><td>~은/는 ~입니다 (단정)</td><td>私は学生です。(나는 학생입니다.)</td></tr>
                     <tr><td class="center">2</td><td><b>～は～ではありません</b></td><td>~은/는 ~이 아닙니다 (부정)</td><td>これは本ではありません。(이것은 책이 아닙니다.)</td></tr>
@@ -306,22 +243,13 @@ body {
                     <tr><td class="center">48</td><td><b>～やすいです</b></td><td>~하기 쉽습니다</td><td>このペンは書きやすいです。(이 펜은 쓰기 쉽습니다.)</td></tr>
                     <tr><td class="center">49</td><td><b>～にくいです</b></td><td>~하기 어렵습니다</td><td>この漢字は覚えにくいです。(이 한자는 외우기 어렵습니다.)</td></tr>
                     <tr><td class="center">50</td><td><b>～と思っています</b></td><td>~하려고 생각하고 있습니다 (의지)</td><td>来年、日本へ行こうと思っています。(내년에 일본에 가려고 생각합니다.)</td></tr>
-                </tbody>
+                    </tbody>
             </table>
         </div>
-
         <div id="panel-N5-kanji" class="content-panel">
-            <h2>N5 필수 한자 (완벽 연동 100자)</h2>
+            <h2>N5 한자</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 8%;" class="center">번호</th>
-                        <th style="width: 12%;" class="center">한자</th>
-                        <th style="width: 20%;">음독 (音読み)</th>
-                        <th style="width: 20%;">훈독 (訓読み)</th>
-                        <th style="width: 40%;">대표 의미 / 단어 예시</th>
-                    </tr>
-                </thead>
+                <thead><tr><th class="center" style="width: 8%;">번호</th><th class="center" style="width: 12%;">한자</th><th style="width: 20%;">음독</th><th style="width: 20%;">훈독</th><th style="width: 40%;">대표 의미 / 단어</th></tr></thead>
                 <tbody>
                     <tr><td class="center">1</td><td class="center"><b>一</b></td><td>イチ, イツ</td><td>ひと(つ)</td><td>하나 (一人, 一つ)</td></tr>
                     <tr><td class="center">2</td><td class="center"><b>二</b></td><td>ニ</td><td>ふた(つ)</td><td>둘 (二つ, 二人)</td></tr>
@@ -423,22 +351,13 @@ body {
                     <tr><td class="center">98</td><td class="center"><b>物</b></td><td>ブツ, モツ</td><td>もの</td><td>물건 물 (飲み物, 買い物)</td></tr>
                     <tr><td class="center">99</td><td class="center"><b>気</b></td><td>キ, ケ</td><td>-</td><td>기운 기 (元気, 天気, 電気)</td></tr>
                     <tr><td class="center">100</td><td class="center"><b>天</b></td><td>テン</td><td>あめ, あま</td><td>하늘 천 (天気, 天ぷら)</td></tr>
-                </tbody>
+                    </tbody>
             </table>
         </div>
-
         <div id="panel-N5-vocab" class="content-panel">
-            <h2>N5 필수 단어 (실전 표기·한자 연동 100선)</h2>
+            <h2>N5 단어</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 8%;" class="center">번호</th>
-                        <th style="width: 22%;">단어 (표기)</th>
-                        <th style="width: 25%;">요미가나 (읽기)</th>
-                        <th style="width: 15%;">품사</th>
-                        <th style="width: 30%;">한국어 뜻</th>
-                    </tr>
-                </thead>
+                <thead><tr><th class="center" style="width: 8%;">번호</th><th style="width: 22%;">단어</th><th style="width: 25%;">요미가나</th><th style="width: 15%;">품사</th><th style="width: 30%;">한국어 뜻</th></tr></thead>
                 <tbody>
                     <tr><td class="center">1</td><td><b>今日</b></td><td>きょう</td><td>명사</td><td>오늘</td></tr>
                     <tr><td class="center">2</td><td><b>明日</b></td><td>あした</td><td>명사</td><td>내일</td></tr>
@@ -540,22 +459,16 @@ body {
                     <tr><td class="center">98</td><td><b>少し</b></td><td>すこし</td><td>부사</td><td>조금</td></tr>
                     <tr><td class="center">99</td><td><b>いつも</b></td><td>いつも</td><td>부사</td><td>언제나, 항상</td></tr>
                     <tr><td class="center">100</td><td><b>一緒に</b></td><td>いっしょに</td><td>부사</td><td>함께, 같이</td></tr>
-                </tbody>
+                    </tbody>
             </table>
         </div>
+
         <div id="panel-N4-grammar" class="content-panel">
-            <h2>N4 문법 학습 (실전 핵심 문형 50)</h2>
+            <h2>N4 문법</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 6%;" class="center">번호</th>
-                        <th style="width: 22%;">문법 표현</th>
-                        <th style="width: 25%;">의미 및 기능</th>
-                        <th style="width: 47%;">예문 (例文)</th>
-                    </tr>
-                </thead>
+                <thead><tr><th class="center" style="width: 8%;">번호</th><th style="width: 22%;">문법 표현</th><th style="width: 25%;">의미 및 기능</th><th style="width: 45%;">예문</th></tr></thead>
                 <tbody>
-                    <tr><td class="center">1</td><td><b>～（ら）れる (수동)</b></td><td>~함을 당하다 (수동 표현)</td><td>泥棒に財布を盗まれました。(도둑에게 지갑을 도둑맞았습니다.)</td></tr>
+                      <tr><td class="center">1</td><td><b>～（ら）れる (수동)</b></td><td>~함을 당하다 (수동 표현)</td><td>泥棒に財布を盗まれました。(도둑에게 지갑을 도둑맞았습니다.)</td></tr>
                     <tr><td class="center">2</td><td><b>～（さ）せる (사역)</b></td><td>~하게 하다 / 시키다</td><td>先生は学生に作文を書かせました。(선생님은 학생에게 작문을 쓰게 했습니다.)</td></tr>
                     <tr><td class="center">3</td><td><b>～（さ）せられる</b></td><td>~함을 강요당하다 (사역수동)</td><td>母に部屋を掃除させられました。(어머니 때문에 억지로 방 청소를 당했습니다.)</td></tr>
                     <tr><td class="center">4</td><td><b>～（ら）れる (가능)</b></td><td>~할 수 있다 (가능형 동사)</td><td>私は刺身が食べられます。(나는 회를 먹을 수 있습니다.)</td></tr>
@@ -605,22 +518,13 @@ body {
                     <tr><td class="center">48</td><td><b>～ば～ほど</b></td><td>~하면 할수록 (비례 변화)</td><td>日本語は勉強すればするほど面白いです。(일본어는 공부하면 할수록 재미있습니다.)</td></tr>
                     <tr><td class="center">49</td><td><b>～てよかった</b></td><td>~해서 다행이다 (안도)</td><td>この本を読んでよかったです。(이 책을 읽어서 다행입니다.)</td></tr>
                     <tr><td class="center">50</td><td><b>お / ご ～ する</b></td><td>~해 드리다 (자신을 낮추는 겸양표현)</td><td>私がお荷物をお持ちします。(제가 짐을 들어 드리겠습니다.)</td></tr>
-                </tbody>
+                    </tbody>
             </table>
         </div>
-
         <div id="panel-N4-kanji" class="content-panel">
-            <h2>N4 필수 한자 (완벽 연동 100자)</h2>
+            <h2>N4 한자</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 8%;" class="center">번호</th>
-                        <th style="width: 12%;" class="center">한자</th>
-                        <th style="width: 20%;">음독 (音読み)</th>
-                        <th style="width: 20%;">훈독 (訓読み)</th>
-                        <th style="width: 40%;">대표 의미 / 단어 예시</th>
-                    </tr>
-                </thead>
+                <thead><tr><th class="center" style="width: 8%;">번호</th><th class="center" style="width: 12%;">한자</th><th style="width: 20%;">음독</th><th style="width: 20%;">훈독</th><th style="width: 40%;">대표 의미 / 단어</th></tr></thead>
                 <tbody>
                     <tr><td class="center">1</td><td class="center"><b>会</b></td><td>カイ</td><td>あ(う)</td><td>모일 회 (会社, 会う)</td></tr>
                     <tr><td class="center">2</td><td class="center"><b>同</b></td><td>ドウ</td><td>おな(じ)</td><td>같을 동 (同じ, 同時)</td></tr>
@@ -722,22 +626,13 @@ body {
                     <tr><td class="center">98</td><td class="center"><b>有</b></td><td>ユウ</td><td>あ(る)</td><td>있을 유 (有名, 有る)</td></tr>
                     <tr><td class="center">99</td><td class="center"><b>便</b></td><td>ベン, ビン</td><td>-</td><td>편할 편 (便利, 郵便)</td></tr>
                     <tr><td class="center">100</td><td class="center"><b>利</b></td><td>リ</td><td>-</td><td>이로울 리 (便利, 利用)</td></tr>
-                </tbody>
+                    </tbody>
             </table>
         </div>
-
         <div id="panel-N4-vocab" class="content-panel">
-            <h2>N4 필수 단어 (실전 표기·한자 연동 100선)</h2>
+            <h2>N4 단어</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 8%;" class="center">번호</th>
-                        <th style="width: 22%;">단어 (표기)</th>
-                        <th style="width: 25%;">요미가나 (읽기)</th>
-                        <th style="width: 15%;">품사</th>
-                        <th style="width: 30%;">한국어 뜻</th>
-                    </tr>
-                </thead>
+                <thead><tr><th class="center" style="width: 8%;">번호</th><th style="width: 22%;">단어</th><th style="width: 25%;">요미가나</th><th style="width: 15%;">품사</th><th style="width: 30%;">한국어 뜻</th></tr></thead>
                 <tbody>
                     <tr><td class="center">1</td><td><b>挨拶</b></td><td>あいさつ</td><td>명사</td><td>인사</td></tr>
                     <tr><td class="center">2</td><td><b>案内</b></td><td>あんない</td><td>명사</td><td>안내</td></tr>
@@ -839,21 +734,14 @@ body {
                     <tr><td class="center">98</td><td><b>割れる</b></td><td>われる</td><td>동사 (그룹2)</td><td>깨지다, 갈라지다</td></tr>
                     <tr><td class="center">99</td><td><b>喜ぶ</b></td><td>よろこぶ</td><td>동사 (그룹1)</td><td>기뻐하다</td></tr>
                     <tr><td class="center">100</td><td><b>急ぐ</b></td><td>いそぐ</td><td>동사 (그룹1)</td><td>서두르다</td></tr>
-                </tbody>
+                    </tbody>
             </table>
         </div>
 
         <div id="panel-N3-grammar" class="content-panel">
-            <h2>N3 문법 학습 (실전 핵심 문형 50)</h2>
+            <h2>N3 문법</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 6%;" class="center">번호</th>
-                        <th style="width: 22%;">문법 표현</th>
-                        <th style="width: 25%;">의미 및 기능</th>
-                        <th style="width: 47%;">예문 (例文)</th>
-                    </tr>
-                </thead>
+                <thead><tr><th class="center" style="width: 8%;">번호</th><th style="width: 22%;">문법 표현</th><th style="width: 25%;">의미 및 기능</th><th style="width: 45%;">예문</th></tr></thead>
                 <tbody>
                     <tr><td class="center">1</td><td><b>～について</b></td><td>~에 대하여 (대상)</td><td>日本の経済について調べました。(일본 경제에 대해 조사했습니다.)</td></tr>
                     <tr><td class="center">2</td><td><b>～に対して</b></td><td>~에 대하여 / ~에 반해 (대조, 대상)</td><td>お客様に対して失礼なことをしてはいけない。(손님에 대해 무례한 짓을 하면 안 된다.)</td></tr>
@@ -905,22 +793,13 @@ body {
                     <tr><td class="center">48</td><td><b>～抜く (ぬく)</b></td><td>끝까지 ~해내다 (고난 극복)</td><td>最後まで走り抜くことができた。(끝까지 달려낼 수 있었다.)</td></tr>
                     <tr><td class="center">49</td><td><b>～得る / ～得ない (うる/えない)</b></td><td>~할 수 있다 / ~할 수 없다 (가능성)</td><td>それは起こり得ることだ。(그것은 일어날 수 있는 일이다.)</td></tr>
                     <tr><td class="center">50</td><td><b>～がちだ</b></td><td>~하기 쉽다 / ~하는 경향이 있다 (부정적)</td><td>最近、彼は病気がちでよく休む。(요즘 그는 병에 걸리기 쉬워서 자주 쉰다.)</td></tr>
-                </tbody>
+                    </tbody>
             </table>
         </div>
-
         <div id="panel-N3-kanji" class="content-panel">
-            <h2>N3 필수 한자 (실전 핵심 100자)</h2>
+            <h2>N3 한자</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 8%;" class="center">번호</th>
-                        <th style="width: 12%;" class="center">한자</th>
-                        <th style="width: 20%;">음독 (音読み)</th>
-                        <th style="width: 20%;">훈독 (訓読み)</th>
-                        <th style="width: 40%;">대표 의미 / 단어 예시</th>
-                    </tr>
-                </thead>
+                <thead><tr><th class="center" style="width: 8%;">번호</th><th class="center" style="width: 12%;">한자</th><th style="width: 20%;">음독</th><th style="width: 20%;">훈독</th><th style="width: 40%;">대표 의미 / 단어</th></tr></thead>
                 <tbody>
                     <tr><td class="center">1</td><td class="center"><b>政</b></td><td>セイ, ショウ</td><td>まつりごと</td><td>정사 정 (政治, 政府)</td></tr>
                     <tr><td class="center">2</td><td class="center"><b>議</b></td><td>ギ</td><td>-</td><td>의논할 의 (会議, 議員)</td></tr>
@@ -1022,22 +901,13 @@ body {
                     <tr><td class="center">98</td><td class="center"><b>容</b></td><td>ヨウ</td><td>-</td><td>얼굴 용 (内容, 美容)</td></tr>
                     <tr><td class="center">99</td><td class="center"><b>必</b></td><td>ヒツ</td><td>かなら(ず)</td><td>반드시 필 (必要, 必ず)</td></tr>
                     <tr><td class="center">100</td><td class="center"><b>演</b></td><td>エン</td><td>-</td><td>펼 연 (講演, 演技)</td></tr>
-                </tbody>
+                    </tbody>
             </table>
         </div>
-
         <div id="panel-N3-vocab" class="content-panel">
-            <h2>N3 필수 단어 (실전 표기·한자 연동 100선)</h2>
+            <h2>N3 단어</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 8%;" class="center">번호</th>
-                        <th style="width: 22%;">단어 (표기)</th>
-                        <th style="width: 25%;">요미가나 (읽기)</th>
-                        <th style="width: 15%;">품사</th>
-                        <th style="width: 30%;">한국어 뜻</th>
-                    </tr>
-                </thead>
+                <thead><tr><th class="center" style="width: 8%;">번호</th><th style="width: 22%;">단어</th><th style="width: 25%;">요미가나</th><th style="width: 15%;">품사</th><th style="width: 30%;">한국어 뜻</th></tr></thead>
                 <tbody>
                     <tr><td class="center">1</td><td><b>愛情</b></td><td>あいじょう</td><td>명사</td><td>애정</td></tr>
                     <tr><td class="center">2</td><td><b>合図</b></td><td>あいず</td><td>명사</td><td>신호</td></tr>
@@ -1139,113 +1009,148 @@ body {
                     <tr><td class="center">98</td><td><b>吸収</b></td><td>きゅうしゅう</td><td>명사</td><td>흡수</td></tr>
                     <tr><td class="center">99</td><td><b>救助</b></td><td>きゅうじょ</td><td>명사</td><td>구조</td></tr>
                     <tr><td class="center">100</td><td><b>急速</b></td><td>きゅうそく</td><td>な형용사</td><td>급속함</td></tr>
-                </tbody>
+                    </tbody>
             </table>
         </div>
-
     </main>
 
     <script>
         let currentLevel = 'N5';
         let currentSection = 'grammar';
+        let showOnlyFavorites = false;
+        let bookmarkedIds = JSON.parse(localStorage.getItem('jlptBookmarks')) || [];
 
+        // 네비게이션 제어
         function changeLevel(level) {
             currentLevel = level;
-            const topButtons = document.querySelectorAll('#topNav button');
-            topButtons.forEach(btn => {
-                if(btn.innerText.includes(level)) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
+            document.querySelectorAll('#topNav button').forEach(btn => btn.classList.toggle('active', btn.innerText.includes(level)));
             updateDisplay();
         }
 
         function changeSection(section) {
             currentSection = section;
-            const subButtons = document.querySelectorAll('#subNav button');
-            const sections = ['grammar', 'kanji', 'vocab'];
-            subButtons.forEach((btn, index) => {
-                if(sections[index] === section) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
+            const sectionsMap = { 'grammar': 0, 'kanji': 1, 'vocab': 2 };
+            document.querySelectorAll('#subNav button').forEach((btn, index) => btn.classList.toggle('active', index === sectionsMap[section]));
             updateDisplay();
         }
 
-        function updateDisplay() {
-            const panels = document.querySelectorAll('.content-panel');
-            panels.forEach(panel => panel.classList.remove('active'));
-            const targetId = `panel-${currentLevel}-${currentSection}`;
-            const targetPanel = document.getElementById(targetId);
-            if(targetPanel) {
-                targetPanel.classList.add('active');
+        // 학습 모드(가리기) 토글
+        function toggleStudyMode(type) {
+            document.body.classList.toggle(`mode-hide-${type}`);
+            document.getElementById(`btn-${type}`).classList.toggle('active');
+            
+            // 모드가 꺼질 때 모든 revealed 상태 초기화
+            if (!document.body.classList.contains(`mode-hide-${type}`)) {
+                document.querySelectorAll(`.hideable-${type}`).forEach(el => el.classList.remove('revealed'));
             }
         }
-    </script>
-    <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // 300개 한자에 대한 획수 데이터 (정렬 조건 3을 위함)
-    const strokeDict = {"一":1,"二":2,"三":3,"四":5,"五":4,"六":4,"七":2,"八":2,"九":2,"十":2,"日":4,"月":4,"火":4,"水":4,"木":4,"金":8,"土":3,"山":3,"川":3,"田":5,"人":2,"子":3,"女":3,"男":7,"見":7,"行":6,"来":7,"食":9,"飲":12,"言":7,"話":13,"書":10,"読":14,"聞":14,"学":8,"校":10,"先":6,"生":5,"本":5,"何":7,"大":3,"小":3,"高":10,"安":6,"新":13,"古":5,"長":8,"多":6,"少":4,"友":4,"朝":12,"昼":9,"晩":12,"夜":8,"時":10,"分":4,"間":12,"週":11,"年":6,"毎":6,"午":4,"前":9,"後":9,"今":4,"帰":10,"買":12,"出":5,"入":2,"立":5,"休":6,"車":7,"電":13,"駅":14,"語":14,"英":8,"国":8,"外":5,"社":7,"員":10,"銀":14,"白":5,"黒":11,"赤":7,"青":8,"明":8,"暗":13,"広":5,"右":5,"左":5,"北":5,"南":9,"東":8,"西":6,"上":3,"下":3,"名":6,"酒":10,"物":8,"気":6,"天":4,"会":6,"同":6,"事":8,"自":6,"発":9,"者":8,"地":6,"業":13,"方":4,"場":12,"開":12,"手":4,"力":2,"問":11,"代":5,"動":11,"京":8,"目":5,"通":10,"理":11,"体":7,"主":5,"題":18,"意":13,"不":4,"作":7,"用":5,"度":9,"強":11,"公":4,"持":9,"野":11,"以":5,"思":9,"家":10,"世":5,"正":5,"院":10,"心":4,"界":9,"教":11,"文":4,"建":9,"旅":10,"館":16,"春":9,"夏":10,"秋":9,"冬":5,"海":9,"洋":9,"服":8,"着":12,"品":9,"質":15,"答":12,"漢":13,"字":6,"試":13,"験":18,"町":7,"村":7,"兄":5,"弟":7,"姉":8,"妹":8,"族":11,"親":16,"病":10,"医":7,"薬":16,"局":7,"音":9,"楽":13,"歌":14,"写":5,"真":10,"映":9,"画":8,"歩":8,"走":7,"急":9,"止":4,"乗":9,"降":10,"転":11,"特":10,"別":7,"有":6,"便":9,"利":7,"政":9,"議":20,"民":5,"連":10,"対":7,"部":11,"合":6,"市":5,"内":4,"相":9,"定":8,"回":6,"選":15,"米":6,"実":8,"関":14,"決":7,"全":6,"表":8,"戦":13,"経":11,"最":12,"現":11,"調":15,"化":4,"当":6,"約":9,"首":9,"法":8,"性":8,"要":9,"制":8,"治":8,"務":11,"成":6,"期":12,"取":8,"都":11,"和":8,"機":16,"平":5,"加":5,"受":8,"続":13,"進":11,"数":13,"記":10,"初":7,"指":9,"権":15,"支":4,"産":11,"点":9,"報":12,"済":11,"活":9,"原":10,"共":6,"得":11,"解":13,"交":6,"資":13,"予":4,"向":6,"際":14,"勝":12,"面":9,"告":7,"反":4,"判":7,"认":14,"参":8,"信":9,"在":6,"件":6,"側":11,"任":6,"引":4,"求":7,"所":8,"次":6,"昨":9,"論":15,"官":8,"増":14,"係":9,"感":13,"情":11,"投":7,"示":5,"変":9,"打":5,"直":8,"両":6,"式":6,"確":15,"果":8,"容":10,"必":5,"演":14};
 
-    // 탁음/반탁음을 청음(기본음)으로 변환하는 매핑 (정렬 조건 2를 위함)
-    const kanaMap = {
-        'ガ':'カ','ギ':'キ','グ':'ク','ゲ':'ケ','ゴ':'コ',
-        'ザ':'サ','ジ':'シ','ズ':'ス','ゼ':'セ','ゾ':'ソ',
-        'ダ':'タ','ヂ':'チ','ヅ':'ツ','デ':'テ','ド':'ト',
-        'バ':'ハ','ビ':'ヒ','ブ':'フ','ベ':'ヘ','ボ':'ホ',
-        'パ':'ハ','ピ':'ヒ','プ':'フ','ペ':'ヘ','ポ':'ホ'
-    };
+        // 즐겨찾기 토글 및 스토리지 저장
+        function toggleBookmark(rowId, event) {
+            event.stopPropagation();
+            const index = bookmarkedIds.indexOf(rowId);
+            if (index > -1) bookmarkedIds.splice(index, 1);
+            else bookmarkedIds.push(rowId);
+            
+            localStorage.setItem('jlptBookmarks', JSON.stringify(bookmarkedIds));
+            const icon = document.getElementById(`star-${rowId}`);
+            if (icon) icon.classList.toggle('active');
+            if (showOnlyFavorites) filterTable();
+        }
 
-    function sortKanjiTable(panelId) {
-        const panel = document.getElementById(panelId);
-        if(!panel) return;
-        const tbody = panel.querySelector('tbody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
+        function toggleFavorites() {
+            showOnlyFavorites = !showOnlyFavorites;
+            document.getElementById('btn-fav').classList.toggle('active');
+            filterTable();
+        }
 
-        rows.sort((a, b) => {
-            const getSortData = (row) => {
-                const kanji = row.cells[1].innerText.trim();
-                let onyomiRaw = row.cells[2].innerText.trim().split(',')[0]; 
-                if (!onyomiRaw || onyomiRaw === '-') onyomiRaw = 'ン'; // 음독 없는 경우 후순위
+        // 화면 갱신 및 전체 통합 검색 로직 (Ver 2.1 개선)
+        function updateDisplay() {
+            // 검색어나 즐겨찾기 모드가 아닐 때만 탭 전환 로직 수행
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query && !showOnlyFavorites) {
+                document.querySelectorAll('.content-panel').forEach(panel => {
+                    const isActive = panel.id === `panel-${currentLevel}-${currentSection}`;
+                    panel.style.display = '';
+                    panel.classList.toggle('active', isActive);
+                });
+            }
+            filterTable();
+        }
+
+        function filterTable() {
+            const rawQuery = document.getElementById('searchInput').value.toLowerCase();
+            const query = rawQuery.replace(/\s+/g, ''); // 띄어쓰기 무시
+            const isGlobalSearch = query.length > 0 || showOnlyFavorites;
+
+            document.querySelectorAll('.content-panel').forEach(panel => {
+                let hasVisibleRow = false;
                 
-                const firstKana = onyomiRaw.charAt(0);
-                const baseKana = kanaMap[firstKana] || firstKana;
-                const strokes = strokeDict[kanji] || 99;
-                return { baseKana, onyomiRaw, strokes };
-            };
+                panel.querySelectorAll('tbody tr').forEach(row => {
+                    const text = row.innerText.toLowerCase().replace(/\s+/g, '');
+                    const isBookmarked = bookmarkedIds.includes(row.id);
+                    
+                    let display = true;
+                    if (query && !text.includes(query)) display = false;
+                    if (showOnlyFavorites && !isBookmarked) display = false;
+                    
+                    row.style.display = display ? '' : 'none';
+                    if (display) hasVisibleRow = true;
+                });
 
-            const dataA = getSortData(a);
-            const dataB = getSortData(b);
+                // 글로벌 검색/즐겨찾기 중일 경우, 데이터가 있는 패널은 전부 표시 (탭 제약 해제)
+                if (isGlobalSearch) {
+                    panel.style.display = hasVisibleRow ? 'block' : 'none';
+                    panel.classList.remove('active'); // 애니메이션 충돌 방지
+                } else {
+                    // 검색이 해제되면 다시 원래 탭 로직으로 복귀
+                    panel.style.display = '';
+                    panel.classList.toggle('active', panel.id === `panel-${currentLevel}-${currentSection}`);
+                }
+            });
+        }
 
-            // 1차 정렬: 기본음(탁음/반탁음 통합) 기준
-            if (dataA.baseKana !== dataB.baseKana) {
-                return dataA.baseKana.localeCompare(dataB.baseKana, 'ja');
-            }
-            // 2차 정렬: 음독 완전 일치 기준
-            if (dataA.onyomiRaw !== dataB.onyomiRaw) {
-                return dataA.onyomiRaw.localeCompare(dataB.onyomiRaw, 'ja');
-            }
-            // 3차 정렬: 획수 오름차순
-            return dataA.strokes - dataB.strokes;
+        // 초기화 (ID 부여, 플래시카드 클릭 이벤트 연결)
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.content-panel').forEach(panel => {
+                const isGrammar = panel.id.includes('grammar');
+                const isKanji = panel.id.includes('kanji');
+                const isVocab = panel.id.includes('vocab');
+
+                panel.querySelectorAll('tbody tr').forEach((row, index) => {
+                    const rowId = `${panel.id}-row-${index}`;
+                    row.id = rowId;
+
+                    const isBookmarked = bookmarkedIds.includes(rowId);
+                    const firstCell = row.cells[0];
+                    const starSpan = document.createElement('span');
+                    starSpan.id = `star-${rowId}`;
+                    starSpan.className = `bookmark-icon ${isBookmarked ? 'active' : ''}`;
+                    starSpan.innerText = '★';
+                    starSpan.onclick = (e) => toggleBookmark(rowId, e);
+                    firstCell.insertBefore(starSpan, firstCell.firstChild);
+
+                    // 셀 클릭 시 정답 공개 로직 연결
+                    const attachReveal = (cell, type) => {
+                        if(cell) {
+                            cell.classList.add(`hideable-${type}`);
+                            cell.onclick = function() { this.classList.toggle('revealed'); };
+                        }
+                    };
+
+                    if (isGrammar) {
+                        attachReveal(row.cells[2], 'meaning'); // 의미
+                    } else if (isKanji) {
+                        attachReveal(row.cells[2], 'reading'); // 음독
+                        attachReveal(row.cells[3], 'reading'); // 훈독
+                        attachReveal(row.cells[4], 'meaning'); // 대표 의미
+                    } else if (isVocab) {
+                        attachReveal(row.cells[2], 'reading'); // 요미가나
+                        attachReveal(row.cells[4], 'meaning'); // 뜻
+                    }
+                });
+            });
         });
-
-        // 정렬된 행 적용 및 번호 재부여
-        tbody.innerHTML = '';
-        rows.forEach((row, index) => {
-            row.cells[0].innerText = index + 1;
-            tbody.appendChild(row);
-        });
-    }
-
-    // 각 급수별 한자 테이블 정렬 실행
-    sortKanjiTable('panel-N5-kanji');
-    sortKanjiTable('panel-N4-kanji');
-    sortKanjiTable('panel-N3-kanji');
-});
-</script>
+    </script>
 </body>
 </html>
