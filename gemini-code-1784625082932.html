@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>업무 관리 시스템 v2.3</title>
+    <title>업무 관리 시스템 v2.4</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f3f2f1; color: #333; font-size: 12px; margin: 0; }
@@ -42,15 +42,36 @@
 
         input[type="number"] { padding: 5px; border: 1px solid #ccc; font-size: 12px; width: 120px; }
 
+        /* 모바일/PC 강제 토글을 위한 클래스 정의 */
+        .force-mobile body { padding: 0; background-color: #ffffff; }
+        .force-mobile .container { flex-direction: column !important; border: none !important; box-shadow: none !important; max-width: 100% !important; }
+        .force-mobile #left-panel { width: 100% !important; border-right: none !important; border-bottom: 2px solid #107c41 !important; padding: 15px 10px !important; }
+        .force-mobile #right-panel { width: 100% !important; padding: 15px 10px !important; }
+        .force-mobile .button-group { flex-direction: row !important; flex-wrap: wrap !important; gap: 8px !important; }
+        .force-mobile .button-group button { flex: 1 1 45% !important; padding: 10px 5px !important; text-align: center !important; margin-top: 0 !important; }
+        .force-mobile .btn-danger { flex: 1 1 100% !important; margin-top: 8px !important; }
+        .force-mobile .row-buttons button { padding: 10px !important; flex: 1 !important; text-align: center !important; }
+        .force-mobile #battle-log { height: 280px !important; }
+        .force-mobile #shop-container { height: 280px !important; }
+
+        .force-pc body { padding: 20px; background-color: #f3f2f1; }
+        .force-pc .container { flex-direction: row !important; border: 1px solid #cccccc !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; max-width: 900px !important; }
+        .force-pc #left-panel { width: 250px !important; border-right: 1px solid #cccccc !important; border-bottom: none !important; padding: 15px !important; }
+        .force-pc #right-panel { width: auto !important; flex: 1 !important; padding: 15px !important; }
+        .force-pc .button-group { flex-direction: column !important; gap: 5px !important; }
+        .force-pc .button-group button { flex: none !important; text-align: left !important; padding: 6px 10px !important; }
+        .force-pc .btn-danger { margin-top: 20px !important; }
+
+        /* 기본 반응형 미디어 쿼리 */
         @media (max-width: 768px) {
-            body { padding: 0; background-color: #ffffff; }
-            .container { flex-direction: column; border: none; box-shadow: none; }
-            #left-panel { width: 100%; border-right: none; border-bottom: 2px solid #107c41; padding: 15px 10px; }
-            #right-panel { width: 100%; padding: 15px 10px; }
+            body:not(.force-pc) { padding: 0; background-color: #ffffff; }
+            .container:not(.force-pc) { flex-direction: column; border: none; box-shadow: none; }
+            #left-panel:not(.force-pc) { width: 100%; border-right: none; border-bottom: 2px solid #107c41; padding: 15px 10px; }
+            #right-panel:not(.force-pc) { width: 100%; padding: 15px 10px; }
             
-            .button-group { flex-direction: row; flex-wrap: wrap; gap: 8px; }
-            .button-group button { flex: 1 1 45%; padding: 10px 5px; text-align: center; margin-top: 0 !important; }
-            .btn-danger { flex: 1 1 100%; margin-top: 8px !important; }
+            .container:not(.force-pc) .button-group { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+            .container:not(.force-pc) .button-group button { flex: 1 1 45%; padding: 10px 5px; text-align: center; margin-top: 0 !important; }
+            .container:not(.force-pc) .btn-danger { flex: 1 1 100%; margin-top: 8px !important; }
             .row-buttons button { padding: 10px; flex: 1; text-align: center; }
             
             #battle-log { height: 280px; }
@@ -58,8 +79,8 @@
         }
     </style>
 </head>
-<body>
-    <div class="container">
+<body id="app-body">
+    <div class="container" id="app-container">
         <!-- 좌측 패널 (상태창) -->
         <div id="left-panel">
             <h2>User Status</h2>
@@ -81,7 +102,7 @@
         <div id="right-panel">
             <div id="view-main" class="view active">
                 <h2>대기 화면</h2>
-                <p style="color: #666;">좌측 메뉴에서 작업을 선택하십시오. (V2.3 통합 시스템 가동 중)</p>
+                <p style="color: #666;">좌측 메뉴에서 작업을 선택하십시오. (V2.4 밸런스 및 디버그 모드 탑재)</p>
             </div>
             
             <div id="view-battle" class="view">
@@ -143,6 +164,14 @@
         </div>
     </div>
 
+    <!-- 화면 하단 개발용 모드 전환 패널 추가 -->
+    <div style="max-width:900px; margin: 10px auto; text-align:right; font-size:11px; color:#666;">
+        [환경 테스트 토글] 
+        <button onclick="setScreenMode('pc')" style="padding:2px 6px; font-size:10px;">PC 모드</button>
+        <button onclick="setScreenMode('mobile')" style="padding:2px 6px; font-size:10px;">모바일 모드</button>
+        <button onclick="setScreenMode('auto')" style="padding:2px 6px; font-size:10px;">자동(반응형)</button>
+    </div>
+
     <script>
         // --- 1. Store Data ---
         const store = {
@@ -188,19 +217,26 @@
                 { name: '지각한 인턴', type: 'normal', hpRate: 0.6, atkRate: 1.2, defRate: 0.4, eva: 5, rewardRate: 0.9 },
                 { name: '늑대 대리', type: 'normal', hpRate: 1.0, atkRate: 1.0, defRate: 0.8, eva: 10, rewardRate: 1.0 },
                 { name: '고블린 횡령범', type: 'normal', hpRate: 0.9, atkRate: 1.1, defRate: 0.8, eva: 10, rewardRate: 1.5 },
-                { name: '오크 주임', type: 'normal', hpRate: 1.5, atkRate: 0.9, defRate: 1.5, eva: 2, rewardRate: 1.2 },
-                { name: '까칠한 디자이너', type: 'normal', hpRate: 0.8, atkRate: 1.4, defRate: 0.6, eva: 12, rewardRate: 1.3 },
-                { name: '불만많은 고객', type: 'normal', hpRate: 1.2, atkRate: 1.3, defRate: 1.0, eva: 5, rewardRate: 1.4 },
+                { name: '오크 주임', type: 'normal', hpRate: 1.2, atkRate: 1.0, defRate: 1.0, eva: 2, rewardRate: 1.2 },
+                { name: '까칠한 디자이너', type: 'normal', hpRate: 0.8, atkRate: 1.1, defRate: 0.7, eva: 8, rewardRate: 1.3 },
+                { name: '불만많은 고객', type: 'normal', hpRate: 1.0, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.4 },
                 
-                { name: '영업부 과장', type: 'strong', hpRate: 1.5, atkRate: 1.5, defRate: 1.2, eva: 5, rewardRate: 2.5 },
-                { name: '광분한 차장', type: 'strong', hpRate: 2.0, atkRate: 1.8, defRate: 1.5, eva: 5, rewardRate: 3.0 },
-                { name: '보안팀장', type: 'strong', hpRate: 2.2, atkRate: 1.2, defRate: 2.5, eva: 0, rewardRate: 3.5 },
-                { name: '스켈레톤 팀장', type: 'strong', hpRate: 1.8, atkRate: 2.2, defRate: 1.5, eva: 10, rewardRate: 4.0 },
-                { name: '데스나이트 부장', type: 'strong', hpRate: 3.0, atkRate: 3.0, defRate: 2.0, eva: 15, rewardRate: 6.0 },
-                { name: '감사팀 임원', type: 'boss', hpRate: 3.5, atkRate: 2.5, defRate: 2.0, eva: 10, rewardRate: 7.0 }
+                { name: '영업부 과장', type: 'strong', hpRate: 1.2, atkRate: 1.2, defRate: 1.0, eva: 5, rewardRate: 2.0 },
+                { name: '광분한 차장', type: 'strong', hpRate: 1.4, atkRate: 1.3, defRate: 1.1, eva: 5, rewardRate: 2.3 },
+                { name: '보안팀장', type: 'strong', hpRate: 1.5, atkRate: 1.1, defRate: 1.4, eva: 2, rewardRate: 2.5 },
+                { name: '스켈레톤 팀장', type: 'strong', hpRate: 1.3, atkRate: 1.4, defRate: 1.1, eva: 8, rewardRate: 2.8 },
+                { name: '데스나이트 부장', type: 'strong', hpRate: 1.6, atkRate: 1.5, defRate: 1.3, eva: 10, rewardRate: 3.5 },
+                { name: '감사팀 임원', type: 'boss', hpRate: 2.0, atkRate: 1.6, defRate: 1.4, eva: 10, rewardRate: 5.0 }
             ],
             currentMonster: null, logs: []
         };
+
+        function setScreenMode(mode) {
+            const body = document.getElementById('app-body');
+            body.className = '';
+            if (mode === 'pc') body.classList.add('force-pc');
+            else if (mode === 'mobile') body.classList.add('force-mobile');
+        }
 
         function getPlayerTotalStats() {
             const p = store.player;
@@ -246,7 +282,6 @@
             if(viewId === 'bank') updateBankUI();
         }
 
-        // --- 전투 쿨타임 시스템 ---
         function updateCooldownUI() {
             const now = Date.now();
             const remain = Math.ceil((store.cooldownEnd - now) / 1000);
@@ -268,7 +303,7 @@
         }
 
         function triggerCooldown() {
-            store.cooldownEnd = Date.now() + 3000; // 3초 쿨타임
+            store.cooldownEnd = Date.now() + 3000;
             if (store.cdInterval) clearInterval(store.cdInterval);
             store.cdInterval = setInterval(updateCooldownUI, 100);
             updateCooldownUI();
@@ -334,7 +369,7 @@
             
             renderPlayerStatus(); renderMonsterStatus(); renderLogs();
             saveGame();
-            triggerCooldown(); // 쿨타임 가동
+            triggerCooldown();
         }
 
         function spawnMonster(isBankBattle) {
@@ -344,7 +379,7 @@
             let cpRatio = 1.0;
 
             if (isBankBattle) {
-                targetTemplate = { name: '악덕 소매치기', hpRate: 1.0, atkRate: 1.1, defRate: 0.8, eva: 10, rewardRate: 0 };
+                targetTemplate = { name: '악덕 소매치기', hpRate: 1.0, atkRate: 1.0, defRate: 0.8, eva: 10, rewardRate: 0 };
                 cpRatio = 1.0;
             } else {
                 const lv = store.player.level;
@@ -367,16 +402,17 @@
 
             const targetCP = pCP * cpRatio;
             
-            let mMaxHp = Math.floor(pStats.atk * 7 * targetTemplate.hpRate * cpRatio); 
-            let mAtk = Math.floor((pStats.maxHp / 8 + pStats.def) * targetTemplate.atkRate * cpRatio);
-            let mDef = Math.floor(pStats.atk * 0.4 * targetTemplate.defRate * cpRatio);
+            // 데스나이트 부장 등 과도한 스펙 상승 문제를 해결하기 위해 밸런스 계수 재조정
+            let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio); 
+            let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio);
+            let mDef = Math.floor(pStats.def * targetTemplate.defRate * cpRatio);
 
             store.currentMonster = {
                 name: targetTemplate.name,
                 cp: Math.floor(targetCP),
                 maxHp: Math.max(20, mMaxHp), hp: Math.max(20, mMaxHp),
                 atk: Math.max(5, mAtk), def: Math.max(0, mDef),
-                acc: 95, eva: targetTemplate.eva,
+                acc: pStats.acc, eva: targetTemplate.eva,
                 exp: Math.floor((targetCP * 0.08 + 10) * targetTemplate.rewardRate),
                 gold: Math.floor((targetCP * 0.08 + 5) * targetTemplate.rewardRate)
             };
@@ -449,9 +485,8 @@
             const p = store.player;
             const item = store.equipments.find(e => e.id === id);
             
-            // 구매 전 확인 창 추가
             if (!confirm(`[${item.name}] 장비를 정말 구매하시겠습니까?\n(구매 시 비용 차감 및 기존 장비는 50% 환급됩니다)`)) {
-                return; // 취소 시 함수 종료
+                return;
             }
 
             if (p.gold >= item.price) {
@@ -505,7 +540,6 @@
             explore(true);
         }
 
-        // 출금액 직접 입력 기능 추가
         function initiateWithdraw(isMax) {
             const p = store.player;
             if (p.bank <= 0) { sysMsg("출금할 자산이 없습니다."); return; }
@@ -532,7 +566,6 @@
             const cp = calculateCP(stats);
             if(p.maxExp === undefined || p.maxExp === 15) p.maxExp = getRequiredExp(p.level);
 
-            // 순수 능력치와 종합 능력치 분리 표기
             document.getElementById('player-status').innerHTML = `
                 <div class="status-line" style="font-weight:bold; color:#107c41;"><span>전투력(CP)</span> <span>${cp}</span></div>
                 <div class="status-line"><span>레벨(Lv)</span> <span>${p.level}</span></div>
