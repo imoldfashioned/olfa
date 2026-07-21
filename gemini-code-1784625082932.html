@@ -2,10 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 모바일 뷰포트 추가 -->
-    <title>업무 관리 시스템 v2.2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업무 관리 시스템 v2.3</title>
     <style>
-        /* MS Excel 스텔스 테마 유지 및 박스 사이징 적용 */
         * { box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f3f2f1; color: #333; font-size: 12px; margin: 0; }
         .container { display: flex; max-width: 900px; margin: 0 auto; background-color: #ffffff; border: 1px solid #cccccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -22,10 +21,12 @@
         
         .button-group { margin-top: 15px; display: flex; flex-direction: column; gap: 5px; }
         .row-buttons { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
-        button { padding: 6px 10px; cursor: pointer; background-color: #ffffff; color: #333; border: 1px solid #8a8886; font-size: 12px; text-align: left; }
-        button:hover { background-color: #e1dfdd; }
+        button { padding: 6px 10px; cursor: pointer; background-color: #ffffff; color: #333; border: 1px solid #8a8886; font-size: 12px; text-align: left; transition: all 0.2s; }
+        button:hover:not(:disabled) { background-color: #e1dfdd; }
+        button:disabled { cursor: not-allowed; opacity: 0.8; }
+        
         .btn-main { background-color: #107c41; color: white; border-color: #107c41; text-align: center; font-weight: bold; }
-        .btn-main:hover { background-color: #0c5f32; }
+        .btn-main:hover:not(:disabled) { background-color: #0c5f32; }
         .btn-danger { background-color: #a4262c; color: white; border-color: #a4262c; text-align: center; font-weight: bold; margin-top: 20px;}
         
         #sys-msg { margin-top: 15px; color: #a4262c; font-size: 11px; min-height: 20px; font-weight:bold; word-break: keep-all; }
@@ -41,14 +42,12 @@
 
         input[type="number"] { padding: 5px; border: 1px solid #ccc; font-size: 12px; width: 120px; }
 
-        /* 모바일 최적화 미디어 쿼리 */
         @media (max-width: 768px) {
             body { padding: 0; background-color: #ffffff; }
             .container { flex-direction: column; border: none; box-shadow: none; }
             #left-panel { width: 100%; border-right: none; border-bottom: 2px solid #107c41; padding: 15px 10px; }
             #right-panel { width: 100%; padding: 15px 10px; }
             
-            /* 모바일에서 버튼 접근성 향상 (터치 영역 확보) */
             .button-group { flex-direction: row; flex-wrap: wrap; gap: 8px; }
             .button-group button { flex: 1 1 45%; padding: 10px 5px; text-align: center; margin-top: 0 !important; }
             .btn-danger { flex: 1 1 100%; margin-top: 8px !important; }
@@ -68,7 +67,7 @@
             <div class="status-block" id="player-equip"></div>
 
             <div class="button-group">
-                <button class="btn-main" onclick="explore(false)">탐색 실행 (전투)</button>
+                <button id="btn-explore" class="btn-main" onclick="explore(false)">탐색 실행 (전투)</button>
                 <button onclick="restAtInn()">여관 휴식 (10G)</button>
                 <button onclick="openShop()">자산 상점 조회</button>
                 <button onclick="changeView('bank')">사내 금고 (은행)</button>
@@ -82,7 +81,7 @@
         <div id="right-panel">
             <div id="view-main" class="view active">
                 <h2>대기 화면</h2>
-                <p style="color: #666;">좌측 메뉴에서 작업을 선택하십시오. (V2.2 모바일 대응 가동 중)</p>
+                <p style="color: #666;">좌측 메뉴에서 작업을 선택하십시오. (V2.3 통합 시스템 가동 중)</p>
             </div>
             
             <div id="view-battle" class="view">
@@ -120,8 +119,10 @@
 
                 <div style="background:#f3f2f1; padding:10px; border:1px solid #ddd;">
                     <strong>출금 업무 (안전)</strong>
+                    <input type="number" id="withdraw-amt" placeholder="출금액 입력" style="margin-bottom: 5px; width:100%; box-sizing:border-box;">
                     <div class="row-buttons">
-                        <button onclick="withdrawBank()">전액 출금</button>
+                        <button onclick="initiateWithdraw(false)">직접 입력 출금</button>
+                        <button onclick="initiateWithdraw(true)">전액 출금</button>
                     </div>
                 </div>
 
@@ -147,6 +148,8 @@
         const store = {
             currentView: 'main',
             pendingDeposit: 0,
+            cooldownEnd: 0, 
+            cdInterval: null,
             player: {
                 name: '용사', level: 1, hp: 60, 
                 str: 5, int: 5, vit: 5, dex: 5, 
@@ -154,7 +157,6 @@
                 weapon: null, armor: null, accessory: null
             },
             equipments: [
-                // 무기류 (밸런스 완화 및 고레벨 추가)
                 { id: 'w1', name: '플라스틱 자', type: 'weapon', price: 50, reqLevel: 1, stats: { atk: 5 } },
                 { id: 'w1_2', name: '녹슨 가위', type: 'weapon', price: 60, reqLevel: 1, stats: { atk: 4, crt: 3 } },
                 { id: 'w2', name: '커터칼', type: 'weapon', price: 150, reqLevel: 5, stats: { atk: 12, crt: 2 } },
@@ -166,7 +168,6 @@
                 { id: 'w5', name: '법인 마검', type: 'weapon', price: 2000, reqLevel: 20, stats: { atk: 75, crt: 5 } },
                 { id: 'w5_2', name: '티타늄 결재판', type: 'weapon', price: 2100, reqLevel: 20, stats: { atk: 65, crt: 12 } },
                 
-                // 방어구류
                 { id: 'a1', name: '종이 박스', type: 'armor', price: 50, reqLevel: 1, stats: { def: 2 } },
                 { id: 'a2', name: '보안 유니폼', type: 'armor', price: 150, reqLevel: 5, stats: { def: 6, eva: 2 } },
                 { id: 'a2_2', name: '두꺼운 패딩', type: 'armor', price: 160, reqLevel: 5, stats: { def: 9, eva: -1 } },
@@ -175,7 +176,6 @@
                 { id: 'a5', name: '맞춤형 정장', type: 'armor', price: 2000, reqLevel: 20, stats: { def: 40, eva: 5 } },
                 { id: 'a5_2', name: '헤비 롱패딩', type: 'armor', price: 2100, reqLevel: 20, stats: { def: 52, eva: -3 } },
                 
-                // 악세사리 추가
                 { id: 'ac1', name: '사원증 목걸이', type: 'accessory', price: 200, reqLevel: 3, stats: { maxHp: 20 } },
                 { id: 'ac2', name: '싸구려 커피', type: 'accessory', price: 250, reqLevel: 4, stats: { eva: 5, crt: 3 } },
                 { id: 'ac3', name: '은단 케이스', type: 'accessory', price: 600, reqLevel: 8, stats: { maxHp: 50, acc: 5 } },
@@ -183,7 +183,6 @@
                 { id: 'ac5', name: '노이즈캔슬링 이어폰', type: 'accessory', price: 2500, reqLevel: 18, stats: { crt: 5, acc: 10, maxHp: 30 } }
             ],
             monsters: [
-                // 몬스터 다양화 추가
                 { name: '슬라임 사원', type: 'normal', hpRate: 0.8, atkRate: 0.8, defRate: 0.5, eva: 0, rewardRate: 0.8 },
                 { name: '파견직 사원', type: 'normal', hpRate: 0.9, atkRate: 0.9, defRate: 0.8, eva: 2, rewardRate: 0.9 },
                 { name: '지각한 인턴', type: 'normal', hpRate: 0.6, atkRate: 1.2, defRate: 0.4, eva: 5, rewardRate: 0.9 },
@@ -238,6 +237,7 @@
         }
 
         function sysMsg(msg) { document.getElementById('sys-msg').innerHTML = msg; }
+        
         function changeView(viewId) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(`view-${viewId}`).classList.add('active');
@@ -246,7 +246,40 @@
             if(viewId === 'bank') updateBankUI();
         }
 
+        // --- 전투 쿨타임 시스템 ---
+        function updateCooldownUI() {
+            const now = Date.now();
+            const remain = Math.ceil((store.cooldownEnd - now) / 1000);
+            const btn = document.getElementById('btn-explore');
+            if (!btn) return;
+            
+            if (remain > 0) {
+                btn.disabled = true;
+                btn.style.backgroundColor = '#8a8886';
+                btn.style.borderColor = '#8a8886';
+                btn.innerText = `휴식 중... (${remain}s)`;
+            } else {
+                btn.disabled = false;
+                btn.style.backgroundColor = ''; 
+                btn.style.borderColor = '';
+                btn.innerText = "탐색 실행 (전투)";
+                if(store.cdInterval) clearInterval(store.cdInterval);
+            }
+        }
+
+        function triggerCooldown() {
+            store.cooldownEnd = Date.now() + 3000; // 3초 쿨타임
+            if (store.cdInterval) clearInterval(store.cdInterval);
+            store.cdInterval = setInterval(updateCooldownUI, 100);
+            updateCooldownUI();
+        }
+
         function explore(isBankBattle) {
+            if (Date.now() < store.cooldownEnd) {
+                sysMsg("아직 탐색 쿨타임이 지나지 않았습니다.");
+                return;
+            }
+
             spawnMonster(isBankBattle);
             changeView('battle');
             store.logs = []; 
@@ -301,6 +334,7 @@
             
             renderPlayerStatus(); renderMonsterStatus(); renderLogs();
             saveGame();
+            triggerCooldown(); // 쿨타임 가동
         }
 
         function spawnMonster(isBankBattle) {
@@ -314,7 +348,6 @@
                 cpRatio = 1.0;
             } else {
                 const lv = store.player.level;
-                // 보스급은 확률을 대폭 축소 (0.01~0.03)
                 let bossProb = lv > 20 ? 0.03 : 0;
                 let strongProb = 0.05 + (lv > 10 ? 0.05 : 0) + (lv > 30 ? 0.05 : 0);
                 
@@ -326,11 +359,10 @@
                 const pool = store.monsters.filter(m => m.type === mType);
                 targetTemplate = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : store.monsters[0];
 
-                // 전투력 스케일링 밴드 축소 (안정적인 전투 유도)
                 const rollCP = Math.random() * 100;
-                if (rollCP < 10) cpRatio = 0.85;       // -15% (10% 확률)
-                else if (rollCP < 85) cpRatio = 1.0 + (Math.random() * 0.15 - 0.05); // -5% ~ +10% (75% 확률, 중심 밴드)
-                else cpRatio = 1.25;                   // +25% (15% 확률)
+                if (rollCP < 10) cpRatio = 0.85;       
+                else if (rollCP < 85) cpRatio = 1.0 + (Math.random() * 0.15 - 0.05); 
+                else cpRatio = 1.25;                   
             }
 
             const targetCP = pCP * cpRatio;
@@ -417,6 +449,11 @@
             const p = store.player;
             const item = store.equipments.find(e => e.id === id);
             
+            // 구매 전 확인 창 추가
+            if (!confirm(`[${item.name}] 장비를 정말 구매하시겠습니까?\n(구매 시 비용 차감 및 기존 장비는 50% 환급됩니다)`)) {
+                return; // 취소 시 함수 종료
+            }
+
             if (p.gold >= item.price) {
                 let refund = 0;
                 if (p[item.type]) {
@@ -440,9 +477,15 @@
             document.getElementById('bank-limit').innerText = p.level * 1000;
             document.getElementById('bank-balance').innerText = p.bank + " G";
             document.getElementById('deposit-amt').value = '';
+            document.getElementById('withdraw-amt').value = '';
         }
 
         function initiateDeposit(isMax) {
+            if (Date.now() < store.cooldownEnd) {
+                sysMsg("아직 탐색 쿨타임이 지나지 않았습니다.");
+                return;
+            }
+
             const p = store.player;
             const limit = p.level * 1000;
             let amt = 0;
@@ -462,12 +505,24 @@
             explore(true);
         }
 
-        function withdrawBank() {
+        // 출금액 직접 입력 기능 추가
+        function initiateWithdraw(isMax) {
             const p = store.player;
             if (p.bank <= 0) { sysMsg("출금할 자산이 없습니다."); return; }
             
-            p.gold += p.bank; const amt = p.bank; p.bank = 0;
-            sysMsg(`${amt}G 안전하게 전액 출금 완료되었습니다.`); 
+            let amt = 0;
+            if (isMax) {
+                amt = p.bank;
+            } else {
+                amt = parseInt(document.getElementById('withdraw-amt').value) || 0;
+            }
+
+            if (amt <= 0) { sysMsg("유효한 금액을 입력하세요."); return; }
+            if (amt > p.bank) { sysMsg("예치금이 부족합니다. (최대 " + p.bank + "G)"); return; }
+
+            p.gold += amt; 
+            p.bank -= amt;
+            sysMsg(`${amt}G 안전하게 출금 완료되었습니다.`); 
             updateBankUI(); renderPlayerStatus(); saveGame();
         }
 
@@ -477,6 +532,7 @@
             const cp = calculateCP(stats);
             if(p.maxExp === undefined || p.maxExp === 15) p.maxExp = getRequiredExp(p.level);
 
+            // 순수 능력치와 종합 능력치 분리 표기
             document.getElementById('player-status').innerHTML = `
                 <div class="status-line" style="font-weight:bold; color:#107c41;"><span>전투력(CP)</span> <span>${cp}</span></div>
                 <div class="status-line"><span>레벨(Lv)</span> <span>${p.level}</span></div>
@@ -484,6 +540,19 @@
                 <div class="status-line"><span>경험치(EXP)</span> <span>${p.exp} / ${p.maxExp}</span></div>
                 <div class="status-line"><span>소지금(Gold)</span> <span>${p.gold} G</span></div>
                 
+                <div class="status-block" style="background:#eaf2ea; border-color:#c3d8c3;">
+                    <strong>[현재 종합 능력치]</strong>
+                    <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                        <span>ATK: ${stats.atk}</span> <span>DEF: ${stats.def}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>ACC: ${stats.acc}</span> <span>EVA: ${stats.eva}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>CRIT: ${stats.crt}%</span> <span>MaxHP: ${stats.maxHp}</span>
+                    </div>
+                </div>
+
                 <div class="status-block">
                     <strong>[순수 능력치]</strong>
                     <div style="display:flex; justify-content:space-between; margin-top:4px;">
@@ -495,7 +564,7 @@
                 </div>
             `;
 
-            const formatGear = (gear) => gear ? `${gear.name} <span style="color:#666; font-size:10px;">${Object.entries(gear.stats).map(([k,v])=>`${k}+${v}`).join(', ')}</span>` : '없음';
+            const formatGear = (gear) => gear ? `${gear.name} <span style="color:#666; font-size:10px;">${Object.entries(gear.stats).map(([k,v])=>`${k.toUpperCase()}${v > 0 ? '+'+v : v}`).join(', ')}</span>` : '없음';
             
             document.getElementById('player-equip').innerHTML = `
                 <strong>[착용 장비]</strong><br>
