@@ -2,9 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>업무 관리 시스템 v2.0</title>
+    <title>업무 관리 시스템 v2.1</title>
     <style>
-        /* MS Excel 스텔스 테마 */
+        /* MS Excel 스텔스 테마 유지 */
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f3f2f1; color: #333; font-size: 12px; margin: 0; }
         .container { display: flex; max-width: 900px; background-color: #ffffff; border: 1px solid #cccccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         #left-panel { width: 250px; border-right: 1px solid #cccccc; padding: 15px; background-color: #faf9f8; }
@@ -13,6 +13,7 @@
         .view.active { display: block; }
         
         h2 { font-size: 13px; color: #107c41; margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid #107c41; padding-bottom: 4px; font-weight: bold; }
+        h3 { font-size: 12px; color: #333; margin: 15px 0 5px 0; border-bottom: 1px dashed #ccc; padding-bottom: 2px;}
         .status-line { margin: 4px 0; border-bottom: 1px solid #eeeeee; padding-bottom: 4px; display: flex; justify-content: space-between; }
         .status-block { background:#f3f2f1; padding:5px; margin-top:8px; border:1px solid #ddd; }
         
@@ -22,6 +23,7 @@
         button:hover { background-color: #e1dfdd; }
         .btn-main { background-color: #107c41; color: white; border-color: #107c41; text-align: center; font-weight: bold; }
         .btn-main:hover { background-color: #0c5f32; }
+        .btn-danger { background-color: #a4262c; color: white; border-color: #a4262c; text-align: center; font-weight: bold; margin-top: 20px;}
         
         #sys-msg { margin-top: 15px; color: #a4262c; font-size: 11px; min-height: 20px; font-weight:bold; }
         #battle-log { margin-top: 10px; padding: 10px; border: 1px solid #cccccc; background-color: #ffffff; height: 350px; overflow-y: auto; font-family: 'Consolas', monospace; font-size: 11px; color: #333; line-height: 1.5; }
@@ -29,9 +31,12 @@
         .log-turn { color: #107c41; font-weight: bold; }
         .log-crit { color: #a4262c; font-weight: bold; }
         .log-miss { color: #8a8886; }
+        .log-stat { color: #0078d4; }
         .log-result { font-weight: bold; border-top: 1px dashed #ccc; margin-top: 5px; padding-top: 5px; display: block; }
         .log-victory { color: #107c41; }
         .log-defeat { color: #a4262c; }
+
+        input[type="number"] { padding: 4px; border: 1px solid #ccc; font-size: 12px; width: 120px; }
     </style>
 </head>
 <body>
@@ -46,8 +51,9 @@
                 <button class="btn-main" onclick="explore(false)">탐색 실행 (전투)</button>
                 <button onclick="restAtInn()">여관 휴식 (10G)</button>
                 <button onclick="openShop()">자산 상점 조회</button>
-                <button onclick="openBank()">사내 금고 (은행)</button>
+                <button onclick="changeView('bank')">사내 금고 (은행)</button>
                 <button onclick="openSync()" style="margin-top: 10px;">데이터 동기화</button>
+                <button class="btn-danger" onclick="resetData()">데이터 초기화</button>
             </div>
             <div id="sys-msg"></div>
         </div>
@@ -56,34 +62,50 @@
         <div id="right-panel">
             <div id="view-main" class="view active">
                 <h2>대기 화면</h2>
-                <p style="color: #666;">좌측 메뉴에서 작업을 선택하십시오. (V2.0 통합 시스템 가동 중)</p>
+                <p style="color: #666;">좌측 메뉴에서 작업을 선택하십시오. (V2.1 통합 시스템 가동 중)</p>
             </div>
             
             <div id="view-battle" class="view">
                 <h2>전투 로그 기록</h2>
                 <div id="monster-status" style="margin-bottom: 10px; padding: 5px; background: #f3f2f1; border: 1px solid #ccc;"></div>
                 <div id="battle-log"></div>
-                <div id="bank-entry-action" class="row-buttons" style="display:none; margin-top:10px;">
-                    <button class="btn-main" onclick="changeView('bank')">금고 입장하기</button>
-                    <button onclick="changeView('main')">취소</button>
+                <div class="row-buttons" style="margin-top:10px;">
+                    <button class="btn-main" onclick="changeView('main')">대기 화면으로</button>
                 </div>
             </div>
             
             <div id="view-shop" class="view">
                 <h2>자산 구매 목록 (구매 시 기존 장비 50% 자동 환급)</h2>
-                <div id="shop-buttons" class="button-group"></div>
+                <div id="shop-container" style="height:350px; overflow-y:auto; border:1px solid #ccc; padding:10px;"></div>
                 <div class="row-buttons">
-                    <button onclick="changeView('main')">이전 화면으로</button>
+                    <button class="btn-main" onclick="changeView('main')">이전 화면으로</button>
                 </div>
             </div>
 
             <div id="view-bank" class="view">
                 <h2>사내 금고 (은행)</h2>
-                <p style="color: #666;">100G 단위 예금. 한도: <span id="bank-limit"></span>G</p>
-                <div class="status-line" style="font-weight:bold; font-size:13px;"><span>예치금:</span> <span id="bank-balance" style="color:#107c41;">0 G</span></div>
+                <p style="color: #666;">보안 규정에 따라 <strong>입금 시도 시에만</strong> 경비 시스템(전투)이 가동됩니다. 출금은 안전합니다. <br>현재 입금 한도: <span id="bank-limit"></span>G</p>
+                <div class="status-line" style="font-weight:bold; font-size:13px; margin-bottom:15px;">
+                    <span>예치금:</span> <span id="bank-balance" style="color:#107c41;">0 G</span>
+                </div>
+                
+                <div style="background:#f3f2f1; padding:10px; border:1px solid #ddd; margin-bottom: 10px;">
+                    <strong>입금 업무 (위험)</strong><br>
+                    <input type="number" id="deposit-amt" placeholder="입금액 입력">
+                    <div class="row-buttons">
+                        <button class="btn-main" onclick="initiateDeposit(false)">직접 입력 입금</button>
+                        <button onclick="initiateDeposit(true)">최대 가능액 입금</button>
+                    </div>
+                </div>
+
+                <div style="background:#f3f2f1; padding:10px; border:1px solid #ddd;">
+                    <strong>출금 업무 (안전)</strong>
+                    <div class="row-buttons">
+                        <button onclick="withdrawBank()">전액 출금</button>
+                    </div>
+                </div>
+
                 <div class="row-buttons" style="margin-top:15px;">
-                    <button onclick="depositBank()">100G 입금</button>
-                    <button onclick="withdrawBank()">전액 출금</button>
                     <button onclick="changeView('main')">퇴장하기</button>
                 </div>
             </div>
@@ -104,59 +126,82 @@
         // --- 1. Store Data ---
         const store = {
             currentView: 'main',
+            pendingDeposit: 0,
             player: {
-                name: '용사', level: 1, hp: 30, maxHp: 30, 
-                str: 10, int: 5, vit: 10, dex: 10, 
+                name: '용사', level: 1, hp: 60, 
+                str: 5, int: 5, vit: 5, dex: 5, 
                 exp: 0, maxExp: 15, gold: 0, bank: 0,
-                weapon: null, armor: null
+                weapon: null, armor: null, accessory: null
             },
             equipments: [
+                // 무기류 (바리에이션 추가)
                 { id: 'w1', name: '플라스틱 자', type: 'weapon', price: 50, reqLevel: 1, stats: { atk: 5 } },
-                { id: 'a1', name: '종이 박스', type: 'armor', price: 50, reqLevel: 1, stats: { def: 2 } },
+                { id: 'w1_2', name: '녹슨 가위', type: 'weapon', price: 60, reqLevel: 1, stats: { atk: 3, crt: 5 } },
                 { id: 'w2', name: '커터칼', type: 'weapon', price: 150, reqLevel: 5, stats: { atk: 12, crt: 2 } },
-                { id: 'a2', name: '보안 유니폼', type: 'armor', price: 150, reqLevel: 5, stats: { def: 6, eva: 2 } },
+                { id: 'w2_2', name: '두꺼운 사전', type: 'weapon', price: 150, reqLevel: 5, stats: { atk: 18, eva: -2 } },
                 { id: 'w3', name: '강철 결재판', type: 'weapon', price: 400, reqLevel: 10, stats: { atk: 25, crt: 5 } },
-                { id: 'a3', name: '가죽 서류가방', type: 'armor', price: 400, reqLevel: 10, stats: { def: 15, eva: 5 } },
+                { id: 'w3_2', name: '날렵한 만년필', type: 'weapon', price: 420, reqLevel: 10, stats: { atk: 15, crt: 12 } },
                 { id: 'w4', name: '기계식 키보드', type: 'weapon', price: 900, reqLevel: 15, stats: { atk: 45, crt: 10 } },
+                { id: 'w4_2', name: '무거운 텀블러', type: 'weapon', price: 900, reqLevel: 15, stats: { atk: 60, acc: -10 } },
+                
+                // 방어구류
+                { id: 'a1', name: '종이 박스', type: 'armor', price: 50, reqLevel: 1, stats: { def: 2 } },
+                { id: 'a2', name: '보안 유니폼', type: 'armor', price: 150, reqLevel: 5, stats: { def: 6, eva: 2 } },
+                { id: 'a2_2', name: '두꺼운 패딩', type: 'armor', price: 160, reqLevel: 5, stats: { def: 10, eva: -3 } },
+                { id: 'a3', name: '가죽 서류가방', type: 'armor', price: 400, reqLevel: 10, stats: { def: 15, eva: 5 } },
                 { id: 'a4', name: '방검 조끼', type: 'armor', price: 900, reqLevel: 15, stats: { def: 28, eva: -5 } },
-                { id: 'w5', name: '법인 마검', type: 'weapon', price: 2000, reqLevel: 20, stats: { atk: 80, crt: 15 } }
+                
+                // 악세사리 추가
+                { id: 'ac1', name: '사원증 목걸이', type: 'accessory', price: 200, reqLevel: 3, stats: { maxHp: 20 } },
+                { id: 'ac2', name: '싸구려 커피', type: 'accessory', price: 250, reqLevel: 4, stats: { eva: 5, crt: 3 } },
+                { id: 'ac3', name: '은단 케이스', type: 'accessory', price: 600, reqLevel: 8, stats: { maxHp: 50, acc: 5 } },
+                { id: 'ac4', name: '스마트 워치', type: 'accessory', price: 1200, reqLevel: 12, stats: { crt: 10, eva: 10 } }
             ],
             monsters: [
                 { name: '슬라임 사원', type: 'normal', hpRate: 0.8, atkRate: 0.8, defRate: 0.5, eva: 0, rewardRate: 0.8 },
-                { name: '늑대 인턴', type: 'normal', hpRate: 1.0, atkRate: 1.0, defRate: 0.8, eva: 15, rewardRate: 1.0 },
+                { name: '지각한 인턴', type: 'normal', hpRate: 0.6, atkRate: 1.2, defRate: 0.4, eva: 5, rewardRate: 0.9 },
+                { name: '늑대 대리', type: 'normal', hpRate: 1.0, atkRate: 1.0, defRate: 0.8, eva: 15, rewardRate: 1.0 },
+                { name: '고블린 횡령범', type: 'normal', hpRate: 0.9, atkRate: 1.1, defRate: 0.8, eva: 10, rewardRate: 1.5 },
                 { name: '오크 주임', type: 'normal', hpRate: 1.5, atkRate: 0.9, defRate: 1.5, eva: 2, rewardRate: 1.2 },
-                { name: '고블린 횡령범', type: 'normal', hpRate: 0.9, atkRate: 1.1, defRate: 0.8, eva: 10, rewardRate: 2.0 },
-                { name: '마법사 해골', type: 'normal', hpRate: 0.7, atkRate: 1.8, defRate: 0.5, eva: 5, rewardRate: 1.2 },
+                { name: '불만많은 고객', type: 'normal', hpRate: 1.2, atkRate: 1.3, defRate: 1.0, eva: 5, rewardRate: 1.4 },
                 
-                { name: '오크 대리', type: 'strong', hpRate: 2.0, atkRate: 1.5, defRate: 2.0, eva: 5, rewardRate: 3.0 },
-                { name: '스켈레톤 과장', type: 'strong', hpRate: 1.8, atkRate: 2.2, defRate: 1.5, eva: 10, rewardRate: 4.0 },
+                { name: '광분한 과장', type: 'strong', hpRate: 2.0, atkRate: 1.8, defRate: 1.5, eva: 5, rewardRate: 3.0 },
+                { name: '스켈레톤 팀장', type: 'strong', hpRate: 1.8, atkRate: 2.2, defRate: 1.5, eva: 10, rewardRate: 4.0 },
                 { name: '데스나이트 부장', type: 'strong', hpRate: 3.0, atkRate: 3.0, defRate: 2.0, eva: 15, rewardRate: 6.0 }
             ],
             currentMonster: null, logs: []
         };
 
-        // --- 2. Stats & CP System ---
+        // --- 2. Stats & CP System (개편) ---
+        // 능력치 제한에 맞춰 전투 보정치를 대폭 상승시켰습니다.
         function getPlayerTotalStats() {
             const p = store.player;
             let total = {
-                atk: Math.floor(p.str * 1.5),
-                def: Math.floor(p.str * 0.8),
-                maxHp: Math.floor(p.vit * 4),
-                acc: 80 + Math.floor(p.dex * 0.5),
-                eva: Math.floor(p.dex * 0.5),
-                crt: Math.floor(p.int * 0.8), // 지능 비례 크리티컬 확률
-                crtDmg: 150 + Math.floor(p.dex * 1.0) // 민첩 비례 크리티컬 데미지
+                atk: Math.floor(p.str * 3.5),
+                def: Math.floor(p.str * 2.0),
+                maxHp: 60 + Math.floor(p.vit * 15),
+                acc: 85 + Math.floor(p.dex * 2.0),
+                eva: Math.floor(p.dex * 1.5),
+                crt: Math.floor(p.int * 1.5), 
+                crtDmg: 150 + Math.floor(p.dex * 2.0) 
             };
             
-            [p.weapon, p.armor].forEach(gear => {
+            [p.weapon, p.armor, p.accessory].forEach(gear => {
                 if (gear && gear.stats) {
                     if (gear.stats.atk) total.atk += gear.stats.atk;
                     if (gear.stats.def) total.def += gear.stats.def;
+                    if (gear.stats.maxHp) total.maxHp += gear.stats.maxHp;
+                    if (gear.stats.acc) total.acc += gear.stats.acc;
                     if (gear.stats.eva) total.eva += gear.stats.eva;
                     if (gear.stats.crt) total.crt += gear.stats.crt;
                 }
             });
             return total;
+        }
+
+        function getRequiredExp(level) {
+            // 500레벨을 위한 점진적 상승 커브 (기본치 + 레벨계수 + 거듭제곱)
+            return Math.floor(10 + (level * 8) + Math.pow(level, 1.7));
         }
 
         function calculateCP(stats, isPlayer = true) {
@@ -169,7 +214,6 @@
         function changeView(viewId) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(`view-${viewId}`).classList.add('active');
-            document.getElementById('bank-entry-action').style.display = 'none';
             store.currentView = viewId;
             sysMsg(''); 
             if(viewId === 'bank') updateBankUI();
@@ -191,7 +235,7 @@
             for (let turn = 1; turn <= 15; turn++) {
                 addLog(`<span class="log-turn">▶ Turn ${turn}</span>`);
                 
-                // 플레이어 공격 (명중/회피 처리 및 데미지 난수 0.8~1.2)
+                // 플레이어 공격
                 if (Math.random() * 100 <= (pStats.acc - m.eva)) {
                     let baseDmg = pStats.atk * (0.8 + Math.random() * 0.4);
                     let finalDmg = Math.max(1, Math.floor(baseDmg - m.def));
@@ -226,7 +270,10 @@
                 }
             }
 
-            if (!battleEnded) addLog(`<span class="log-result log-defeat">[연산 종료] Time Out - 무승부</span>`);
+            if (!battleEnded) {
+                addLog(`<span class="log-result log-defeat">[연산 종료] Time Out - 무승부</span>`);
+                if(isBankBattle) store.pendingDeposit = 0; // 은행 거래 취소
+            }
             
             renderPlayerStatus(); renderMonsterStatus(); renderLogs();
             saveGame();
@@ -241,28 +288,23 @@
             if (isBankBattle) {
                 targetTemplate = { name: '악덕 소매치기', hpRate: 1.0, atkRate: 1.1, defRate: 0.8, eva: 10, rewardRate: 0 };
             } else {
-                // 강적 출현 확률 로직
                 const lv = store.player.level;
-                let strongProb = 0.05;
-                if (lv >= 11 && lv <= 20) strongProb = 0.08;
-                else if (lv > 20) strongProb = 0.12;
-
+                let strongProb = 0.05 + (lv > 10 ? 0.05 : 0) + (lv > 30 ? 0.05 : 0);
+                
                 const isStrong = Math.random() < strongProb;
                 const pool = store.monsters.filter(m => isStrong ? m.type === 'strong' : m.type === 'normal');
                 targetTemplate = pool[Math.floor(Math.random() * pool.length)];
 
-                // 조우 알고리즘 (CP 격차)
                 const roll = Math.random() * 100;
-                if (roll < 5) cpRatio = 0.5;       // -50% 이하 (5%)
-                else if (roll < 25) cpRatio = 0.8; // -20% 이하 (20%)
-                else if (roll < 85) cpRatio = 1.0; // 비슷한 수준 (60%)
-                else if (roll < 95) cpRatio = 1.2; // +20% 이상 (10%)
-                else cpRatio = 1.5;                // +50% 이상 (5%)
+                if (roll < 5) cpRatio = 0.6;       
+                else if (roll < 25) cpRatio = 0.8; 
+                else if (roll < 85) cpRatio = 1.0; 
+                else if (roll < 95) cpRatio = 1.2; 
+                else cpRatio = 1.5;                
             }
 
             const targetCP = pCP * cpRatio;
             
-            // 몬스터 스탯 역산 생성
             let mMaxHp = Math.floor(pStats.atk * 7 * targetTemplate.hpRate * cpRatio); 
             let mAtk = Math.floor((pStats.maxHp / 8 + pStats.def) * targetTemplate.atkRate * cpRatio);
             let mDef = Math.floor(pStats.atk * 0.4 * targetTemplate.defRate * cpRatio);
@@ -281,8 +323,10 @@
         function winBattle(m, isBankBattle) {
             const p = store.player;
             if (isBankBattle) {
-                addLog(` > 소매치기를 제압하고 금고 앞에 도착했습니다.`);
-                document.getElementById('bank-entry-action').style.display = 'flex';
+                p.gold -= store.pendingDeposit; 
+                p.bank += store.pendingDeposit;
+                addLog(` > 불순분자를 제압하고 <strong>${store.pendingDeposit}G</strong> 안전하게 입금했습니다.`);
+                store.pendingDeposit = 0;
                 return;
             }
 
@@ -292,32 +336,37 @@
             let leveledUp = false;
             while (p.exp >= p.maxExp) {
                 p.exp -= p.maxExp; p.level += 1;
-                p.maxExp = Math.floor(p.maxExp * 1.5);
+                p.maxExp = getRequiredExp(p.level);
                 
-                // 고레벨 보정 스탯 상승률 (최대 50% 제한, 10레벨 이후 감소)
-                let cap = p.level > 10 ? 0.2 : 0.3; 
-                const grow = (stat) => Math.floor(stat * (0.1 + Math.random() * cap));
+                // 스탯 1 고정 상승 시스템
+                let upStats = [], flatStats = [];
+                const tryStat = (name, val) => {
+                    if(Math.random() < 0.6) { upStats.push(name); return val + 1; }
+                    else { flatStats.push(name); return val; }
+                };
                 
-                p.str += Math.max(1, grow(p.str));
-                p.int += Math.max(1, grow(p.int));
-                p.vit += Math.max(1, grow(p.vit));
-                p.dex += Math.max(1, grow(p.dex));
+                p.str = tryStat('STR', p.str);
+                p.int = tryStat('INT', p.int);
+                p.vit = tryStat('VIT', p.vit);
+                p.dex = tryStat('DEX', p.dex);
                 
                 leveledUp = true;
+                addLog(` > <span class="log-victory">레벨업! Lv.${p.level}</span>`);
+                addLog(` > <span class="log-stat">상승: ${upStats.length ? upStats.join(', ') : '없음'}</span>`);
+                addLog(` > <span style="color:#888;">유지: ${flatStats.length ? flatStats.join(', ') : '없음'}</span>`);
             }
             if (leveledUp) {
                 p.hp = getPlayerTotalStats().maxHp; 
-                addLog(` > <span class="log-victory">레벨업! Lv.${p.level} (체력 회복)</span>`);
             }
         }
 
         function loseBattle(isBankBattle) {
             const p = store.player;
-            // 은행 패배 시 30%, 일반 20%
             const lossRate = isBankBattle ? 0.3 : 0.2; 
             const lostGold = Math.floor(p.gold * lossRate);
             p.gold -= lostGold;
             p.hp = getPlayerTotalStats().maxHp; 
+            if(isBankBattle) store.pendingDeposit = 0; // 입금 실패
             addLog(` > 패배 페널티 : ${lostGold} G 손실 및 체력 초기화`);
         }
 
@@ -343,41 +392,47 @@
             if (p.gold >= item.price) {
                 let refund = 0;
                 if (p[item.type]) {
-                    refund = Math.floor(p[item.type].price * 0.5); // 50% 환급
+                    refund = Math.floor(p[item.type].price * 0.5);
                     p.gold += refund;
                 }
                 p.gold -= item.price;
                 p[item.type] = item;
                 
-                // 장비 착용 시 최대 체력 변동될 수 있으므로 상한 보정
                 const maxHp = getPlayerTotalStats().maxHp;
                 if(p.hp > maxHp) p.hp = maxHp;
 
                 sysMsg(`[${item.name}] 장착 완료. ${refund > 0 ? '(기존 장비 처분: +'+refund+'G)' : ''}`);
-                renderPlayerStatus(); saveGame();
+                renderPlayerStatus(); saveGame(); openShop(); // 화면 갱신
             } else { sysMsg("골드가 부족합니다."); }
         }
 
-        function openBank() {
-            sysMsg("금고 진입 중 불순분자와 마주쳤습니다!");
-            explore(true); 
-        }
-
+        // --- 은행 (입출금 분리) ---
         function updateBankUI() {
             const p = store.player;
             if(p.bank === undefined) p.bank = 0;
             document.getElementById('bank-limit').innerText = p.level * 1000;
             document.getElementById('bank-balance').innerText = p.bank + " G";
+            document.getElementById('deposit-amt').value = '';
         }
 
-        function depositBank() {
+        function initiateDeposit(isMax) {
             const p = store.player;
             const limit = p.level * 1000;
-            if (p.gold < 100) { sysMsg("최소 100G 이상 소지해야 합니다."); return; }
-            if (p.bank + 100 > limit) { sysMsg("예금 한도 초과입니다."); return; }
-            
-            p.gold -= 100; p.bank += 100;
-            sysMsg("100G 입금 완료."); updateBankUI(); renderPlayerStatus(); saveGame();
+            let amt = 0;
+
+            if (isMax) {
+                amt = Math.min(p.gold, limit - p.bank);
+            } else {
+                amt = parseInt(document.getElementById('deposit-amt').value) || 0;
+            }
+
+            if (amt <= 0) { sysMsg("유효한 금액을 입력하세요."); return; }
+            if (amt > p.gold) { sysMsg("소지금이 부족합니다."); return; }
+            if (p.bank + amt > limit) { sysMsg("예금 한도를 초과합니다."); return; }
+
+            store.pendingDeposit = amt;
+            sysMsg(`${amt}G 입금 처리 중 경비원칙에 따라 전투가 발생합니다!`);
+            explore(true);
         }
 
         function withdrawBank() {
@@ -385,7 +440,8 @@
             if (p.bank <= 0) { sysMsg("출금할 자산이 없습니다."); return; }
             
             p.gold += p.bank; const amt = p.bank; p.bank = 0;
-            sysMsg(`${amt}G 전액 출금 완료.`); updateBankUI(); renderPlayerStatus(); saveGame();
+            sysMsg(`${amt}G 안전하게 전액 출금 완료되었습니다.`); 
+            updateBankUI(); renderPlayerStatus(); saveGame();
         }
 
         // --- 6. Renders & Saves ---
@@ -393,7 +449,8 @@
             const p = store.player;
             const stats = getPlayerTotalStats();
             const cp = calculateCP(stats);
-            
+            if(p.maxExp === undefined || p.maxExp === 15) p.maxExp = getRequiredExp(p.level);
+
             document.getElementById('player-status').innerHTML = `
                 <div class="status-line" style="font-weight:bold; color:#107c41;"><span>전투력(CP)</span> <span>${cp}</span></div>
                 <div class="status-line"><span>레벨(Lv)</span> <span>${p.level}</span></div>
@@ -402,7 +459,7 @@
                 <div class="status-line"><span>소지금(Gold)</span> <span>${p.gold} G</span></div>
                 
                 <div class="status-block">
-                    <strong>[능력치]</strong>
+                    <strong>[순수 능력치]</strong>
                     <div style="display:flex; justify-content:space-between; margin-top:4px;">
                         <span>STR (힘): ${p.str}</span> <span>INT (지능): ${p.int}</span>
                     </div>
@@ -412,15 +469,13 @@
                 </div>
             `;
 
-            const wName = p.weapon ? p.weapon.name : '없음';
-            const wAtk = p.weapon && p.weapon.stats.atk ? `ATK +${p.weapon.stats.atk}` : '';
-            const aName = p.armor ? p.armor.name : '없음';
-            const aDef = p.armor && p.armor.stats.def ? `DEF +${p.armor.stats.def}` : '';
+            const formatGear = (gear) => gear ? `${gear.name} <span style="color:#666; font-size:10px;">${Object.entries(gear.stats).map(([k,v])=>`${k}+${v}`).join(', ')}</span>` : '없음';
             
             document.getElementById('player-equip').innerHTML = `
                 <strong>[착용 장비]</strong><br>
-                무기: ${wName} <span style="color:#666; font-size:10px;">${wAtk}</span><br>
-                방어구: ${aName} <span style="color:#666; font-size:10px;">${aDef}</span>
+                무기: ${formatGear(p.weapon)}<br>
+                방어: ${formatGear(p.armor)}<br>
+                장신구: ${formatGear(p.accessory)}
             `;
         }
 
@@ -434,17 +489,33 @@
         }
 
         function renderShop() {
+            const types = [
+                { key: 'weapon', label: '무기 (공격력 중심)' },
+                { key: 'armor', label: '방어구 (생존력 중심)' },
+                { key: 'accessory', label: '악세사리 (유틸리티)' }
+            ];
+            
             let html = '';
-            store.equipments.forEach(item => {
-                if (store.player.level >= item.reqLevel) {
-                    const stats = Object.entries(item.stats).map(([k, v]) => `${k.toUpperCase()}+${v}`).join(', ');
-                    html += `<button onclick="buyEquipment('${item.id}')" style="margin-bottom:5px;">
-                                [Lv.${item.reqLevel}] ${item.name} | ${item.price}G <br> 
-                                <span style="color:#666; font-size:10px;">${stats}</span>
-                             </button><br>`;
-                }
+            types.forEach(t => {
+                html += `<h3>${t.label}</h3>`;
+                let hasItem = false;
+                store.equipments.filter(e => e.type === t.key).forEach(item => {
+                    if (store.player.level >= item.reqLevel) {
+                        hasItem = true;
+                        const stats = Object.entries(item.stats).map(([k, v]) => `${k.toUpperCase()}${v > 0 ? '+'+v : v}`).join(', ');
+                        const isEquipped = store.player[t.key] && store.player[t.key].id === item.id;
+                        const btnStyle = isEquipped ? 'border:2px solid #107c41;' : '';
+                        
+                        html += `<button onclick="buyEquipment('${item.id}')" style="margin-bottom:5px; width:100%; ${btnStyle}">
+                                    [Lv.${item.reqLevel}] ${item.name} | ${item.price}G ${isEquipped ? '(착용중)' : ''}<br> 
+                                    <span style="color:#666; font-size:10px;">${stats}</span>
+                                 </button><br>`;
+                    }
+                });
+                if(!hasItem) html += '<p style="color:#999;">현재 레벨에 구매 가능한 품목이 없습니다.</p>';
             });
-            document.getElementById('shop-buttons').innerHTML = html || '<p>구매 가능한 품목이 없습니다.</p>';
+            
+            document.getElementById('shop-container').innerHTML = html;
         }
 
         function renderLogs() {
@@ -454,15 +525,26 @@
         }
 
         function saveGame() { localStorage.setItem('work_sys_v2', JSON.stringify(store.player)); }
+        
         function loadGame() {
             const saved = localStorage.getItem('work_sys_v2');
             if (saved) store.player = { ...store.player, ...JSON.parse(saved) };
             if (store.player.bank === undefined) store.player.bank = 0;
+            if (store.player.maxExp === undefined || store.player.maxExp === 15) store.player.maxExp = getRequiredExp(store.player.level);
         }
+        
+        function resetData() {
+            if (confirm("경고: 모든 플레이 데이터가 삭제되고 1레벨부터 다시 시작합니다.\n정말 삭제하시겠습니까?")) {
+                localStorage.removeItem('work_sys_v2');
+                location.reload();
+            }
+        }
+
         function exportData() {
             document.getElementById('sync-code').value = btoa(encodeURIComponent(JSON.stringify(store.player)));
             sysMsg("데이터 코드가 복사되었습니다.");
         }
+        
         function importData() {
             try {
                 store.player = { ...store.player, ...JSON.parse(decodeURIComponent(atob(document.getElementById('sync-code').value))) };
