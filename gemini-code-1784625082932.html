@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>업무 관리 시스템 v2.4</title>
+    <title>업무 관리 시스템 v2.5</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f3f2f1; color: #333; font-size: 12px; margin: 0; }
@@ -39,6 +39,7 @@
         .log-result { font-weight: bold; border-top: 1px dashed #ccc; margin-top: 5px; padding-top: 5px; display: block; }
         .log-victory { color: #107c41; }
         .log-defeat { color: #a4262c; }
+        .log-treasure { color: #d6b800; font-weight: bold; }
 
         input[type="number"] { padding: 5px; border: 1px solid #ccc; font-size: 12px; width: 120px; }
 
@@ -81,7 +82,6 @@
 </head>
 <body id="app-body">
     <div class="container" id="app-container">
-        <!-- 좌측 패널 (상태창) -->
         <div id="left-panel">
             <h2>User Status</h2>
             <div id="player-status"></div>
@@ -98,11 +98,10 @@
             <div id="sys-msg"></div>
         </div>
         
-        <!-- 우측 패널 (화면 출력) -->
         <div id="right-panel">
             <div id="view-main" class="view active">
                 <h2>대기 화면</h2>
-                <p style="color: #666;">좌측 메뉴에서 작업을 선택하십시오. (V2.4 밸런스 및 디버그 모드 탑재)</p>
+                <p style="color: #666;">좌측 메뉴에서 작업을 선택하십시오. (V2.5 밸런스 및 보물 몬스터 탑재)</p>
             </div>
             
             <div id="view-battle" class="view">
@@ -164,7 +163,6 @@
         </div>
     </div>
 
-    <!-- 화면 하단 개발용 모드 전환 패널 추가 -->
     <div style="max-width:900px; margin: 10px auto; text-align:right; font-size:11px; color:#666;">
         [환경 테스트 토글] 
         <button onclick="setScreenMode('pc')" style="padding:2px 6px; font-size:10px;">PC 모드</button>
@@ -173,7 +171,6 @@
     </div>
 
     <script>
-        // --- 1. Store Data ---
         const store = {
             currentView: 'main',
             pendingDeposit: 0,
@@ -182,6 +179,7 @@
             player: {
                 name: '용사', level: 1, hp: 60, 
                 str: 5, int: 5, vit: 5, dex: 5, 
+                cha: 5, luk: 5, // 매력, 행운 신규 추가
                 exp: 0, maxExp: 15, gold: 0, bank: 0,
                 weapon: null, armor: null, accessory: null
             },
@@ -246,8 +244,10 @@
                 maxHp: 60 + Math.floor(p.vit * 15),
                 acc: 85 + Math.floor(p.dex * 2.0),
                 eva: Math.floor(p.dex * 1.5),
-                crt: Math.floor(p.int * 1.5), 
-                crtDmg: 150 + Math.floor(p.dex * 2.0) 
+                skillChance: Math.floor(p.int * 2.0), // 지능: 스킬 발동 확률
+                crt: Math.floor(p.cha * 1.5),         // 매력: 크리티컬 확률
+                crtDmg: 150 + Math.floor(p.cha * 2.0),// 매력: 크리티컬 데미지
+                lukBonus: p.luk * 0.01                // 행운: 승리 보상 보너스 (1당 1%)
             };
             
             [p.weapon, p.armor, p.accessory].forEach(gear => {
@@ -324,47 +324,78 @@
             const pStats = getPlayerTotalStats();
             let battleEnded = false;
 
-            addLog(`[시스템] 대상 '${m.name}'(CP: ${m.cp}) 조우. (나의 CP: ${calculateCP(pStats)})`);
+            if (m.isTreasure) {
+                addLog(`[경고] <span class="log-treasure">진귀한 몬스터 '${m.name}'</span>(CP: ${m.cp}) 조우! (나의 CP: ${calculateCP(pStats)})`);
+            } else {
+                addLog(`[시스템] 대상 '${m.name}'(CP: ${m.cp}) 조우. (나의 CP: ${calculateCP(pStats)})`);
+            }
 
             for (let turn = 1; turn <= 15; turn++) {
                 addLog(`<span class="log-turn">▶ Turn ${turn}</span>`);
                 
+                let pDmg = 0, mDmg = 0;
+                let pCrit = false, pMiss = false, mMiss = false;
+
+                // 1. 플레이어 공격 연산
                 if (Math.random() * 100 <= (pStats.acc - m.eva)) {
                     let baseDmg = pStats.atk * (0.8 + Math.random() * 0.4);
-                    let finalDmg = Math.max(1, Math.floor(baseDmg - m.def));
+                    pDmg = Math.max(1, Math.floor(baseDmg - m.def));
                     
-                    let isCrit = Math.random() * 100 <= pStats.crt;
-                    if (isCrit) finalDmg = Math.floor(finalDmg * (pStats.crtDmg / 100));
-                    
-                    m.hp -= finalDmg;
-                    addLog(` - 공격 : ${finalDmg} 피해 ${isCrit ? '<span class="log-crit">(Critical!)</span>' : ''}`);
+                    pCrit = Math.random() * 100 <= pStats.crt;
+                    if (pCrit) pDmg = Math.floor(pDmg * (pStats.crtDmg / 100));
                 } else {
-                    addLog(` - 공격 : <span class="log-miss">Miss</span>`);
+                    pMiss = true;
                 }
 
-                if (m.hp <= 0) {
-                    addLog(`<span class="log-result log-victory">[연산 종료] 승리 (소요: ${turn}턴)</span>`);
-                    winBattle(m, isBankBattle); battleEnded = true; break;
-                }
-
+                // 2. 몬스터 공격 연산 (동시 연산 적용)
                 if (Math.random() * 100 <= (m.acc - pStats.eva)) {
                     let baseDmg = m.atk * (0.8 + Math.random() * 0.4);
-                    let finalDmg = Math.max(1, Math.floor(baseDmg - pStats.def));
-                    p.hp -= finalDmg;
-                    addLog(` - 반격 : ${finalDmg} 피해`);
+                    mDmg = Math.max(1, Math.floor(baseDmg - pStats.def));
                 } else {
-                    addLog(` - 반격 : <span class="log-miss">Miss (회피함)</span>`);
+                    mMiss = true;
                 }
 
-                if (p.hp <= 0) {
+                // 3. 데미지 동시 적용
+                m.hp -= pDmg;
+                p.hp -= mDmg;
+
+                // 4. 로그 출력
+                if (pMiss) {
+                    addLog(` - 공격 : <span class="log-miss">Miss</span>`);
+                } else {
+                    addLog(` - 공격 : ${pDmg} 피해 ${pCrit ? '<span class="log-crit">(Critical!)</span>' : ''}`);
+                }
+
+                if (mMiss) {
+                    addLog(` - 반격 : <span class="log-miss">Miss (회피함)</span>`);
+                } else {
+                    addLog(` - 반격 : ${mDmg} 피해`);
+                }
+
+                // 5. HP 판정 (동시 쓰러짐 룰 적용)
+                if (m.hp <= 0 && p.hp <= 0) {
+                    addLog(`<span class="log-result log-victory">[연산 종료] 동시 쓰러짐 발생 - 플레이어 승리 판정 (체력 100% 회복)</span>`);
+                    p.hp = getPlayerTotalStats().maxHp;
+                    winBattle(m, isBankBattle);
+                    battleEnded = true; 
+                    break;
+                } else if (m.hp <= 0) {
+                    addLog(`<span class="log-result log-victory">[연산 종료] 승리 (소요: ${turn}턴)</span>`);
+                    winBattle(m, isBankBattle); 
+                    battleEnded = true; 
+                    break;
+                } else if (p.hp <= 0) {
                     addLog(`<span class="log-result log-defeat">[연산 종료] 실패 - 체력 소진</span>`);
-                    loseBattle(isBankBattle); battleEnded = true; break;
+                    loseBattle(isBankBattle); 
+                    battleEnded = true; 
+                    break;
                 }
             }
 
+            // 15턴 종료 시 양측 모두 생존한 경우 무승부(패배) 룰 적용
             if (!battleEnded) {
-                addLog(`<span class="log-result log-defeat">[연산 종료] Time Out - 무승부</span>`);
-                if(isBankBattle) store.pendingDeposit = 0; 
+                addLog(`<span class="log-result log-defeat">[연산 종료] Time Out - 무승부 (전투 패배 처리)</span>`);
+                loseBattle(isBankBattle); 
             }
             
             renderPlayerStatus(); renderMonsterStatus(); renderLogs();
@@ -377,35 +408,62 @@
             const pCP = calculateCP(pStats);
             let targetTemplate = null;
             let cpRatio = 1.0;
+            let isTreasure = false;
+            let treasureType = '';
 
             if (isBankBattle) {
                 targetTemplate = { name: '악덕 소매치기', hpRate: 1.0, atkRate: 1.0, defRate: 0.8, eva: 10, rewardRate: 0 };
                 cpRatio = 1.0;
             } else {
                 const lv = store.player.level;
-                let bossProb = lv > 20 ? 0.03 : 0;
-                let strongProb = 0.05 + (lv > 10 ? 0.05 : 0) + (lv > 30 ? 0.05 : 0);
                 
-                const rollType = Math.random();
-                let mType = 'normal';
-                if (rollType < bossProb) mType = 'boss';
-                else if (rollType < bossProb + strongProb) mType = 'strong';
+                // 보물 몬스터 출현 확률: 기본 1% + 행운 1당 0.1% 보정
+                const treasureProb = 0.01 + (store.player.luk * 0.001); 
 
-                const pool = store.monsters.filter(m => m.type === mType);
-                targetTemplate = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : store.monsters[0];
+                if (Math.random() < treasureProb) {
+                    isTreasure = true;
+                    cpRatio = 0.9; // 유저보다 약간 약하게 조우
+                    
+                    if (Math.random() < 0.5) {
+                        targetTemplate = { name: '경험치 보따리 몬스터', hpRate: 0.9, atkRate: 0.8, defRate: 0.8, eva: 15, rewardRate: 1.0 };
+                        treasureType = 'exp';
+                    } else {
+                        targetTemplate = { name: '황금 보물상자 몬스터', hpRate: 0.9, atkRate: 0.8, defRate: 0.8, eva: 15, rewardRate: 1.0 };
+                        treasureType = 'gold';
+                    }
+                } else {
+                    let bossProb = lv > 20 ? 0.03 : 0;
+                    let strongProb = 0.05 + (lv > 10 ? 0.05 : 0) + (lv > 30 ? 0.05 : 0);
+                    
+                    const rollType = Math.random();
+                    let mType = 'normal';
+                    if (rollType < bossProb) mType = 'boss';
+                    else if (rollType < bossProb + strongProb) mType = 'strong';
 
-                const rollCP = Math.random() * 100;
-                if (rollCP < 10) cpRatio = 0.85;       
-                else if (rollCP < 85) cpRatio = 1.0 + (Math.random() * 0.15 - 0.05); 
-                else cpRatio = 1.25;                   
+                    const pool = store.monsters.filter(m => m.type === mType);
+                    targetTemplate = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : store.monsters[0];
+
+                    const rollCP = Math.random() * 100;
+                    if (rollCP < 10) cpRatio = 0.85;       
+                    else if (rollCP < 85) cpRatio = 1.0 + (Math.random() * 0.15 - 0.05); 
+                    else cpRatio = 1.25;                   
+                }
             }
 
             const targetCP = pCP * cpRatio;
             
-            // 데스나이트 부장 등 과도한 스펙 상승 문제를 해결하기 위해 밸런스 계수 재조정
             let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio); 
             let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio);
             let mDef = Math.floor(pStats.def * targetTemplate.defRate * cpRatio);
+
+            let baseExp = Math.floor((targetCP * 0.08 + 10) * targetTemplate.rewardRate);
+            let baseGold = Math.floor((targetCP * 0.08 + 5) * targetTemplate.rewardRate);
+
+            // 보물 몬스터의 경우 보상 10배
+            if (isTreasure) {
+                if (treasureType === 'exp') baseExp *= 10;
+                else if (treasureType === 'gold') baseGold *= 10;
+            }
 
             store.currentMonster = {
                 name: targetTemplate.name,
@@ -413,13 +471,16 @@
                 maxHp: Math.max(20, mMaxHp), hp: Math.max(20, mMaxHp),
                 atk: Math.max(5, mAtk), def: Math.max(0, mDef),
                 acc: pStats.acc, eva: targetTemplate.eva,
-                exp: Math.floor((targetCP * 0.08 + 10) * targetTemplate.rewardRate),
-                gold: Math.floor((targetCP * 0.08 + 5) * targetTemplate.rewardRate)
+                exp: baseExp,
+                gold: baseGold,
+                isTreasure: isTreasure
             };
         }
 
         function winBattle(m, isBankBattle) {
             const p = store.player;
+            const pStats = getPlayerTotalStats();
+
             if (isBankBattle) {
                 p.gold -= store.pendingDeposit; 
                 p.bank += store.pendingDeposit;
@@ -428,8 +489,18 @@
                 return;
             }
 
-            p.exp += m.exp; p.gold += m.gold;
-            addLog(` > 보상 : ${m.exp} EXP / ${m.gold} G`);
+            // 행운(LUK) 보너스 적용
+            const earnedExp = Math.floor(m.exp * (1 + pStats.lukBonus));
+            const earnedGold = Math.floor(m.gold * (1 + pStats.lukBonus));
+
+            p.exp += earnedExp; 
+            p.gold += earnedGold;
+            
+            if (pStats.lukBonus > 0) {
+                addLog(` > 보상 : ${earnedExp} EXP / ${earnedGold} G (행운 보너스 적용)`);
+            } else {
+                addLog(` > 보상 : ${earnedExp} EXP / ${earnedGold} G`);
+            }
             
             let leveledUp = false;
             while (p.exp >= p.maxExp) {
@@ -446,6 +517,8 @@
                 p.int = tryStat('INT', p.int);
                 p.vit = tryStat('VIT', p.vit);
                 p.dex = tryStat('DEX', p.dex);
+                p.cha = tryStat('CHA', p.cha); // 매력
+                p.luk = tryStat('LUK', p.luk); // 행운
                 
                 leveledUp = true;
                 addLog(` > <span class="log-victory">레벨업! Lv.${p.level}</span>`);
@@ -584,6 +657,10 @@
                     <div style="display:flex; justify-content:space-between;">
                         <span>CRIT: ${stats.crt}%</span> <span>MaxHP: ${stats.maxHp}</span>
                     </div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:4px;">
+                        <span style="color:#0078d4">Skill 확률: ${stats.skillChance}%</span> 
+                        <span style="color:#107c41">보상 보너스: +${Math.floor(stats.lukBonus * 100)}%</span>
+                    </div>
                 </div>
 
                 <div class="status-block">
@@ -593,6 +670,9 @@
                     </div>
                     <div style="display:flex; justify-content:space-between;">
                         <span>VIT: ${p.vit}</span> <span>DEX: ${p.dex}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; color:#8a8886;">
+                        <span>CHA: ${p.cha}</span> <span>LUK: ${p.luk}</span>
                     </div>
                 </div>
             `;
@@ -610,8 +690,9 @@
         function renderMonsterStatus() {
             const m = store.currentMonster;
             if (!m) return;
+            const nameColor = m.isTreasure ? '#d6b800' : '#a4262c';
             document.getElementById('monster-status').innerHTML = `
-                <span style="font-weight:bold; color:#a4262c;">대상: ${m.name}</span> 
+                <span style="font-weight:bold; color:${nameColor};">대상: ${m.name}</span> 
                 | CP: ${m.cp} | HP: ${m.hp}/${m.maxHp}
             `;
         }
@@ -659,6 +740,9 @@
             if (saved) store.player = { ...store.player, ...JSON.parse(saved) };
             if (store.player.bank === undefined) store.player.bank = 0;
             if (store.player.maxExp === undefined || store.player.maxExp === 15) store.player.maxExp = getRequiredExp(store.player.level);
+            // v2.5 신규 스탯 호환성 처리
+            if (store.player.cha === undefined) store.player.cha = 5;
+            if (store.player.luk === undefined) store.player.luk = 5;
         }
         
         function resetData() {
