@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>업무 관리 시스템 v2.5</title>
+    <title>업무 관리 시스템 v2.6</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f3f2f1; color: #333; font-size: 12px; margin: 0; }
@@ -63,7 +63,6 @@
         .force-pc .button-group button { flex: none !important; text-align: left !important; padding: 6px 10px !important; }
         .force-pc .btn-danger { margin-top: 20px !important; }
 
-        /* 기본 반응형 미디어 쿼리 */
         @media (max-width: 768px) {
             body:not(.force-pc) { padding: 0; background-color: #ffffff; }
             .container:not(.force-pc) { flex-direction: column; border: none; box-shadow: none; }
@@ -101,7 +100,7 @@
         <div id="right-panel">
             <div id="view-main" class="view active">
                 <h2>대기 화면</h2>
-                <p style="color: #666;">좌측 메뉴에서 작업을 선택하십시오. (V2.5 밸런스 및 보물 몬스터 탑재)</p>
+                <p style="color: #666;">좌측 메뉴에서 작업을 선택하십시오. (V2.6 대규모 데이터베이스 탑재)</p>
             </div>
             
             <div id="view-battle" class="view">
@@ -179,52 +178,96 @@
             player: {
                 name: '용사', level: 1, hp: 60, 
                 str: 5, int: 5, vit: 5, dex: 5, 
-                cha: 5, luk: 5, // 매력, 행운 신규 추가
+                cha: 5, luk: 5, 
                 exp: 0, maxExp: 15, gold: 0, bank: 0,
                 weapon: null, armor: null, accessory: null
             },
             equipments: [
-                { id: 'w1', name: '플라스틱 자', type: 'weapon', price: 50, reqLevel: 1, stats: { atk: 5 } },
-                { id: 'w1_2', name: '녹슨 가위', type: 'weapon', price: 60, reqLevel: 1, stats: { atk: 4, crt: 3 } },
-                { id: 'w2', name: '커터칼', type: 'weapon', price: 150, reqLevel: 5, stats: { atk: 12, crt: 2 } },
-                { id: 'w2_2', name: '두꺼운 사전', type: 'weapon', price: 150, reqLevel: 5, stats: { atk: 14, maxHp: 10 } },
-                { id: 'w3', name: '강철 결재판', type: 'weapon', price: 400, reqLevel: 10, stats: { atk: 25, crt: 5 } },
-                { id: 'w3_2', name: '날렵한 만년필', type: 'weapon', price: 420, reqLevel: 10, stats: { atk: 20, crt: 8 } },
-                { id: 'w4', name: '기계식 키보드', type: 'weapon', price: 900, reqLevel: 15, stats: { atk: 45, crt: 10 } },
-                { id: 'w4_2', name: '무거운 텀블러', type: 'weapon', price: 900, reqLevel: 15, stats: { atk: 50, eva: -2 } },
-                { id: 'w5', name: '법인 마검', type: 'weapon', price: 2000, reqLevel: 20, stats: { atk: 75, crt: 5 } },
-                { id: 'w5_2', name: '티타늄 결재판', type: 'weapon', price: 2100, reqLevel: 20, stats: { atk: 65, crt: 12 } },
+                // Lv 1~10 무기 (문구/완구류)
+                { id: 'w01', name: '몽당연필', type: 'weapon', price: 20, reqLevel: 1, stats: { atk: 3 } },
+                { id: 'w02', name: '지우개 가루 뭉치', type: 'weapon', price: 40, reqLevel: 2, stats: { atk: 5, crt: 1 } },
+                { id: 'w03', name: '제도샤프', type: 'weapon', price: 100, reqLevel: 4, stats: { atk: 12, crt: 3 } },
+                { id: 'w04', name: '굴렁쇠', type: 'weapon', price: 250, reqLevel: 6, stats: { atk: 18, eva: 2 } },
+                { id: 'w05', name: '탑블레이드', type: 'weapon', price: 400, reqLevel: 9, stats: { atk: 25, crt: 5 } },
                 
-                { id: 'a1', name: '종이 박스', type: 'armor', price: 50, reqLevel: 1, stats: { def: 2 } },
-                { id: 'a2', name: '보안 유니폼', type: 'armor', price: 150, reqLevel: 5, stats: { def: 6, eva: 2 } },
-                { id: 'a2_2', name: '두꺼운 패딩', type: 'armor', price: 160, reqLevel: 5, stats: { def: 9, eva: -1 } },
-                { id: 'a3', name: '가죽 서류가방', type: 'armor', price: 400, reqLevel: 10, stats: { def: 15, eva: 5 } },
-                { id: 'a4', name: '방검 조끼', type: 'armor', price: 900, reqLevel: 15, stats: { def: 28, eva: -2 } },
-                { id: 'a5', name: '맞춤형 정장', type: 'armor', price: 2000, reqLevel: 20, stats: { def: 40, eva: 5 } },
-                { id: 'a5_2', name: '헤비 롱패딩', type: 'armor', price: 2100, reqLevel: 20, stats: { def: 52, eva: -3 } },
+                // Lv 11~25 무기 (사무용품)
+                { id: 'w11', name: '커터칼', type: 'weapon', price: 600, reqLevel: 12, stats: { atk: 40, crt: 5 } },
+                { id: 'w12', name: '두꺼운 사전', type: 'weapon', price: 850, reqLevel: 15, stats: { atk: 55, maxHp: 20 } },
+                { id: 'w13', name: '날렵한 만년필', type: 'weapon', price: 1300, reqLevel: 19, stats: { atk: 80, crt: 10 } },
+                { id: 'w14', name: '기계식 키보드', type: 'weapon', price: 2200, reqLevel: 24, stats: { atk: 120, crt: 8 } },
                 
-                { id: 'ac1', name: '사원증 목걸이', type: 'accessory', price: 200, reqLevel: 3, stats: { maxHp: 20 } },
-                { id: 'ac2', name: '싸구려 커피', type: 'accessory', price: 250, reqLevel: 4, stats: { eva: 5, crt: 3 } },
-                { id: 'ac3', name: '은단 케이스', type: 'accessory', price: 600, reqLevel: 8, stats: { maxHp: 50, acc: 5 } },
-                { id: 'ac4', name: '스마트 워치', type: 'accessory', price: 1200, reqLevel: 12, stats: { crt: 10, eva: 8 } },
-                { id: 'ac5', name: '노이즈캔슬링 이어폰', type: 'accessory', price: 2500, reqLevel: 18, stats: { crt: 5, acc: 10, maxHp: 30 } }
+                // Lv 26~45 무기 (현대 테크/명품)
+                { id: 'w21', name: '명품 클러치백', type: 'weapon', price: 3500, reqLevel: 28, stats: { atk: 180, crt: 12, eva: -2 } },
+                { id: 'w22', name: '최고급 만년필', type: 'weapon', price: 5000, reqLevel: 33, stats: { atk: 250, acc: 10 } },
+                { id: 'w23', name: 'USB-C 마법검', type: 'weapon', price: 8000, reqLevel: 39, stats: { atk: 380, crt: 15 } },
+                { id: 'w24', name: '레이저 포인터 완드', type: 'weapon', price: 12000, reqLevel: 44, stats: { atk: 520, acc: 20 } },
+
+                // Lv 46~70 무기 (판타지 혼합형/하이엔드)
+                { id: 'w31', name: '양자컴퓨터 서버검', type: 'weapon', price: 25000, reqLevel: 52, stats: { atk: 850, crt: 20 } },
+                { id: 'w32', name: '회장님의 골프채', type: 'weapon', price: 45000, reqLevel: 61, stats: { atk: 1400, crt: 25, eva: -5 } },
+                { id: 'w33', name: '전설의 인감도장', type: 'weapon', price: 80000, reqLevel: 70, stats: { atk: 2200, acc: 30, crt: 30 } },
+
+                // 방어구
+                { id: 'a01', name: '종이 박스', type: 'armor', price: 30, reqLevel: 1, stats: { def: 2 } },
+                { id: 'a02', name: '신발주머니', type: 'armor', price: 80, reqLevel: 3, stats: { def: 5, eva: 1 } },
+                { id: 'a03', name: '교과서 갑옷', type: 'armor', price: 200, reqLevel: 7, stats: { def: 12, eva: -1 } },
+                { id: 'a04', name: '책가방 실드', type: 'armor', price: 400, reqLevel: 10, stats: { def: 22, maxHp: 10 } },
+                { id: 'a11', name: '보안 유니폼', type: 'armor', price: 800, reqLevel: 14, stats: { def: 45, eva: 3 } },
+                { id: 'a12', name: '가죽 서류가방', type: 'armor', price: 1500, reqLevel: 20, stats: { def: 80, eva: 5 } },
+                { id: 'a21', name: '수입산 정장', type: 'armor', price: 3000, reqLevel: 27, stats: { def: 150, eva: 8 } },
+                { id: 'a22', name: '스마트 방탄수트', type: 'armor', price: 6500, reqLevel: 35, stats: { def: 280, eva: -2 } },
+                { id: 'a31', name: '두랄루민 사슬갑옷', type: 'armor', price: 15000, reqLevel: 45, stats: { def: 550, maxHp: 200 } },
+                { id: 'a32', name: '나노머신 방호복', type: 'armor', price: 35000, reqLevel: 58, stats: { def: 950, eva: 15 } },
+                { id: 'a33', name: 'CEO의 절대방벽', type: 'armor', price: 70000, reqLevel: 68, stats: { def: 1600, maxHp: 500, eva: 10 } },
+
+                // 장신구
+                { id: 'ac01', name: '지우개', type: 'accessory', price: 50, reqLevel: 2, stats: { maxHp: 10 } },
+                { id: 'ac02', name: '지점토 목걸이', type: 'accessory', price: 150, reqLevel: 5, stats: { maxHp: 30, acc: 2 } },
+                { id: 'ac03', name: '콩순이 노트북', type: 'accessory', price: 350, reqLevel: 8, stats: { crt: 3, acc: 5 } },
+                { id: 'ac11', name: '사원증 목걸이', type: 'accessory', price: 700, reqLevel: 13, stats: { maxHp: 80, eva: 2 } },
+                { id: 'ac12', name: '스마트 워치', type: 'accessory', price: 1800, reqLevel: 22, stats: { crt: 5, eva: 8 } },
+                { id: 'ac21', name: '금장 롤렉스', type: 'accessory', price: 4000, reqLevel: 30, stats: { crt: 8, maxHp: 150 } },
+                { id: 'ac22', name: '한정판 향수', type: 'accessory', price: 8000, reqLevel: 38, stats: { eva: 15, acc: 10 } },
+                { id: 'ac31', name: '블루투스 수정구', type: 'accessory', price: 20000, reqLevel: 48, stats: { crt: 12, acc: 20, maxHp: 300 } },
+                { id: 'ac32', name: '무한동력 커피머신', type: 'accessory', price: 50000, reqLevel: 65, stats: { crt: 20, eva: 20, maxHp: 800 } }
             ],
             monsters: [
-                { name: '슬라임 사원', type: 'normal', hpRate: 0.8, atkRate: 0.8, defRate: 0.5, eva: 0, rewardRate: 0.8 },
-                { name: '파견직 사원', type: 'normal', hpRate: 0.9, atkRate: 0.9, defRate: 0.8, eva: 2, rewardRate: 0.9 },
-                { name: '지각한 인턴', type: 'normal', hpRate: 0.6, atkRate: 1.2, defRate: 0.4, eva: 5, rewardRate: 0.9 },
-                { name: '늑대 대리', type: 'normal', hpRate: 1.0, atkRate: 1.0, defRate: 0.8, eva: 10, rewardRate: 1.0 },
-                { name: '고블린 횡령범', type: 'normal', hpRate: 0.9, atkRate: 1.1, defRate: 0.8, eva: 10, rewardRate: 1.5 },
-                { name: '오크 주임', type: 'normal', hpRate: 1.2, atkRate: 1.0, defRate: 1.0, eva: 2, rewardRate: 1.2 },
-                { name: '까칠한 디자이너', type: 'normal', hpRate: 0.8, atkRate: 1.1, defRate: 0.7, eva: 8, rewardRate: 1.3 },
-                { name: '불만많은 고객', type: 'normal', hpRate: 1.0, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.4 },
-                
-                { name: '영업부 과장', type: 'strong', hpRate: 1.2, atkRate: 1.2, defRate: 1.0, eva: 5, rewardRate: 2.0 },
-                { name: '광분한 차장', type: 'strong', hpRate: 1.4, atkRate: 1.3, defRate: 1.1, eva: 5, rewardRate: 2.3 },
-                { name: '보안팀장', type: 'strong', hpRate: 1.5, atkRate: 1.1, defRate: 1.4, eva: 2, rewardRate: 2.5 },
-                { name: '스켈레톤 팀장', type: 'strong', hpRate: 1.3, atkRate: 1.4, defRate: 1.1, eva: 8, rewardRate: 2.8 },
-                { name: '데스나이트 부장', type: 'strong', hpRate: 1.6, atkRate: 1.5, defRate: 1.3, eva: 10, rewardRate: 3.5 },
-                { name: '감사팀 임원', type: 'boss', hpRate: 2.0, atkRate: 1.6, defRate: 1.4, eva: 10, rewardRate: 5.0 }
+                // 1~30 구간 몬스터
+                { name: '하루살이', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.1, atkRate: 0.5, defRate: 0.1, eva: 60, rewardRate: 0.5 },
+                { name: '콩벌레', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.5, atkRate: 0.4, defRate: 3.5, eva: 0, rewardRate: 0.8 },
+                { name: '들개', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.7, atkRate: 1.2, defRate: 0.6, eva: 10, rewardRate: 0.9 },
+                { name: '잼민이', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.4, atkRate: 2.2, defRate: 0.2, eva: 15, rewardRate: 1.1 },
+                { name: '중삐리', type: 'normal', minLv: 3, maxLv: 30, hpRate: 0.9, atkRate: 0.9, defRate: 0.8, eva: 5, rewardRate: 1.0 },
+                { name: '파오후', type: 'normal', minLv: 5, maxLv: 30, hpRate: 2.5, atkRate: 0.6, defRate: 0.5, eva: -20, rewardRate: 1.2 },
+                { name: '고삐리', type: 'strong', minLv: 10, maxLv: 30, hpRate: 1.1, atkRate: 1.2, defRate: 0.9, eva: 5, rewardRate: 1.5 },
+                { name: '양키', type: 'strong', minLv: 15, maxLv: 30, hpRate: 1.0, atkRate: 1.4, defRate: 0.8, eva: 15, rewardRate: 1.8 },
+                { name: '일진', type: 'boss', minLv: 20, maxLv: 30, hpRate: 1.5, atkRate: 1.5, defRate: 1.0, eva: 10, rewardRate: 2.5 },
+
+                // 20~50 구간 몬스터
+                { name: '백수', type: 'normal', minLv: 20, maxLv: 50, hpRate: 1.5, atkRate: 0.5, defRate: 0.5, eva: 0, rewardRate: 0.9 },
+                { name: '재수생', type: 'normal', minLv: 20, maxLv: 50, hpRate: 0.8, atkRate: 1.1, defRate: 1.5, eva: 0, rewardRate: 1.0 },
+                { name: '미미짱', type: 'normal', minLv: 20, maxLv: 50, hpRate: 0.3, atkRate: 0.9, defRate: 0.4, eva: 50, rewardRate: 1.2 },
+                { name: '취준생', type: 'normal', minLv: 22, maxLv: 50, hpRate: 1.1, atkRate: 1.0, defRate: 0.9, eva: 5, rewardRate: 1.1 },
+                { name: '라면가이더', type: 'normal', minLv: 25, maxLv: 50, hpRate: 0.6, atkRate: 1.8, defRate: 0.5, eva: 25, rewardRate: 1.3 },
+                { name: '헬린이', type: 'strong', minLv: 30, maxLv: 50, hpRate: 2.5, atkRate: 1.2, defRate: 1.2, eva: -5, rewardRate: 1.8 },
+                { name: '야타족', type: 'strong', minLv: 35, maxLv: 50, hpRate: 0.9, atkRate: 1.5, defRate: 0.8, eva: 25, rewardRate: 2.0 },
+                { name: '조기축구 아저씨', type: 'boss', minLv: 40, maxLv: 50, hpRate: 1.8, atkRate: 1.4, defRate: 1.3, eva: 15, rewardRate: 3.0 },
+
+                // 40~99 구간 몬스터 (기존 사내 몬스터군 상향 배치)
+                { name: '지각한 인턴', type: 'normal', minLv: 40, maxLv: 99, hpRate: 0.6, atkRate: 1.5, defRate: 0.4, eva: 30, rewardRate: 1.1 },
+                { name: '슬라임 사원', type: 'normal', minLv: 40, maxLv: 99, hpRate: 1.0, atkRate: 1.0, defRate: 1.0, eva: 0, rewardRate: 1.0 },
+                { name: '파견직 사원', type: 'normal', minLv: 42, maxLv: 99, hpRate: 1.1, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.2 },
+                { name: '까칠한 디자이너', type: 'normal', minLv: 45, maxLv: 99, hpRate: 0.8, atkRate: 1.3, defRate: 0.7, eva: 15, rewardRate: 1.4 },
+                { name: '불만많은 고객', type: 'normal', minLv: 48, maxLv: 99, hpRate: 1.3, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.5 },
+                { name: '늑대 대리', type: 'strong', minLv: 50, maxLv: 99, hpRate: 1.2, atkRate: 1.4, defRate: 1.0, eva: 15, rewardRate: 2.0 },
+                { name: '고블린 횡령범', type: 'strong', minLv: 55, maxLv: 99, hpRate: 0.9, atkRate: 1.8, defRate: 0.8, eva: 25, rewardRate: 2.3 },
+                { name: '오크 주임', type: 'strong', minLv: 60, maxLv: 99, hpRate: 1.8, atkRate: 1.2, defRate: 1.5, eva: 0, rewardRate: 2.2 },
+                { name: '보안팀장', type: 'boss', minLv: 65, maxLv: 99, hpRate: 2.0, atkRate: 1.3, defRate: 2.5, eva: 5, rewardRate: 3.5 },
+                { name: '광분한 차장', type: 'boss', minLv: 70, maxLv: 99, hpRate: 0.5, atkRate: 3.5, defRate: 0.5, eva: 10, rewardRate: 3.8 },
+                { name: '영업부 과장', type: 'boss', minLv: 75, maxLv: 99, hpRate: 1.5, atkRate: 1.6, defRate: 1.2, eva: 10, rewardRate: 3.0 },
+                { name: '스켈레톤 팀장', type: 'boss', minLv: 80, maxLv: 99, hpRate: 1.3, atkRate: 1.8, defRate: 1.1, eva: 20, rewardRate: 4.0 },
+                { name: '데스나이트 부장', type: 'boss', minLv: 85, maxLv: 99, hpRate: 2.2, atkRate: 1.8, defRate: 1.5, eva: 10, rewardRate: 5.0 },
+                { name: '감사팀 임원', type: 'boss', minLv: 90, maxLv: 99, hpRate: 3.0, atkRate: 2.0, defRate: 2.0, eva: 15, rewardRate: 7.0 }
             ],
             currentMonster: null, logs: []
         };
@@ -244,10 +287,10 @@
                 maxHp: 60 + Math.floor(p.vit * 15),
                 acc: 85 + Math.floor(p.dex * 2.0),
                 eva: Math.floor(p.dex * 1.5),
-                skillChance: Math.floor(p.int * 2.0), // 지능: 스킬 발동 확률
-                crt: Math.floor(p.cha * 1.5),         // 매력: 크리티컬 확률
-                crtDmg: 150 + Math.floor(p.cha * 2.0),// 매력: 크리티컬 데미지
-                lukBonus: p.luk * 0.01                // 행운: 승리 보상 보너스 (1당 1%)
+                skillChance: Math.floor(p.int * 2.0), 
+                crt: Math.floor(p.cha * 1.5),         
+                crtDmg: 150 + Math.floor(p.cha * 2.0),
+                lukBonus: p.luk * 0.01                
             };
             
             [p.weapon, p.armor, p.accessory].forEach(gear => {
@@ -336,7 +379,6 @@
                 let pDmg = 0, mDmg = 0;
                 let pCrit = false, pMiss = false, mMiss = false;
 
-                // 1. 플레이어 공격 연산
                 if (Math.random() * 100 <= (pStats.acc - m.eva)) {
                     let baseDmg = pStats.atk * (0.8 + Math.random() * 0.4);
                     pDmg = Math.max(1, Math.floor(baseDmg - m.def));
@@ -347,7 +389,6 @@
                     pMiss = true;
                 }
 
-                // 2. 몬스터 공격 연산 (동시 연산 적용)
                 if (Math.random() * 100 <= (m.acc - pStats.eva)) {
                     let baseDmg = m.atk * (0.8 + Math.random() * 0.4);
                     mDmg = Math.max(1, Math.floor(baseDmg - pStats.def));
@@ -355,11 +396,9 @@
                     mMiss = true;
                 }
 
-                // 3. 데미지 동시 적용
                 m.hp -= pDmg;
                 p.hp -= mDmg;
 
-                // 4. 로그 출력
                 if (pMiss) {
                     addLog(` - 공격 : <span class="log-miss">Miss</span>`);
                 } else {
@@ -372,7 +411,6 @@
                     addLog(` - 반격 : ${mDmg} 피해`);
                 }
 
-                // 5. HP 판정 (동시 쓰러짐 룰 적용)
                 if (m.hp <= 0 && p.hp <= 0) {
                     addLog(`<span class="log-result log-victory">[연산 종료] 동시 쓰러짐 발생 - 플레이어 승리 판정 (체력 100% 회복)</span>`);
                     p.hp = getPlayerTotalStats().maxHp;
@@ -392,7 +430,6 @@
                 }
             }
 
-            // 15턴 종료 시 양측 모두 생존한 경우 무승부(패배) 룰 적용
             if (!battleEnded) {
                 addLog(`<span class="log-result log-defeat">[연산 종료] Time Out - 무승부 (전투 패배 처리)</span>`);
                 loseBattle(isBankBattle); 
@@ -406,6 +443,7 @@
         function spawnMonster(isBankBattle) {
             const pStats = getPlayerTotalStats();
             const pCP = calculateCP(pStats);
+            const lv = store.player.level;
             let targetTemplate = null;
             let cpRatio = 1.0;
             let isTreasure = false;
@@ -415,15 +453,11 @@
                 targetTemplate = { name: '악덕 소매치기', hpRate: 1.0, atkRate: 1.0, defRate: 0.8, eva: 10, rewardRate: 0 };
                 cpRatio = 1.0;
             } else {
-                const lv = store.player.level;
-                
-                // 보물 몬스터 출현 확률: 기본 1% + 행운 1당 0.1% 보정
                 const treasureProb = 0.01 + (store.player.luk * 0.001); 
 
                 if (Math.random() < treasureProb) {
                     isTreasure = true;
-                    cpRatio = 0.9; // 유저보다 약간 약하게 조우
-                    
+                    cpRatio = 0.9; 
                     if (Math.random() < 0.5) {
                         targetTemplate = { name: '경험치 보따리 몬스터', hpRate: 0.9, atkRate: 0.8, defRate: 0.8, eva: 15, rewardRate: 1.0 };
                         treasureType = 'exp';
@@ -440,8 +474,20 @@
                     if (rollType < bossProb) mType = 'boss';
                     else if (rollType < bossProb + strongProb) mType = 'strong';
 
-                    const pool = store.monsters.filter(m => m.type === mType);
-                    targetTemplate = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : store.monsters[0];
+                    // 플레이어 레벨에 맞는 몬스터 풀 필터링
+                    let pool = store.monsters.filter(m => lv >= m.minLv && lv <= m.maxLv && m.type === mType);
+                    
+                    // 해당 타입/레벨 구간에 몬스터가 없으면 타입 무시하고 레벨 구간으로만 필터링
+                    if (pool.length === 0) {
+                        pool = store.monsters.filter(m => lv >= m.minLv && lv <= m.maxLv);
+                    }
+                    
+                    // 그래도 없으면 (ex. 99레벨 초과) 가장 레벨이 높은 몬스터 선택
+                    if (pool.length === 0) {
+                        targetTemplate = store.monsters[store.monsters.length - 1];
+                    } else {
+                        targetTemplate = pool[Math.floor(Math.random() * pool.length)];
+                    }
 
                     const rollCP = Math.random() * 100;
                     if (rollCP < 10) cpRatio = 0.85;       
@@ -459,7 +505,6 @@
             let baseExp = Math.floor((targetCP * 0.08 + 10) * targetTemplate.rewardRate);
             let baseGold = Math.floor((targetCP * 0.08 + 5) * targetTemplate.rewardRate);
 
-            // 보물 몬스터의 경우 보상 10배
             if (isTreasure) {
                 if (treasureType === 'exp') baseExp *= 10;
                 else if (treasureType === 'gold') baseGold *= 10;
@@ -489,7 +534,6 @@
                 return;
             }
 
-            // 행운(LUK) 보너스 적용
             const earnedExp = Math.floor(m.exp * (1 + pStats.lukBonus));
             const earnedGold = Math.floor(m.gold * (1 + pStats.lukBonus));
 
@@ -517,8 +561,8 @@
                 p.int = tryStat('INT', p.int);
                 p.vit = tryStat('VIT', p.vit);
                 p.dex = tryStat('DEX', p.dex);
-                p.cha = tryStat('CHA', p.cha); // 매력
-                p.luk = tryStat('LUK', p.luk); // 행운
+                p.cha = tryStat('CHA', p.cha); 
+                p.luk = tryStat('LUK', p.luk); 
                 
                 leveledUp = true;
                 addLog(` > <span class="log-victory">레벨업! Lv.${p.level}</span>`);
@@ -740,7 +784,6 @@
             if (saved) store.player = { ...store.player, ...JSON.parse(saved) };
             if (store.player.bank === undefined) store.player.bank = 0;
             if (store.player.maxExp === undefined || store.player.maxExp === 15) store.player.maxExp = getRequiredExp(store.player.level);
-            // v2.5 신규 스탯 호환성 처리
             if (store.player.cha === undefined) store.player.cha = 5;
             if (store.player.luk === undefined) store.player.luk = 5;
         }
@@ -754,7 +797,7 @@
 
         function exportData() {
             document.getElementById('sync-code').value = btoa(encodeURIComponent(JSON.stringify(store.player)));
-            sysMsg("데이터 코드가 복사되었습니다.");
+            sysMsg("데이터 코 বোর্가 복사되었습니다.");
         }
         
         function importData() {
