@@ -391,7 +391,7 @@
                 addLog(`[시스템] 대상 '${m.name}'(CP: ${m.cp}) 조우. (나의 CP: ${calculateCP(pStats)})`);
             }
 
-            for (let turn = 1; turn <= 15; turn++) {
+            for (let turn = 1; turn <= 10; turn++) {
                 addLog(`<span class="log-turn">▶ Turn ${turn}</span>`);
                 
                 let pDmg = 0, mDmg = 0;
@@ -458,6 +458,31 @@
             triggerCooldown();
         }
 
+        function performAttack(pStats, m, mult) {
+    const p = store.player;
+    // 무기를 착용하지 않았을 경우 '맨주먹'으로 출력
+    const wName = p.weapon ? p.weapon.name : '맨주먹';
+    
+    // 회피 판정 (Miss)
+    if (Math.random() * 100 > (pStats.acc - m.eva)) {
+        addLog(` - 적은 여유롭게 몸을 비틀어 가뿐히 회피했다.. <span class="log-miss">(Miss)</span>`);
+        return 0;
+    }
+    
+    // 명중 및 피해량 계산
+    let dmg = Math.max(1, Math.floor((pStats.atk * mult * (0.8 + Math.random() * 0.4)) - m.def));
+    
+    // 치명타 판정
+    if (Math.random() * 100 <= pStats.crt) {
+        dmg = Math.floor(dmg * (pStats.crtDmg / 100));
+        addLog(` - ${p.name}은(는) ${m.name}을(를) 향해 ${wName}을(를) 세차게 휘둘렀다! <span class="log-crit">치명적인 일격! ${dmg}의 피해를 입혔다!</span>`);
+    } else {
+        addLog(` - ${p.name}은(는) ${m.name}을(를) 향해 ${wName}을(를) 세차게 휘둘렀다! ${dmg}의 피해를 입혔다!`);
+    }
+    
+    m.hp -= dmg;
+    return dmg;
+}
         function spawnMonster(isBankBattle) {
             const pStats = getPlayerTotalStats();
             const pCP = calculateCP(pStats);
@@ -499,6 +524,15 @@
                     if (pool.length === 0) {
                         pool = store.monsters.filter(m => lv >= m.minLv && lv <= m.maxLv);
                     }
+
+                    // 몬스터 공격 페이즈
+if (Math.random() * 100 <= (m.acc - pStats.eva)) {
+    let mDmg = Math.max(1, Math.floor(m.atk * (0.8 + Math.random() * 0.4) - pStats.def));
+    p.hp -= mDmg;
+    addLog(` - ${m.name}의 반격! <span style="color:#a4262c;">${mDmg}의 피해를 입었다.</span>`);
+} else { 
+    addLog(` - ${p.name}은(는) 날렵한 움직임으로 공격을 받아넘겼다! <span class="log-miss">(Miss)</span>`); 
+}
                     
                     // 그래도 없으면 (ex. 99레벨 초과) 가장 레벨이 높은 몬스터 선택
                     if (pool.length === 0) {
