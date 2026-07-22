@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>업무 관리 시스템 v2.7</title>
+    <title>업무 관리 시스템 v2.6</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f3f2f1; color: #333; font-size: 12px; margin: 0; }
@@ -28,15 +28,12 @@
         .btn-main { background-color: #107c41; color: white; border-color: #107c41; text-align: center; font-weight: bold; }
         .btn-main:hover:not(:disabled) { background-color: #0c5f32; }
         .btn-danger { background-color: #a4262c; color: white; border-color: #a4262c; text-align: center; font-weight: bold; margin-top: 20px;}
-        .btn-skill { background-color: #0078d4; color: white; border-color: #0078d4; text-align: center; font-weight: bold; }
-        .btn-skill:hover:not(:disabled) { background-color: #005a9e; }
         
         #sys-msg { margin-top: 15px; color: #a4262c; font-size: 11px; min-height: 20px; font-weight:bold; word-break: keep-all; }
         #battle-log { margin-top: 10px; padding: 10px; border: 1px solid #cccccc; background-color: #ffffff; height: 350px; overflow-y: auto; font-family: 'Consolas', monospace; font-size: 11px; color: #333; line-height: 1.5; }
         
         .log-turn { color: #107c41; font-weight: bold; }
         .log-crit { color: #a4262c; font-weight: bold; }
-        .log-skill { color: #0078d4; font-weight: bold; }
         .log-miss { color: #8a8886; }
         .log-stat { color: #0078d4; }
         .log-result { font-weight: bold; border-top: 1px dashed #ccc; margin-top: 5px; padding-top: 5px; display: block; }
@@ -44,16 +41,45 @@
         .log-defeat { color: #a4262c; }
         .log-treasure { color: #d6b800; font-weight: bold; }
 
-        .skill-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #ddd; background: #fff; margin-bottom: 5px; }
-        .skill-rank { font-weight: bold; display: inline-block; width: 20px; text-align: center; }
-        .rank-0 { color: #999; } .rank-1 { color: #333; } .rank-2 { color: #28a745; } 
-        .rank-3 { color: #0078d4; } .rank-4 { color: #6f42c1; } .rank-5 { color: #e83e8c; } 
-        .rank-6 { color: #fd7e14; } .rank-7 { color: #a4262c; font-weight: 900; }
-
         input[type="number"] { padding: 5px; border: 1px solid #ccc; font-size: 12px; width: 120px; }
+
+        /* 모바일/PC 강제 토글을 위한 클래스 정의 */
+        .force-mobile body { padding: 0; background-color: #ffffff; }
+        .force-mobile .container { flex-direction: column !important; border: none !important; box-shadow: none !important; max-width: 100% !important; }
+        .force-mobile #left-panel { width: 100% !important; border-right: none !important; border-bottom: 2px solid #107c41 !important; padding: 15px 10px !important; }
+        .force-mobile #right-panel { width: 100% !important; padding: 15px 10px !important; }
+        .force-mobile .button-group { flex-direction: row !important; flex-wrap: wrap !important; gap: 8px !important; }
+        .force-mobile .button-group button { flex: 1 1 45% !important; padding: 10px 5px !important; text-align: center !important; margin-top: 0 !important; }
+        .force-mobile .btn-danger { flex: 1 1 100% !important; margin-top: 8px !important; }
+        .force-mobile .row-buttons button { padding: 10px !important; flex: 1 !important; text-align: center !important; }
+        .force-mobile #battle-log { height: 280px !important; }
+        .force-mobile #shop-container { height: 280px !important; }
+
+        .force-pc body { padding: 20px; background-color: #f3f2f1; }
+        .force-pc .container { flex-direction: row !important; border: 1px solid #cccccc !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; max-width: 900px !important; }
+        .force-pc #left-panel { width: 250px !important; border-right: 1px solid #cccccc !important; border-bottom: none !important; padding: 15px !important; }
+        .force-pc #right-panel { width: auto !important; flex: 1 !important; padding: 15px !important; }
+        .force-pc .button-group { flex-direction: column !important; gap: 5px !important; }
+        .force-pc .button-group button { flex: none !important; text-align: left !important; padding: 6px 10px !important; }
+        .force-pc .btn-danger { margin-top: 20px !important; }
+
+        @media (max-width: 768px) {
+            body:not(.force-pc) { padding: 0; background-color: #ffffff; }
+            .container:not(.force-pc) { flex-direction: column; border: none; box-shadow: none; }
+            #left-panel:not(.force-pc) { width: 100%; border-right: none; border-bottom: 2px solid #107c41; padding: 15px 10px; }
+            #right-panel:not(.force-pc) { width: 100%; padding: 15px 10px; }
+            
+            .container:not(.force-pc) .button-group { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+            .container:not(.force-pc) .button-group button { flex: 1 1 45%; padding: 10px 5px; text-align: center; margin-top: 0 !important; }
+            .container:not(.force-pc) .btn-danger { flex: 1 1 100%; margin-top: 8px !important; }
+            .row-buttons button { padding: 10px; flex: 1; text-align: center; }
+            
+            #battle-log { height: 280px; }
+            #shop-container { height: 280px !important; }
+        }
     </style>
 </head>
-<body>
+<body id="app-body">
     <div class="container" id="app-container">
         <div id="left-panel">
             <h2>User Status</h2>
@@ -61,12 +87,11 @@
             <div class="status-block" id="player-equip"></div>
 
             <div class="button-group">
-                <button id="btn-explore" class="btn-main" onclick="explore(false)">탐색 실행 (자동 전투)</button>
+                <button id="btn-explore" class="btn-main" onclick="explore(false)">탐색 실행 (전투)</button>
                 <button onclick="restAtInn()">여관 휴식 (10G)</button>
-                <button onclick="openShop()">자산 상점</button>
-                <button onclick="openSkills()" class="btn-skill">스킬 관리</button>
-                <button onclick="changeView('bank')">사내 금고</button>
-                <button onclick="changeView('sync')">데이터 동기화</button>
+                <button onclick="openShop()">자산 상점 조회</button>
+                <button onclick="changeView('bank')">사내 금고 (은행)</button>
+                <button onclick="openSync()">데이터 동기화</button>
                 <button class="btn-danger" onclick="resetData()">데이터 초기화</button>
             </div>
             <div id="sys-msg"></div>
@@ -75,7 +100,7 @@
         <div id="right-panel">
             <div id="view-main" class="view active">
                 <h2>대기 화면</h2>
-                <p style="color: #666;">자동 전투 중심의 V2.7 환경이 로드되었습니다.<br>좌측 메뉴에서 탐색을 실행하여 성장을 감상하십시오.</p>
+                <p style="color: #666;">좌측 메뉴에서 작업을 선택하십시오. (V2.6 대규모 데이터베이스 탑재)</p>
             </div>
             
             <div id="view-battle" class="view">
@@ -88,40 +113,46 @@
             </div>
             
             <div id="view-shop" class="view">
-                <h2>자산 상점</h2>
+                <h2>자산 구매 목록 (구매 시 50% 환급)</h2>
                 <div id="shop-container" style="height:350px; overflow-y:auto; border:1px solid #ccc; padding:10px;"></div>
                 <div class="row-buttons">
                     <button class="btn-main" onclick="changeView('main')">이전 화면으로</button>
                 </div>
             </div>
 
-            <div id="view-skills" class="view">
-                <h2>스킬 관리</h2>
-                <p style="color: #666;">보유 SP(Skill Point)를 소모하여 스킬을 해금 및 랭크업(F~S) 합니다. 스킬은 전투 중 자동으로 발동합니다.<br>
-                <strong>잔여 SP : <span id="sp-display" style="color:#0078d4; font-weight:bold; font-size:14px;"></span></strong></p>
-                <div id="skills-container" style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px; background:#f9f9f9;"></div>
-                <div class="row-buttons">
-                    <button class="btn-main" onclick="changeView('main')">이전 화면으로</button>
-                </div>
-            </div>
-
             <div id="view-bank" class="view">
-                <h2>사내 금고</h2>
+                <h2>사내 금고 (은행)</h2>
+                <p style="color: #666;">보안 규정에 따라 <strong>입금 시도 시에만</strong> 경비 시스템(전투)이 가동됩니다. 출금은 안전합니다. <br>현재 입금 한도: <span id="bank-limit"></span>G</p>
                 <div class="status-line" style="font-weight:bold; font-size:13px; margin-bottom:15px;">
                     <span>예치금:</span> <span id="bank-balance" style="color:#107c41;">0 G</span>
                 </div>
+                
                 <div style="background:#f3f2f1; padding:10px; border:1px solid #ddd; margin-bottom: 10px;">
-                    <input type="number" id="deposit-amt" placeholder="입금액 입력">
-                    <button onclick="initiateDeposit(true)">최대액 입금</button>
+                    <strong>입금 업무 (위험)</strong><br>
+                    <input type="number" id="deposit-amt" placeholder="입금액 입력" style="margin-bottom: 5px; width:100%; box-sizing:border-box;">
+                    <div class="row-buttons">
+                        <button class="btn-main" onclick="initiateDeposit(false)">직접 입력 입금</button>
+                        <button onclick="initiateDeposit(true)">최대액 입금</button>
+                    </div>
                 </div>
-                <div class="row-buttons">
+
+                <div style="background:#f3f2f1; padding:10px; border:1px solid #ddd;">
+                    <strong>출금 업무 (안전)</strong>
+                    <input type="number" id="withdraw-amt" placeholder="출금액 입력" style="margin-bottom: 5px; width:100%; box-sizing:border-box;">
+                    <div class="row-buttons">
+                        <button onclick="initiateWithdraw(false)">직접 입력 출금</button>
+                        <button onclick="initiateWithdraw(true)">전액 출금</button>
+                    </div>
+                </div>
+
+                <div class="row-buttons" style="margin-top:15px;">
                     <button onclick="changeView('main')">퇴장하기</button>
                 </div>
             </div>
 
             <div id="view-sync" class="view">
                 <h2>로컬 데이터 동기화</h2>
-                <textarea id="sync-code" style="width:100%; height:80px;"></textarea>
+                <textarea id="sync-code" style="width:100%; height:80px; font-family:Consolas, monospace; font-size:11px; margin-bottom:5px; box-sizing:border-box;"></textarea>
                 <div class="row-buttons">
                     <button onclick="exportData()">데이터 복사</button>
                     <button class="btn-main" onclick="importData()">데이터 병합</button>
@@ -131,262 +162,651 @@
         </div>
     </div>
 
+    <div style="max-width:900px; margin: 10px auto; text-align:right; font-size:11px; color:#666;">
+        [환경 테스트 토글] 
+        <button onclick="setScreenMode('pc')" style="padding:2px 6px; font-size:10px;">PC 모드</button>
+        <button onclick="setScreenMode('mobile')" style="padding:2px 6px; font-size:10px;">모바일 모드</button>
+        <button onclick="setScreenMode('auto')" style="padding:2px 6px; font-size:10px;">자동(반응형)</button>
+    </div>
+
     <script>
-        const Ranks = ['미습득', 'F', 'E', 'D', 'C', 'B', 'A', 'S'];
-        
         const store = {
-            currentView: 'main', cooldownEnd: 0, cdInterval: null, logs: [], currentMonster: null,
+            currentView: 'main',
+            pendingDeposit: 0,
+            cooldownEnd: 0, 
+            cdInterval: null,
             player: {
                 name: '용사', level: 1, hp: 60, 
-                str: 5, int: 5, vit: 5, dex: 5, cha: 5, luk: 5, 
-                exp: 0, maxExp: 15, gold: 0, bank: 0, sp: 0,
-                weapon: null, armor: null, accessory: null,
-                skills: { dash: 0, multiHit: 0, lifesteal: 0 }
-            },
-            skillsData: {
-                dash: { id: 'dash', name: '돌진', reqLv: 3, desc: '강력한 타격을 단일 적에게 가함 (기본 피해량 증가)' },
-                multiHit: { id: 'multiHit', name: '연속공격', reqLv: 7, desc: '재빠르게 2연속 공격을 가함 (독립적인 회피/치명타 계산)' },
-                lifesteal: { id: 'lifesteal', name: '흡혈', reqLv: 12, desc: '가한 피해량의 일부를 체력으로 즉시 회복' }
+                str: 5, int: 5, vit: 5, dex: 5, 
+                cha: 5, luk: 5, 
+                exp: 0, maxExp: 15, gold: 0, bank: 0,
+                weapon: null, armor: null, accessory: null
             },
             equipments: [
+                // Lv 1~10 무기 (문구/완구류)
                 { id: 'w01', name: '몽당연필', type: 'weapon', price: 20, reqLevel: 1, stats: { atk: 3 } },
-                { id: 'a01', name: '종이 박스', type: 'armor', price: 30, reqLevel: 1, stats: { def: 2 } },
+                { id: 'w02', name: '지우개 가루 뭉치', type: 'weapon', price: 40, reqLevel: 2, stats: { atk: 5, crt: 1 } },
+                { id: 'w03', name: '제도샤프', type: 'weapon', price: 100, reqLevel: 4, stats: { atk: 12, crt: 3 } },
+                { id: 'w04', name: '굴렁쇠', type: 'weapon', price: 250, reqLevel: 6, stats: { atk: 18, eva: 2 } },
+                { id: 'w05', name: '탑블레이드', type: 'weapon', price: 400, reqLevel: 9, stats: { atk: 25, crt: 5 } },
+                
+                // Lv 11~25 무기 (사무용품)
                 { id: 'w11', name: '커터칼', type: 'weapon', price: 600, reqLevel: 12, stats: { atk: 40, crt: 5 } },
+                { id: 'w12', name: '두꺼운 사전', type: 'weapon', price: 850, reqLevel: 15, stats: { atk: 55, maxHp: 20 } },
+                { id: 'w13', name: '날렵한 만년필', type: 'weapon', price: 1300, reqLevel: 19, stats: { atk: 80, crt: 10 } },
+                { id: 'w14', name: '기계식 키보드', type: 'weapon', price: 2200, reqLevel: 24, stats: { atk: 120, crt: 8 } },
+                
+                // Lv 26~45 무기 (현대 테크/명품)
+                { id: 'w21', name: '명품 클러치백', type: 'weapon', price: 3500, reqLevel: 28, stats: { atk: 180, crt: 12, eva: -2 } },
+                { id: 'w22', name: '최고급 만년필', type: 'weapon', price: 5000, reqLevel: 33, stats: { atk: 250, acc: 10 } },
+                { id: 'w23', name: 'USB-C 마법검', type: 'weapon', price: 8000, reqLevel: 39, stats: { atk: 380, crt: 15 } },
+                { id: 'w24', name: '레이저 포인터 완드', type: 'weapon', price: 12000, reqLevel: 44, stats: { atk: 520, acc: 20 } },
+
+                // Lv 46~70 무기 (판타지 혼합형/하이엔드)
+                { id: 'w31', name: '양자컴퓨터 서버검', type: 'weapon', price: 25000, reqLevel: 52, stats: { atk: 850, crt: 20 } },
+                { id: 'w32', name: '회장님의 골프채', type: 'weapon', price: 45000, reqLevel: 61, stats: { atk: 1400, crt: 25, eva: -5 } },
+                { id: 'w33', name: '전설의 인감도장', type: 'weapon', price: 80000, reqLevel: 70, stats: { atk: 2200, acc: 30, crt: 30 } },
+
+                // 방어구
+                { id: 'a01', name: '종이 박스', type: 'armor', price: 30, reqLevel: 1, stats: { def: 2 } },
+                { id: 'a02', name: '신발주머니', type: 'armor', price: 80, reqLevel: 3, stats: { def: 5, eva: 1 } },
+                { id: 'a03', name: '교과서 갑옷', type: 'armor', price: 200, reqLevel: 7, stats: { def: 12, eva: -1 } },
+                { id: 'a04', name: '책가방 실드', type: 'armor', price: 400, reqLevel: 10, stats: { def: 22, maxHp: 10 } },
                 { id: 'a11', name: '보안 유니폼', type: 'armor', price: 800, reqLevel: 14, stats: { def: 45, eva: 3 } },
-                { id: 'w32', name: '회장님의 골프채', type: 'weapon', price: 45000, reqLevel: 61, stats: { atk: 1400, crt: 25 } },
-                { id: 'a32', name: '나노머신 방호복', type: 'armor', price: 35000, reqLevel: 58, stats: { def: 950 } }
+                { id: 'a12', name: '가죽 서류가방', type: 'armor', price: 1500, reqLevel: 20, stats: { def: 80, eva: 5 } },
+                { id: 'a21', name: '수입산 정장', type: 'armor', price: 3000, reqLevel: 27, stats: { def: 150, eva: 8 } },
+                { id: 'a22', name: '스마트 방탄수트', type: 'armor', price: 6500, reqLevel: 35, stats: { def: 280, eva: -2 } },
+                { id: 'a31', name: '두랄루민 사슬갑옷', type: 'armor', price: 15000, reqLevel: 45, stats: { def: 550, maxHp: 200 } },
+                { id: 'a32', name: '나노머신 방호복', type: 'armor', price: 35000, reqLevel: 58, stats: { def: 950, eva: 15 } },
+                { id: 'a33', name: 'CEO의 절대방벽', type: 'armor', price: 70000, reqLevel: 68, stats: { def: 1600, maxHp: 500, eva: 10 } },
+
+                // 장신구
+                { id: 'ac01', name: '지우개', type: 'accessory', price: 50, reqLevel: 2, stats: { maxHp: 10 } },
+                { id: 'ac02', name: '지점토 목걸이', type: 'accessory', price: 150, reqLevel: 5, stats: { maxHp: 30, acc: 2 } },
+                { id: 'ac03', name: '콩순이 노트북', type: 'accessory', price: 350, reqLevel: 8, stats: { crt: 3, acc: 5 } },
+                { id: 'ac11', name: '사원증 목걸이', type: 'accessory', price: 700, reqLevel: 13, stats: { maxHp: 80, eva: 2 } },
+                { id: 'ac12', name: '스마트 워치', type: 'accessory', price: 1800, reqLevel: 22, stats: { crt: 5, eva: 8 } },
+                { id: 'ac21', name: '금장 롤렉스', type: 'accessory', price: 4000, reqLevel: 30, stats: { crt: 8, maxHp: 150 } },
+                { id: 'ac22', name: '한정판 향수', type: 'accessory', price: 8000, reqLevel: 38, stats: { eva: 15, acc: 10 } },
+                { id: 'ac31', name: '블루투스 수정구', type: 'accessory', price: 20000, reqLevel: 48, stats: { crt: 12, acc: 20, maxHp: 300 } },
+                { id: 'ac32', name: '무한동력 커피머신', type: 'accessory', price: 50000, reqLevel: 65, stats: { crt: 20, eva: 20, maxHp: 800 } }
             ],
             monsters: [
+                // 1~30 구간 몬스터
                 { name: '하루살이', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.1, atkRate: 0.5, defRate: 0.1, eva: 60, rewardRate: 0.5 },
-                { name: '콩벌레', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.1, atkRate: 0.4, defRate: 4.0, eva: 0, rewardRate: 0.8 }, // 체력 대폭하향, 방어 상향
+                { name: '콩벌레', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.5, atkRate: 0.4, defRate: 3.5, eva: 0, rewardRate: 0.8 },
+                { name: '들개', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.7, atkRate: 1.2, defRate: 0.6, eva: 10, rewardRate: 0.9 },
                 { name: '잼민이', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.4, atkRate: 2.2, defRate: 0.2, eva: 15, rewardRate: 1.1 },
-                { name: '재수생', type: 'normal', minLv: 20, maxLv: 50, hpRate: 0.15, atkRate: 1.1, defRate: 2.5, eva: 0, rewardRate: 1.0 }, // 방어형 밸런스 조정
+                { name: '중삐리', type: 'normal', minLv: 3, maxLv: 30, hpRate: 0.9, atkRate: 0.9, defRate: 0.8, eva: 5, rewardRate: 1.0 },
+                { name: '파오후', type: 'normal', minLv: 5, maxLv: 30, hpRate: 2.5, atkRate: 0.6, defRate: 0.5, eva: -20, rewardRate: 1.2 },
+                { name: '고삐리', type: 'strong', minLv: 10, maxLv: 30, hpRate: 1.1, atkRate: 1.2, defRate: 0.9, eva: 5, rewardRate: 1.5 },
+                { name: '양키', type: 'strong', minLv: 15, maxLv: 30, hpRate: 1.0, atkRate: 1.4, defRate: 0.8, eva: 15, rewardRate: 1.8 },
+                { name: '일진', type: 'boss', minLv: 20, maxLv: 30, hpRate: 1.5, atkRate: 1.5, defRate: 1.0, eva: 10, rewardRate: 2.5 },
+
+                // 20~50 구간 몬스터
+                { name: '백수', type: 'normal', minLv: 20, maxLv: 50, hpRate: 1.5, atkRate: 0.5, defRate: 0.5, eva: 0, rewardRate: 0.9 },
+                { name: '재수생', type: 'normal', minLv: 20, maxLv: 50, hpRate: 0.8, atkRate: 1.1, defRate: 1.5, eva: 0, rewardRate: 1.0 },
                 { name: '미미짱', type: 'normal', minLv: 20, maxLv: 50, hpRate: 0.3, atkRate: 0.9, defRate: 0.4, eva: 50, rewardRate: 1.2 },
-                { name: '광분한 차장', type: 'boss', minLv: 70, maxLv: 99, hpRate: 0.5, atkRate: 3.5, defRate: 0.5, eva: 10, rewardRate: 3.8 }
-            ]
+                { name: '취준생', type: 'normal', minLv: 22, maxLv: 50, hpRate: 1.1, atkRate: 1.0, defRate: 0.9, eva: 5, rewardRate: 1.1 },
+                { name: '라면가이더', type: 'normal', minLv: 25, maxLv: 50, hpRate: 0.6, atkRate: 1.8, defRate: 0.5, eva: 25, rewardRate: 1.3 },
+                { name: '헬린이', type: 'strong', minLv: 30, maxLv: 50, hpRate: 2.5, atkRate: 1.2, defRate: 1.2, eva: -5, rewardRate: 1.8 },
+                { name: '야타족', type: 'strong', minLv: 35, maxLv: 50, hpRate: 0.9, atkRate: 1.5, defRate: 0.8, eva: 25, rewardRate: 2.0 },
+                { name: '조기축구 아저씨', type: 'boss', minLv: 40, maxLv: 50, hpRate: 1.8, atkRate: 1.4, defRate: 1.3, eva: 15, rewardRate: 3.0 },
+
+                // 40~99 구간 몬스터 (기존 사내 몬스터군 상향 배치)
+                { name: '지각한 인턴', type: 'normal', minLv: 40, maxLv: 99, hpRate: 0.6, atkRate: 1.5, defRate: 0.4, eva: 30, rewardRate: 1.1 },
+                { name: '슬라임 사원', type: 'normal', minLv: 40, maxLv: 99, hpRate: 1.0, atkRate: 1.0, defRate: 1.0, eva: 0, rewardRate: 1.0 },
+                { name: '파견직 사원', type: 'normal', minLv: 42, maxLv: 99, hpRate: 1.1, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.2 },
+                { name: '까칠한 디자이너', type: 'normal', minLv: 45, maxLv: 99, hpRate: 0.8, atkRate: 1.3, defRate: 0.7, eva: 15, rewardRate: 1.4 },
+                { name: '불만많은 고객', type: 'normal', minLv: 48, maxLv: 99, hpRate: 1.3, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.5 },
+                { name: '늑대 대리', type: 'strong', minLv: 50, maxLv: 99, hpRate: 1.2, atkRate: 1.4, defRate: 1.0, eva: 15, rewardRate: 2.0 },
+                { name: '고블린 횡령범', type: 'strong', minLv: 55, maxLv: 99, hpRate: 0.9, atkRate: 1.8, defRate: 0.8, eva: 25, rewardRate: 2.3 },
+                { name: '오크 주임', type: 'strong', minLv: 60, maxLv: 99, hpRate: 1.8, atkRate: 1.2, defRate: 1.5, eva: 0, rewardRate: 2.2 },
+                { name: '보안팀장', type: 'boss', minLv: 65, maxLv: 99, hpRate: 2.0, atkRate: 1.3, defRate: 2.5, eva: 5, rewardRate: 3.5 },
+                { name: '광분한 차장', type: 'boss', minLv: 70, maxLv: 99, hpRate: 0.5, atkRate: 3.5, defRate: 0.5, eva: 10, rewardRate: 3.8 },
+                { name: '영업부 과장', type: 'boss', minLv: 75, maxLv: 99, hpRate: 1.5, atkRate: 1.6, defRate: 1.2, eva: 10, rewardRate: 3.0 },
+                { name: '스켈레톤 팀장', type: 'boss', minLv: 80, maxLv: 99, hpRate: 1.3, atkRate: 1.8, defRate: 1.1, eva: 20, rewardRate: 4.0 },
+                { name: '데스나이트 부장', type: 'boss', minLv: 85, maxLv: 99, hpRate: 2.2, atkRate: 1.8, defRate: 1.5, eva: 10, rewardRate: 5.0 },
+                { name: '감사팀 임원', type: 'boss', minLv: 90, maxLv: 99, hpRate: 3.0, atkRate: 2.0, defRate: 2.0, eva: 15, rewardRate: 7.0 }
+            ],
+            currentMonster: null, logs: []
         };
+
+        function setScreenMode(mode) {
+            const body = document.getElementById('app-body');
+            body.className = '';
+            if (mode === 'pc') body.classList.add('force-pc');
+            else if (mode === 'mobile') body.classList.add('force-mobile');
+        }
 
         function getPlayerTotalStats() {
             const p = store.player;
-            let total = { atk: Math.floor(p.str * 3.5), def: Math.floor(p.str * 2.0), maxHp: 60 + Math.floor(p.vit * 15), acc: 85 + Math.floor(p.dex * 2.0), eva: Math.floor(p.dex * 1.5), crt: Math.floor(p.cha * 1.5), crtDmg: 150 + Math.floor(p.cha * 2.0), skillChance: Math.floor(p.int * 2.0) };
-            [p.weapon, p.armor, p.accessory].forEach(gear => { if (gear && gear.stats) { for(let key in gear.stats) total[key] += gear.stats[key]; } });
+            let total = {
+                atk: Math.floor(p.str * 3.5),
+                def: Math.floor(p.str * 2.0),
+                maxHp: 60 + Math.floor(p.vit * 15),
+                acc: 85 + Math.floor(p.dex * 2.0),
+                eva: Math.floor(p.dex * 1.5),
+                skillChance: Math.floor(p.int * 2.0), 
+                crt: Math.floor(p.cha * 1.5),         
+                crtDmg: 150 + Math.floor(p.cha * 2.0),
+                lukBonus: p.luk * 0.01                
+            };
+            
+            [p.weapon, p.armor, p.accessory].forEach(gear => {
+                if (gear && gear.stats) {
+                    if (gear.stats.atk) total.atk += gear.stats.atk;
+                    if (gear.stats.def) total.def += gear.stats.def;
+                    if (gear.stats.maxHp) total.maxHp += gear.stats.maxHp;
+                    if (gear.stats.acc) total.acc += gear.stats.acc;
+                    if (gear.stats.eva) total.eva += gear.stats.eva;
+                    if (gear.stats.crt) total.crt += gear.stats.crt;
+                }
+            });
             return total;
         }
 
-        function calculateCP(stats) { return Math.floor((stats.maxHp * 0.3) + (stats.atk * 2) + (stats.def * 1.5)); }
+        function getRequiredExp(level) {
+            return Math.floor(10 + (level * 8) + Math.pow(level, 1.7));
+        }
+
+        function calculateCP(stats, isPlayer = true) {
+            const hp = isPlayer ? stats.maxHp : stats.hp;
+            return Math.floor((hp * 0.3) + (stats.atk * 2) + (stats.def * 1.5) + (stats.acc * 0.5) + (stats.eva * 0.5));
+        }
+
         function sysMsg(msg) { document.getElementById('sys-msg').innerHTML = msg; }
         
         function changeView(viewId) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(`view-${viewId}`).classList.add('active');
-            store.currentView = viewId; sysMsg(''); 
-            if(viewId === 'bank') document.getElementById('bank-balance').innerText = store.player.bank + " G";
+            store.currentView = viewId;
+            sysMsg(''); 
+            if(viewId === 'bank') updateBankUI();
         }
 
         function updateCooldownUI() {
-            const remain = Math.ceil((store.cooldownEnd - Date.now()) / 1000);
+            const now = Date.now();
+            const remain = Math.ceil((store.cooldownEnd - now) / 1000);
             const btn = document.getElementById('btn-explore');
-            if (remain > 0) { btn.disabled = true; btn.innerText = `전투 중... (${remain}s)`; } 
-            else { btn.disabled = false; btn.innerText = "탐색 실행 (자동 전투)"; clearInterval(store.cdInterval); }
+            if (!btn) return;
+            
+            if (remain > 0) {
+                btn.disabled = true;
+                btn.style.backgroundColor = '#8a8886';
+                btn.style.borderColor = '#8a8886';
+                btn.innerText = `휴식 중... (${remain}s)`;
+            } else {
+                btn.disabled = false;
+                btn.style.backgroundColor = ''; 
+                btn.style.borderColor = '';
+                btn.innerText = "탐색 실행 (전투)";
+                if(store.cdInterval) clearInterval(store.cdInterval);
+            }
         }
 
-        function explore(isBankBattle) {
-            if (Date.now() < store.cooldownEnd) return sysMsg("아직 쿨타임이 지나지 않았습니다.");
-            
-            spawnMonster(); changeView('battle'); store.logs = []; 
-            const p = store.player; const m = store.currentMonster; const pStats = getPlayerTotalStats();
-            
-            addLog(`[시스템] 대상 '${m.name}' 조우. (전투 자동 진행)`);
-
-            let battleEnded = false;
-            for (let turn = 1; turn <= 15; turn++) {
-                addLog(`<span class="log-turn">▶ Turn ${turn}</span>`);
-                
-                // 플레이어 턴 프로세스
-                let turnAtkLogs = [];
-                let skillProc = checkSkillActivation(pStats.skillChance);
-                
-                if (skillProc === 'multiHit') {
-                    turnAtkLogs.push(`<span class="log-skill">[스킬: 연속공격 발동!]</span>`);
-                    turnAtkLogs.push(performAttack(pStats, m, 0.8));
-                    if(m.hp > 0) turnAtkLogs.push(performAttack(pStats, m, 0.8));
-                } else if (skillProc === 'dash') {
-                    const rankMult = 1.2 + (p.skills.dash * 0.2);
-                    turnAtkLogs.push(`<span class="log-skill">[스킬: 돌진 발동!]</span>`);
-                    turnAtkLogs.push(performAttack(pStats, m, rankMult));
-                } else if (skillProc === 'lifesteal') {
-                    const lifestealRate = 0.1 + (p.skills.lifesteal * 0.05);
-                    turnAtkLogs.push(`<span class="log-skill">[스킬: 흡혈 발동!]</span>`);
-                    const atkResult = performAttack(pStats, m, 1.0);
-                    turnAtkLogs.push(atkResult.log);
-                    if (atkResult.dmg > 0) {
-                        const heal = Math.floor(atkResult.dmg * lifestealRate);
-                        p.hp = Math.min(pStats.maxHp, p.hp + heal);
-                        turnAtkLogs.push(`   ↳ <span style="color:#28a745;">${heal} 체력 회복!</span>`);
-                    }
-                } else {
-                    turnAtkLogs.push(performAttack(pStats, m, 1.0).log);
-                }
-
-                turnAtkLogs.forEach(l => { if(typeof l === 'string') addLog(l); else addLog(l.log); });
-
-                if (m.hp <= 0) {
-                    addLog(`<span class="log-result log-victory">[전투 종료] 승리!</span>`);
-                    winBattle(m); battleEnded = true; break;
-                }
-
-                // 몬스터 턴
-                let mDmg = 0;
-                if (Math.random() * 100 <= (m.acc - pStats.eva)) {
-                    mDmg = Math.max(1, Math.floor(m.atk * (0.8 + Math.random() * 0.4) - pStats.def));
-                    p.hp -= mDmg;
-                    addLog(` - 몬스터 반격 : ${mDmg} 피해`);
-                } else { addLog(` - 몬스터 반격 : <span class="log-miss">Miss</span>`); }
-
-                if (p.hp <= 0) {
-                    addLog(`<span class="log-result log-defeat">[전투 종료] 패배... 체력 소진</span>`);
-                    p.hp = pStats.maxHp; p.gold = Math.floor(p.gold * 0.8);
-                    addLog(` > 페널티 : 소지금 20% 상실`); battleEnded = true; break;
-                }
-            }
-
-            if (!battleEnded) { addLog(`<span class="log-result log-defeat">Time Out - 전투 무승부</span>`); }
-            
-            renderPlayerStatus(); renderMonsterStatus();
-            document.getElementById('battle-log').innerHTML = store.logs.join('<br>');
-            document.getElementById('battle-log').scrollTop = 9999;
-            saveGame();
-            
+        function triggerCooldown() {
             store.cooldownEnd = Date.now() + 3000;
+            if (store.cdInterval) clearInterval(store.cdInterval);
             store.cdInterval = setInterval(updateCooldownUI, 100);
             updateCooldownUI();
         }
 
-        // 스킬 발동 확률 계산 로직 (순차 롤링)
-        function checkSkillActivation(baseChance) {
-            const p = store.player;
-            let activeSkills = [];
-            if(p.skills.lifesteal > 0) activeSkills.push({id: 'lifesteal', chance: baseChance + p.skills.lifesteal * 3});
-            if(p.skills.multiHit > 0) activeSkills.push({id: 'multiHit', chance: baseChance + p.skills.multiHit * 3});
-            if(p.skills.dash > 0) activeSkills.push({id: 'dash', chance: baseChance + p.skills.dash * 3});
-            
-            for(let s of activeSkills) {
-                if(Math.random() * 100 < s.chance) return s.id; // 우선순위 높은 스킬부터 굴림
+        function explore(isBankBattle) {
+            if (Date.now() < store.cooldownEnd) {
+                sysMsg("아직 탐색 쿨타임이 지나지 않았습니다.");
+                return;
             }
-            return null;
+
+            spawnMonster(isBankBattle);
+            changeView('battle');
+            store.logs = []; 
+            
+            const p = store.player;
+            const m = store.currentMonster;
+            const pStats = getPlayerTotalStats();
+            let battleEnded = false;
+
+            if (m.isTreasure) {
+                addLog(`[경고] <span class="log-treasure">진귀한 몬스터 '${m.name}'</span>(CP: ${m.cp}) 조우! (나의 CP: ${calculateCP(pStats)})`);
+            } else {
+                addLog(`[시스템] 대상 '${m.name}'(CP: ${m.cp}) 조우. (나의 CP: ${calculateCP(pStats)})`);
+            }
+
+            for (let turn = 1; turn <= 15; turn++) {
+                addLog(`<span class="log-turn">▶ Turn ${turn}</span>`);
+                
+                let pDmg = 0, mDmg = 0;
+                let pCrit = false, pMiss = false, mMiss = false;
+
+                if (Math.random() * 100 <= (pStats.acc - m.eva)) {
+                    let baseDmg = pStats.atk * (0.8 + Math.random() * 0.4);
+                    pDmg = Math.max(1, Math.floor(baseDmg - m.def));
+                    
+                    pCrit = Math.random() * 100 <= pStats.crt;
+                    if (pCrit) pDmg = Math.floor(pDmg * (pStats.crtDmg / 100));
+                } else {
+                    pMiss = true;
+                }
+
+                if (Math.random() * 100 <= (m.acc - pStats.eva)) {
+                    let baseDmg = m.atk * (0.8 + Math.random() * 0.4);
+                    mDmg = Math.max(1, Math.floor(baseDmg - pStats.def));
+                } else {
+                    mMiss = true;
+                }
+
+                m.hp -= pDmg;
+                p.hp -= mDmg;
+
+                if (pMiss) {
+                    addLog(` - 공격 : <span class="log-miss">Miss</span>`);
+                } else {
+                    addLog(` - 공격 : ${pDmg} 피해 ${pCrit ? '<span class="log-crit">(Critical!)</span>' : ''}`);
+                }
+
+                if (mMiss) {
+                    addLog(` - 반격 : <span class="log-miss">Miss (회피함)</span>`);
+                } else {
+                    addLog(` - 반격 : ${mDmg} 피해`);
+                }
+
+                if (m.hp <= 0 && p.hp <= 0) {
+                    addLog(`<span class="log-result log-victory">[연산 종료] 동시 쓰러짐 발생 - 플레이어 승리 판정 (체력 100% 회복)</span>`);
+                    p.hp = getPlayerTotalStats().maxHp;
+                    winBattle(m, isBankBattle);
+                    battleEnded = true; 
+                    break;
+                } else if (m.hp <= 0) {
+                    addLog(`<span class="log-result log-victory">[연산 종료] 승리 (소요: ${turn}턴)</span>`);
+                    winBattle(m, isBankBattle); 
+                    battleEnded = true; 
+                    break;
+                } else if (p.hp <= 0) {
+                    addLog(`<span class="log-result log-defeat">[연산 종료] 실패 - 체력 소진</span>`);
+                    loseBattle(isBankBattle); 
+                    battleEnded = true; 
+                    break;
+                }
+            }
+
+            if (!battleEnded) {
+                addLog(`<span class="log-result log-defeat">[연산 종료] Time Out - 무승부 (전투 패배 처리)</span>`);
+                loseBattle(isBankBattle); 
+            }
+            
+            renderPlayerStatus(); renderMonsterStatus(); renderLogs();
+            saveGame();
+            triggerCooldown();
         }
 
-        function performAttack(pStats, m, dmgMult) {
-            if (Math.random() * 100 > (pStats.acc - m.eva)) return { dmg: 0, log: ` - 공격 : <span class="log-miss">Miss</span>` };
-            
-            let dmg = Math.max(1, Math.floor((pStats.atk * dmgMult * (0.8 + Math.random() * 0.4)) - m.def));
-            const isCrit = Math.random() * 100 <= pStats.crt;
-            if (isCrit) dmg = Math.floor(dmg * (pStats.crtDmg / 100));
-            
-            m.hp -= dmg;
-            return { dmg: dmg, log: ` - 공격 : ${dmg} 피해 ${isCrit ? '<span class="log-crit">(Critical!)</span>' : ''}` };
-        }
+        function spawnMonster(isBankBattle) {
+            const pStats = getPlayerTotalStats();
+            const pCP = calculateCP(pStats);
+            const lv = store.player.level;
+            let targetTemplate = null;
+            let cpRatio = 1.0;
+            let isTreasure = false;
+            let treasureType = '';
 
-        function spawnMonster() {
-            const pStats = getPlayerTotalStats(); const lv = store.player.level;
-            let pool = store.monsters.filter(m => lv >= m.minLv && lv <= m.maxLv);
-            if (!pool.length) pool = store.monsters;
-            const tmpl = pool[Math.floor(Math.random() * pool.length)];
+            if (isBankBattle) {
+                targetTemplate = { name: '악덕 소매치기', hpRate: 1.0, atkRate: 1.0, defRate: 0.8, eva: 10, rewardRate: 0 };
+                cpRatio = 1.0;
+            } else {
+                const treasureProb = 0.01 + (store.player.luk * 0.001); 
+
+                if (Math.random() < treasureProb) {
+                    isTreasure = true;
+                    cpRatio = 0.9; 
+                    if (Math.random() < 0.5) {
+                        targetTemplate = { name: '경험치 보따리 몬스터', hpRate: 0.9, atkRate: 0.8, defRate: 0.8, eva: 15, rewardRate: 1.0 };
+                        treasureType = 'exp';
+                    } else {
+                        targetTemplate = { name: '황금 보물상자 몬스터', hpRate: 0.9, atkRate: 0.8, defRate: 0.8, eva: 15, rewardRate: 1.0 };
+                        treasureType = 'gold';
+                    }
+                } else {
+                    let bossProb = lv > 20 ? 0.03 : 0;
+                    let strongProb = 0.05 + (lv > 10 ? 0.05 : 0) + (lv > 30 ? 0.05 : 0);
+                    
+                    const rollType = Math.random();
+                    let mType = 'normal';
+                    if (rollType < bossProb) mType = 'boss';
+                    else if (rollType < bossProb + strongProb) mType = 'strong';
+
+                    // 플레이어 레벨에 맞는 몬스터 풀 필터링
+                    let pool = store.monsters.filter(m => lv >= m.minLv && lv <= m.maxLv && m.type === mType);
+                    
+                    // 해당 타입/레벨 구간에 몬스터가 없으면 타입 무시하고 레벨 구간으로만 필터링
+                    if (pool.length === 0) {
+                        pool = store.monsters.filter(m => lv >= m.minLv && lv <= m.maxLv);
+                    }
+                    
+                    // 그래도 없으면 (ex. 99레벨 초과) 가장 레벨이 높은 몬스터 선택
+                    if (pool.length === 0) {
+                        targetTemplate = store.monsters[store.monsters.length - 1];
+                    } else {
+                        targetTemplate = pool[Math.floor(Math.random() * pool.length)];
+                    }
+
+                    const rollCP = Math.random() * 100;
+                    if (rollCP < 10) cpRatio = 0.85;       
+                    else if (rollCP < 85) cpRatio = 1.0 + (Math.random() * 0.15 - 0.05); 
+                    else cpRatio = 1.25;                   
+                }
+            }
+
+            const targetCP = pCP * cpRatio;
             
-            const targetCP = calculateCP(pStats) * (0.8 + Math.random()*0.4);
+            let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio); 
+            let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio);
+            let mDef = Math.floor(pStats.def * targetTemplate.defRate * cpRatio);
+
+            let baseExp = Math.floor((targetCP * 0.08 + 10) * targetTemplate.rewardRate);
+            let baseGold = Math.floor((targetCP * 0.08 + 5) * targetTemplate.rewardRate);
+
+            if (isTreasure) {
+                if (treasureType === 'exp') baseExp *= 10;
+                else if (treasureType === 'gold') baseGold *= 10;
+            }
+
             store.currentMonster = {
-                name: tmpl.name, maxHp: Math.max(20, Math.floor(pStats.maxHp * tmpl.hpRate)),
-                hp: Math.max(20, Math.floor(pStats.maxHp * tmpl.hpRate)),
-                atk: Math.max(5, Math.floor(pStats.atk * tmpl.atkRate)),
-                def: Math.max(0, Math.floor(pStats.def * tmpl.defRate)),
-                acc: pStats.acc, eva: tmpl.eva,
-                exp: Math.floor(targetCP * 0.08 * tmpl.rewardRate),
-                gold: Math.floor(targetCP * 0.08 * tmpl.rewardRate)
+                name: targetTemplate.name,
+                cp: Math.floor(targetCP),
+                maxHp: Math.max(20, mMaxHp), hp: Math.max(20, mMaxHp),
+                atk: Math.max(5, mAtk), def: Math.max(0, mDef),
+                acc: pStats.acc, eva: targetTemplate.eva,
+                exp: baseExp,
+                gold: baseGold,
+                isTreasure: isTreasure
             };
         }
 
-        function winBattle(m) {
-            const p = store.player; p.exp += m.exp; p.gold += m.gold;
-            addLog(` > 보상 : ${m.exp} EXP / ${m.gold} G`);
-            while (p.exp >= p.maxExp) {
-                p.exp -= p.maxExp; p.level++; p.sp++; p.maxExp = Math.floor(10 + (p.level * 8) + Math.pow(p.level, 1.7));
-                ['str','int','vit','dex','cha','luk'].forEach(s => { if(Math.random()<0.6) p[s]++ });
-                p.hp = getPlayerTotalStats().maxHp;
-                addLog(` > <span class="log-victory">레벨업! Lv.${p.level} (SP +1)</span>`);
-            }
-        }
+        function winBattle(m, isBankBattle) {
+            const p = store.player;
+            const pStats = getPlayerTotalStats();
 
-        function addLog(msg) { store.logs.push(msg); }
-        
-        function openSkills() {
-            changeView('skills');
-            document.getElementById('sp-display').innerText = store.player.sp;
-            const container = document.getElementById('skills-container');
-            let html = '';
+            if (isBankBattle) {
+                p.gold -= store.pendingDeposit; 
+                p.bank += store.pendingDeposit;
+                addLog(` > 불순분자를 제압하고 <strong>${store.pendingDeposit}G</strong> 안전하게 입금했습니다.`);
+                store.pendingDeposit = 0;
+                return;
+            }
+
+            const earnedExp = Math.floor(m.exp * (1 + pStats.lukBonus));
+            const earnedGold = Math.floor(m.gold * (1 + pStats.lukBonus));
+
+            p.exp += earnedExp; 
+            p.gold += earnedGold;
             
-            Object.keys(store.skillsData).forEach(key => {
-                const s = store.skillsData[key];
-                const currentRank = store.player.skills[key] || 0;
-                const isUnlocked = store.player.level >= s.reqLv;
+            if (pStats.lukBonus > 0) {
+                addLog(` > 보상 : ${earnedExp} EXP / ${earnedGold} G (행운 보너스 적용)`);
+            } else {
+                addLog(` > 보상 : ${earnedExp} EXP / ${earnedGold} G`);
+            }
+            
+            let leveledUp = false;
+            while (p.exp >= p.maxExp) {
+                p.exp -= p.maxExp; p.level += 1;
+                p.maxExp = getRequiredExp(p.level);
                 
-                html += `
-                <div class="skill-item" style="opacity: ${isUnlocked ? '1' : '0.5'}">
-                    <div>
-                        <strong>${s.name}</strong> <span style="font-size:10px; color:#666;">(Lv.${s.reqLv} 해금)</span><br>
-                        <span class="skill-rank rank-${currentRank}">[${Ranks[currentRank]}]</span>
-                        <span style="font-size:11px; color:#555;">${s.desc}</span>
-                    </div>
-                    <div>
-                        <button class="btn-skill" onclick="upgradeSkill('${key}')" 
-                        ${(!isUnlocked || store.player.sp < 1 || currentRank >= 7) ? 'disabled' : ''}>
-                        ${currentRank >= 7 ? 'MAX' : '강화 (1 SP)'}
-                        </button>
-                    </div>
-                </div>`;
-            });
-            container.innerHTML = html;
+                let upStats = [], flatStats = [];
+                const tryStat = (name, val) => {
+                    if(Math.random() < 0.6) { upStats.push(name); return val + 1; }
+                    else { flatStats.push(name); return val; }
+                };
+                
+                p.str = tryStat('STR', p.str);
+                p.int = tryStat('INT', p.int);
+                p.vit = tryStat('VIT', p.vit);
+                p.dex = tryStat('DEX', p.dex);
+                p.cha = tryStat('CHA', p.cha); 
+                p.luk = tryStat('LUK', p.luk); 
+                
+                leveledUp = true;
+                addLog(` > <span class="log-victory">레벨업! Lv.${p.level}</span>`);
+                addLog(` > <span class="log-stat">상승: ${upStats.length ? upStats.join(', ') : '없음'}</span>`);
+                addLog(` > <span style="color:#888;">유지: ${flatStats.length ? flatStats.join(', ') : '없음'}</span>`);
+            }
+            if (leveledUp) {
+                p.hp = getPlayerTotalStats().maxHp; 
+            }
         }
 
-        function upgradeSkill(key) {
-            if (store.player.sp > 0 && store.player.skills[key] < 7) {
-                store.player.sp--;
-                store.player.skills[key]++;
-                saveGame();
-                openSkills();
-                renderPlayerStatus();
-                sysMsg(`${store.skillsData[key].name} 스킬이 랭크업 되었습니다!`);
+        function loseBattle(isBankBattle) {
+            const p = store.player;
+            const lossRate = isBankBattle ? 0.3 : 0.2; 
+            const lostGold = Math.floor(p.gold * lossRate);
+            p.gold -= lostGold;
+            p.hp = getPlayerTotalStats().maxHp; 
+            if(isBankBattle) store.pendingDeposit = 0;
+            addLog(` > 패배 페널티 : ${lostGold} G 손실 및 체력 초기화`);
+        }
+
+        function addLog(message) { store.logs.push(message); }
+
+        function restAtInn() {
+            const p = store.player;
+            const maxHp = getPlayerTotalStats().maxHp;
+            if (p.gold >= 10 && p.hp < maxHp) {
+                p.gold -= 10; p.hp = maxHp;
+                sysMsg("휴식으로 체력을 모두 회복했습니다. (-10G)"); renderPlayerStatus(); saveGame();
+            } else if (p.hp >= maxHp) { sysMsg("체력이 가득 찼습니다.");
+            } else { sysMsg("골드가 부족합니다."); }
+        }
+
+        function openShop() { renderShop(); changeView('shop'); }
+
+        function buyEquipment(id) {
+            const p = store.player;
+            const item = store.equipments.find(e => e.id === id);
+            
+            if (!confirm(`[${item.name}] 장비를 정말 구매하시겠습니까?\n(구매 시 비용 차감 및 기존 장비는 50% 환급됩니다)`)) {
+                return;
             }
+
+            if (p.gold >= item.price) {
+                let refund = 0;
+                if (p[item.type]) {
+                    refund = Math.floor(p[item.type].price * 0.5);
+                    p.gold += refund;
+                }
+                p.gold -= item.price;
+                p[item.type] = item;
+                
+                const maxHp = getPlayerTotalStats().maxHp;
+                if(p.hp > maxHp) p.hp = maxHp;
+
+                sysMsg(`[${item.name}] 장착 완료. ${refund > 0 ? '(기존 처분: +'+refund+'G)' : ''}`);
+                renderPlayerStatus(); saveGame(); openShop(); 
+            } else { sysMsg("골드가 부족합니다."); }
+        }
+
+        function updateBankUI() {
+            const p = store.player;
+            if(p.bank === undefined) p.bank = 0;
+            document.getElementById('bank-limit').innerText = p.level * 1000;
+            document.getElementById('bank-balance').innerText = p.bank + " G";
+            document.getElementById('deposit-amt').value = '';
+            document.getElementById('withdraw-amt').value = '';
+        }
+
+        function initiateDeposit(isMax) {
+            if (Date.now() < store.cooldownEnd) {
+                sysMsg("아직 탐색 쿨타임이 지나지 않았습니다.");
+                return;
+            }
+
+            const p = store.player;
+            const limit = p.level * 1000;
+            let amt = 0;
+
+            if (isMax) {
+                amt = Math.min(p.gold, limit - p.bank);
+            } else {
+                amt = parseInt(document.getElementById('deposit-amt').value) || 0;
+            }
+
+            if (amt <= 0) { sysMsg("유효한 금액을 입력하세요."); return; }
+            if (amt > p.gold) { sysMsg("소지금이 부족합니다."); return; }
+            if (p.bank + amt > limit) { sysMsg("예금 한도를 초과합니다."); return; }
+
+            store.pendingDeposit = amt;
+            sysMsg(`${amt}G 입금 처리 중 경비원칙에 따라 전투가 발생합니다!`);
+            explore(true);
+        }
+
+        function initiateWithdraw(isMax) {
+            const p = store.player;
+            if (p.bank <= 0) { sysMsg("출금할 자산이 없습니다."); return; }
+            
+            let amt = 0;
+            if (isMax) {
+                amt = p.bank;
+            } else {
+                amt = parseInt(document.getElementById('withdraw-amt').value) || 0;
+            }
+
+            if (amt <= 0) { sysMsg("유효한 금액을 입력하세요."); return; }
+            if (amt > p.bank) { sysMsg("예치금이 부족합니다. (최대 " + p.bank + "G)"); return; }
+
+            p.gold += amt; 
+            p.bank -= amt;
+            sysMsg(`${amt}G 안전하게 출금 완료되었습니다.`); 
+            updateBankUI(); renderPlayerStatus(); saveGame();
         }
 
         function renderPlayerStatus() {
-            const p = store.player; const stats = getPlayerTotalStats();
+            const p = store.player;
+            const stats = getPlayerTotalStats();
+            const cp = calculateCP(stats);
+            if(p.maxExp === undefined || p.maxExp === 15) p.maxExp = getRequiredExp(p.level);
+
             document.getElementById('player-status').innerHTML = `
-                <div class="status-line"><span>레벨(Lv)</span> <span>${p.level} (SP: ${p.sp})</span></div>
+                <div class="status-line" style="font-weight:bold; color:#107c41;"><span>전투력(CP)</span> <span>${cp}</span></div>
+                <div class="status-line"><span>레벨(Lv)</span> <span>${p.level}</span></div>
                 <div class="status-line"><span>체력(HP)</span> <span>${p.hp} / ${stats.maxHp}</span></div>
                 <div class="status-line"><span>경험치(EXP)</span> <span>${p.exp} / ${p.maxExp}</span></div>
                 <div class="status-line"><span>소지금(Gold)</span> <span>${p.gold} G</span></div>
-                <div class="status-block">
-                    <strong>[자동 발동 스탯]</strong><br>
-                    <span style="color:#0078d4">스킬 기본 발동률: ${stats.skillChance}% (INT 비례)</span>
+                
+                <div class="status-block" style="background:#eaf2ea; border-color:#c3d8c3;">
+                    <strong>[현재 종합 능력치]</strong>
+                    <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                        <span>ATK: ${stats.atk}</span> <span>DEF: ${stats.def}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>ACC: ${stats.acc}</span> <span>EVA: ${stats.eva}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>CRIT: ${stats.crt}%</span> <span>MaxHP: ${stats.maxHp}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:4px;">
+                        <span style="color:#0078d4">Skill 확률: ${stats.skillChance}%</span> 
+                        <span style="color:#107c41">보상 보너스: +${Math.floor(stats.lukBonus * 100)}%</span>
+                    </div>
                 </div>
+
+                <div class="status-block">
+                    <strong>[순수 능력치]</strong>
+                    <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                        <span>STR: ${p.str}</span> <span>INT: ${p.int}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>VIT: ${p.vit}</span> <span>DEX: ${p.dex}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; color:#8a8886;">
+                        <span>CHA: ${p.cha}</span> <span>LUK: ${p.luk}</span>
+                    </div>
+                </div>
+            `;
+
+            const formatGear = (gear) => gear ? `${gear.name} <span style="color:#666; font-size:10px;">${Object.entries(gear.stats).map(([k,v])=>`${k.toUpperCase()}${v > 0 ? '+'+v : v}`).join(', ')}</span>` : '없음';
+            
+            document.getElementById('player-equip').innerHTML = `
+                <strong>[착용 장비]</strong><br>
+                무기: ${formatGear(p.weapon)}<br>
+                방어: ${formatGear(p.armor)}<br>
+                장식: ${formatGear(p.accessory)}
             `;
         }
 
         function renderMonsterStatus() {
-            const m = store.currentMonster; if (!m) return;
-            document.getElementById('monster-status').innerHTML = `대상: ${m.name} | HP: ${m.hp}/${m.maxHp}`;
+            const m = store.currentMonster;
+            if (!m) return;
+            const nameColor = m.isTreasure ? '#d6b800' : '#a4262c';
+            document.getElementById('monster-status').innerHTML = `
+                <span style="font-weight:bold; color:${nameColor};">대상: ${m.name}</span> 
+                | CP: ${m.cp} | HP: ${m.hp}/${m.maxHp}
+            `;
+        }
+
+        function renderShop() {
+            const types = [
+                { key: 'weapon', label: '무기 (공격력 중심)' },
+                { key: 'armor', label: '방어구 (생존력 중심)' },
+                { key: 'accessory', label: '악세사리 (유틸리티)' }
+            ];
+            
+            let html = '';
+            types.forEach(t => {
+                html += `<h3>${t.label}</h3>`;
+                let hasItem = false;
+                store.equipments.filter(e => e.type === t.key).forEach(item => {
+                    if (store.player.level >= item.reqLevel) {
+                        hasItem = true;
+                        const stats = Object.entries(item.stats).map(([k, v]) => `${k.toUpperCase()}${v > 0 ? '+'+v : v}`).join(', ');
+                        const isEquipped = store.player[t.key] && store.player[t.key].id === item.id;
+                        const btnStyle = isEquipped ? 'border:2px solid #107c41;' : '';
+                        
+                        html += `<button onclick="buyEquipment('${item.id}')" style="margin-bottom:5px; width:100%; ${btnStyle}">
+                                    [Lv.${item.reqLevel}] ${item.name} | ${item.price}G ${isEquipped ? '(착용중)' : ''}<br> 
+                                    <span style="color:#666; font-size:10px;">${stats}</span>
+                                 </button><br>`;
+                    }
+                });
+                if(!hasItem) html += '<p style="color:#999;">현재 레벨에 구매 가능한 품목이 없습니다.</p>';
+            });
+            
+            document.getElementById('shop-container').innerHTML = html;
+        }
+
+        function renderLogs() {
+            const logDiv = document.getElementById('battle-log');
+            logDiv.innerHTML = store.logs.join('<br>');
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function saveGame() { localStorage.setItem('work_sys_v2', JSON.stringify(store.player)); }
+        
+        function loadGame() {
+            const saved = localStorage.getItem('work_sys_v2');
+            if (saved) store.player = { ...store.player, ...JSON.parse(saved) };
+            if (store.player.bank === undefined) store.player.bank = 0;
+            if (store.player.maxExp === undefined || store.player.maxExp === 15) store.player.maxExp = getRequiredExp(store.player.level);
+            if (store.player.cha === undefined) store.player.cha = 5;
+            if (store.player.luk === undefined) store.player.luk = 5;
         }
         
-        function restAtInn() { if(store.player.gold>=10) { store.player.gold-=10; store.player.hp=getPlayerTotalStats().maxHp; renderPlayerStatus(); saveGame(); sysMsg("회복 완료"); } }
-        function saveGame() { localStorage.setItem('work_sys_v27', JSON.stringify(store.player)); }
-        function loadGame() {
-            const saved = localStorage.getItem('work_sys_v27');
-            if (saved) {
-                store.player = { ...store.player, ...JSON.parse(saved) };
-                if(!store.player.skills) store.player.skills = {dash:0, multiHit:0, lifesteal:0};
-                if(store.player.sp === undefined) store.player.sp = Math.max(0, store.player.level - 1);
+        function resetData() {
+            if (confirm("경고: 모든 플레이 데이터가 삭제되고 1레벨부터 다시 시작합니다.\n정말 삭제하시겠습니까?")) {
+                localStorage.removeItem('work_sys_v2');
+                location.reload();
             }
         }
+
+        function exportData() {
+            document.getElementById('sync-code').value = btoa(encodeURIComponent(JSON.stringify(store.player)));
+            sysMsg("데이터 코 বোর্가 복사되었습니다.");
+        }
+        
+        function importData() {
+            try {
+                store.player = { ...store.player, ...JSON.parse(decodeURIComponent(atob(document.getElementById('sync-code').value))) };
+                saveGame(); renderPlayerStatus(); sysMsg("병합 성공.");
+            } catch (e) { sysMsg("유효하지 않은 코드입니다."); }
+        }
+
         loadGame(); renderPlayerStatus();
     </script>
 </body>
