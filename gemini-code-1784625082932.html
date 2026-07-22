@@ -90,6 +90,7 @@
                 <button id="btn-explore" class="btn-main" onclick="explore(false)">탐색 실행 (전투)</button>
                 <button onclick="restAtInn()">여관 휴식 (10G)</button>
                 <button onclick="openShop()">자산 상점 조회</button>
+                <button onclick="openSkills()" class="btn-skill" style="background-color: #0078d4; color: white; border-color: #0078d4; text-align: center; font-weight: bold;">스킬 관리 (SP)</button>
                 <button onclick="changeView('bank')">사내 금고 (은행)</button>
                 <button onclick="openSync()">데이터 동기화</button>
                 <button class="btn-danger" onclick="resetData()">데이터 초기화</button>
@@ -119,6 +120,16 @@
                     <button class="btn-main" onclick="changeView('main')">이전 화면으로</button>
                 </div>
             </div>
+            <div id="view-skills" class="view">
+    <h2>스킬 관리 (자동 발동)</h2>
+    <p style="color: #666;">레벨업 시 획득하는 SP로 스킬을 강화합니다.<br>
+    전투 중 <strong>지능(INT) 수치에 비례하여 자동으로 발동</strong>합니다.<br>
+    <strong>잔여 SP : <span id="sp-display" style="color:#0078d4; font-weight:bold; font-size:14px;"></span></strong></p>
+    <div id="skills-container" style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px; background:#f9f9f9;"></div>
+    <div class="row-buttons">
+        <button class="btn-main" onclick="changeView('main')">이전 화면으로</button>
+    </div>
+</div>
 
             <div id="view-bank" class="view">
                 <h2>사내 금고 (은행)</h2>
@@ -180,8 +191,14 @@
                 str: 5, int: 5, vit: 5, dex: 5, 
                 cha: 5, luk: 5, 
                 exp: 0, maxExp: 15, gold: 0, bank: 0,
-                weapon: null, armor: null, accessory: null
+                weapon: null, armor: null, accessory: null,
+                sp: 0, skills: { dash: 0, multiHit: 0, lifesteal: 0 }
             },
+            skillsData: {
+    dash: { id: 'dash', name: '강타', reqLv: 3, desc: '강력한 공격을 가함 (피해량 증가)' },
+    multiHit: { id: 'multiHit', name: '연속공격', reqLv: 7, desc: '빠르게 2연속 타격을 가함' },
+    lifesteal: { id: 'lifesteal', name: '흡혈', reqLv: 12, desc: '피해량의 일부를 체력으로 회복' }
+},
             equipments: [
                 // Lv 1~10 무기 (문구/완구류)
                 { id: 'w01', name: '몽당연필', type: 'weapon', price: 20, reqLevel: 1, stats: { atk: 3 } },
@@ -290,7 +307,8 @@
                 skillChance: Math.floor(p.int * 2.0), 
                 crt: Math.floor(p.cha * 1.5),         
                 crtDmg: 150 + Math.floor(p.cha * 2.0),
-                lukBonus: p.luk * 0.01                
+                lukBonus: p.luk * 0.01,
+                skillChance: 10 + Math.floor(p.int * 2.0)
             };
             
             [p.weapon, p.armor, p.accessory].forEach(gear => {
@@ -548,8 +566,7 @@
             
             let leveledUp = false;
             while (p.exp >= p.maxExp) {
-                p.exp -= p.maxExp; p.level += 1;
-                p.maxExp = getRequiredExp(p.level);
+                p.exp -= p.maxExp; p.level++; p.sp++; p.maxExp = Math.floor(10 + (p.level * 8) + Math.pow(p.level, 1.7));
                 
                 let upStats = [], flatStats = [];
                 const tryStat = (name, val) => {
@@ -808,6 +825,40 @@
         }
 
         loadGame(); renderPlayerStatus();
+        const Ranks = ['미습득', 'F', 'E', 'D', 'C', 'B', 'A', 'S'];
+
+function openSkills() {
+    changeView('skills');
+    document.getElementById('sp-display').innerText = store.player.sp;
+    let html = '';
+    Object.keys(store.skillsData).forEach(key => {
+        const s = store.skillsData[key];
+        const currentRank = store.player.skills[key] || 0;
+        const isUnlocked = store.player.level >= s.reqLv;
+        
+        html += `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #ddd; background: #fff; margin-bottom: 5px; opacity: ${isUnlocked ? '1' : '0.5'}">
+            <div>
+                <strong>${s.name}</strong> <span style="font-size:10px; color:#666;">(Lv.${s.reqLv} 해금)</span><br>
+                <span style="font-weight: bold; color: #0078d4;">[${Ranks[currentRank]}]</span>
+                <span style="font-size:11px; color:#555;">${s.desc}</span>
+            </div>
+            <button class="btn-skill" style="background-color: #0078d4; color: white;" onclick="upgradeSkill('${key}')" 
+            ${(!isUnlocked || store.player.sp < 1 || currentRank >= 7) ? 'disabled' : ''}>
+            ${currentRank >= 7 ? 'MAX' : '강화 (1 SP)'}
+            </button>
+        </div>`;
+    });
+    document.getElementById('skills-container').innerHTML = html;
+}
+
+function upgradeSkill(key) {
+    if (store.player.sp > 0 && store.player.skills[key] < 7) {
+        store.player.sp--; store.player.skills[key]++;
+        saveGame(); openSkills(); renderPlayerStatus();
+        sysMsg(`${store.skillsData[key].name} 랭크가 상승했습니다.`);
+    }
+}
     </script>
 </body>
 </html>
