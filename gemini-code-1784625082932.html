@@ -524,16 +524,7 @@
                     if (pool.length === 0) {
                         pool = store.monsters.filter(m => lv >= m.minLv && lv <= m.maxLv);
                     }
-
-                    // 몬스터 공격 페이즈
-if (Math.random() * 100 <= (m.acc - pStats.eva)) {
-    let mDmg = Math.max(1, Math.floor(m.atk * (0.8 + Math.random() * 0.4) - pStats.def));
-    p.hp -= mDmg;
-    addLog(` - ${m.name}의 반격! <span style="color:#a4262c;">${mDmg}의 피해를 입었다.</span>`);
-} else { 
-    addLog(` - ${p.name}은(는) 날렵한 움직임으로 공격을 받아넘겼다! <span class="log-miss">(Miss)</span>`); 
-}
-                    
+                                       
                     // 그래도 없으면 (ex. 99레벨 초과) 가장 레벨이 높은 몬스터 선택
                     if (pool.length === 0) {
                         targetTemplate = store.monsters[store.monsters.length - 1];
