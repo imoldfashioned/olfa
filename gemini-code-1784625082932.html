@@ -415,8 +415,9 @@
             for (let turn = 1; turn <= 10; turn++) {
                 addLog(`<span class="log-turn">▶ Turn ${turn}</span>`);
                 
-                let pDmg = 0, mDmg = 0;
-                let pCrit = false, pMiss = false, mMiss = false;
+                // 1. 플레이어 공격 연산
+                let pDmg = 0;
+                let pCrit = false, pMiss = false;
 
                 if (Math.random() * 100 <= (pStats.acc - m.eva)) {
                     let baseDmg = pStats.atk * (0.8 + Math.random() * 0.4);
@@ -428,6 +429,10 @@
                     pMiss = true;
                 }
 
+                m.hp -= pDmg;
+
+                // 2. 몬스터 반격 연산
+                let mDmg = 0, mMiss = false;
                 if (Math.random() * 100 <= (m.acc - pStats.eva)) {
                     let baseDmg = m.atk * (0.8 + Math.random() * 0.4);
                     mDmg = Math.max(1, Math.floor(baseDmg - pStats.def));
@@ -435,9 +440,9 @@
                     mMiss = true;
                 }
 
-                m.hp -= pDmg;
                 p.hp -= mDmg;
 
+                // 로그 출력
                 if (pMiss) {
                     addLog(` - 공격 : <span class="log-miss">Miss</span>`);
                 } else {
@@ -450,18 +455,20 @@
                     addLog(` - 반격 : ${mDmg} 피해`);
                 }
 
-                // [수정점] 동시 사망 발생 시 플레이어 패배(무승부)로 처리하여 승률 정상화
-                if (m.hp <= 0 && p.hp <= 0) {
-                    addLog(`<span class="log-result log-defeat">[연산 종료] 동시 쓰러짐 발생 - 무승부 (전투 패배 처리)</span>`);
-                    loseBattle(isBankBattle);
-                    battleEnded = true; 
-                    break;
-                } else if (m.hp <= 0) {
-                    addLog(`<span class="log-result log-victory">[연산 종료] 승리 (소요: ${turn}턴)</span>`);
+                // [판정 원칙 반영]
+                // 1. 크로스 카운터 포함, 몬스터가 쓰러졌다면 플레이어 무조건 승리
+                if (m.hp <= 0) {
+                    if (p.hp <= 0) {
+                        addLog(`<span class="log-result log-victory">[연산 종료] 크로스 카운터! 승리 (소요: ${turn}턴)</span>`);
+                    } else {
+                        addLog(`<span class="log-result log-victory">[연산 종료] 승리 (소요: ${turn}턴)</span>`);
+                    }
                     winBattle(m, isBankBattle); 
                     battleEnded = true; 
                     break;
-                } else if (p.hp <= 0) {
+                } 
+                // 2. 몬스터는 살고 플레이어만 쓰러진 경우 패배
+                else if (p.hp <= 0) {
                     addLog(`<span class="log-result log-defeat">[연산 종료] 실패 - 체력 소진</span>`);
                     loseBattle(isBankBattle); 
                     battleEnded = true; 
@@ -469,8 +476,9 @@
                 }
             }
 
+            // [판정 원칙 반영] 10턴 초과(타임아웃) 시 플레이어 패배 처리
             if (!battleEnded) {
-                addLog(`<span class="log-result log-defeat">[연산 종료] Time Out - 턴 초과 (전투 패배 처리)</span>`);
+                addLog(`<span class="log-result log-defeat">[연산 종료] Time Out - 턴 초과 (전투 패배)</span>`);
                 loseBattle(isBankBattle); 
             }
             
