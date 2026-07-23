@@ -450,10 +450,10 @@
                     addLog(` - 반격 : ${mDmg} 피해`);
                 }
 
+                // [수정점] 동시 사망 발생 시 플레이어 패배(무승부)로 처리하여 승률 정상화
                 if (m.hp <= 0 && p.hp <= 0) {
-                    addLog(`<span class="log-result log-victory">[연산 종료] 동시 쓰러짐 발생 - 플레이어 승리 판정 (체력 100% 회복)</span>`);
-                    p.hp = getPlayerTotalStats().maxHp;
-                    winBattle(m, isBankBattle);
+                    addLog(`<span class="log-result log-defeat">[연산 종료] 동시 쓰러짐 발생 - 무승부 (전투 패배 처리)</span>`);
+                    loseBattle(isBankBattle);
                     battleEnded = true; 
                     break;
                 } else if (m.hp <= 0) {
@@ -470,7 +470,7 @@
             }
 
             if (!battleEnded) {
-                addLog(`<span class="log-result log-defeat">[연산 종료] Time Out - 무승부 (전투 패배 처리)</span>`);
+                addLog(`<span class="log-result log-defeat">[연산 종료] Time Out - 턴 초과 (전투 패배 처리)</span>`);
                 loseBattle(isBankBattle); 
             }
             
@@ -557,12 +557,12 @@
                 }
             }
 
-            // [핵심 변경점] 종합 능력치(pCP, pStats)를 기준으로 1.05배 상향 조정하여 긴장감(승률 40~60%) 유지
-            const targetCP = pCP * cpRatio * 1.05;
+            // [핵심 변경점] 체력을 플레이어의 약 2.2배로 증량하여 1턴 킬을 방지하고 3~5턴 공방 유도
+            const targetCP = pCP * cpRatio * 1.1;
             
-            let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio * 1.05); 
-            let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio * 1.05);
-            let mDef = Math.floor(pStats.def * targetTemplate.defRate * cpRatio * 1.05);
+            let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio * 2.2); 
+            let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio * 1.0);
+            let mDef = Math.floor(pStats.def * targetTemplate.defRate * cpRatio * 0.9);
 
             let baseExp = Math.floor((targetCP * 0.08 + 10) * targetTemplate.rewardRate);
             let baseGold = Math.floor((targetCP * 0.08 + 5) * targetTemplate.rewardRate);
