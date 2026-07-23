@@ -822,6 +822,16 @@
                         <span>CRIT: ${stats.crt}%</span> <span>MaxHP: ${stats.maxHp}</span>
                     </div>
                 </div>
+                
+                <div class="status-block" style="margin-top:5px;">
+                    <strong>[순수 능력치]</strong>
+                    <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                        <span>STR: ${p.str}</span> <span>INT: ${p.int}</span> <span>VIT: ${p.vit}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>DEX: ${p.dex}</span> <span>CHA: ${p.cha}</span> <span>LUK: ${p.luk}</span>
+                    </div>
+                </div>
             `;
 
             const formatGear = (gear) => gear ? `${gear.name} <span style="color:#666; font-size:10px;">${Object.entries(gear.stats).map(([k,v])=>`${k.toUpperCase()}${v > 0 ? '+'+v : v}`).join(', ')}</span>` : '없음';
