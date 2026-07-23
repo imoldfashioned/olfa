@@ -459,6 +459,7 @@
                 // 1. 크로스 카운터 포함, 몬스터가 쓰러졌다면 플레이어 무조건 승리
                 if (m.hp <= 0) {
                     if (p.hp <= 0) {
+                        p.hp = pStats.maxHp;
                         addLog(`<span class="log-result log-victory">[연산 종료] 크로스 카운터! 승리 (소요: ${turn}턴)</span>`);
                     } else {
                         addLog(`<span class="log-result log-victory">[연산 종료] 승리 (소요: ${turn}턴)</span>`);
