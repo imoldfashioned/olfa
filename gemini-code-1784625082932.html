@@ -316,19 +316,9 @@
                 crt: Math.floor(p.cha * 1.5),         
                 crtDmg: 150 + Math.floor(p.cha * 2.0),
                 lukBonus: p.luk * 0.01,
+                // 주의: 기존 코드에 skillChance가 중복 선언되어 있었으나 로직 유지를 위해 그대로 둡니다.
                 skillChance: 10 + Math.floor(p.int * 2.0)
             };
-        // 장비 능력치를 제외한 순수 능력치 (몬스터 밸런싱 기준점)
-        function getBaseStats() {
-            const p = store.player;
-            return {
-                atk: Math.floor(p.str * 3.5),
-                def: Math.floor(p.str * 2.0),
-                maxHp: 60 + Math.floor(p.vit * 15),
-                acc: 85 + Math.floor(p.dex * 2.0),
-                eva: Math.floor(p.dex * 1.5)
-            };
-        }
             
             [p.weapon, p.armor, p.accessory].forEach(gear => {
                 if (gear && gear.stats) {
@@ -341,6 +331,18 @@
                 }
             });
             return total;
+        }
+
+        // 장비 능력치를 제외한 순수 능력치 (독립된 함수로 이동)
+        function getBaseStats() {
+            const p = store.player;
+            return {
+                atk: Math.floor(p.str * 3.5),
+                def: Math.floor(p.str * 2.0),
+                maxHp: 60 + Math.floor(p.vit * 15),
+                acc: 85 + Math.floor(p.dex * 2.0),
+                eva: Math.floor(p.dex * 1.5)
+            };
         }
 
         function getRequiredExp(level) {
