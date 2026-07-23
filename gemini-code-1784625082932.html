@@ -199,7 +199,8 @@
                 cha: 5, luk: 5, 
                 exp: 0, maxExp: 15, gold: 0, bank: 0,
                 weapon: null, armor: null, accessory: null,
-                sp: 0, skills: { dash: 0, multiHit: 0, lifesteal: 0 }
+                sp: 0, skills: { dash: 0, multiHit: 0, lifesteal: 0 },
+                classTier: 0, job: '초보자', battles: { total: 0, win: 0, lose: 0 }
             },
             skillsData: {
     dash: { id: 'dash', name: '강타', reqLv: 3, desc: '강력한 공격을 가함 (피해량 증가)' },
@@ -317,6 +318,17 @@
                 lukBonus: p.luk * 0.01,
                 skillChance: 10 + Math.floor(p.int * 2.0)
             };
+        // 장비 능력치를 제외한 순수 능력치 (몬스터 밸런싱 기준점)
+        function getBaseStats() {
+            const p = store.player;
+            return {
+                atk: Math.floor(p.str * 3.5),
+                def: Math.floor(p.str * 2.0),
+                maxHp: 60 + Math.floor(p.vit * 15),
+                acc: 85 + Math.floor(p.dex * 2.0),
+                eva: Math.floor(p.dex * 1.5)
+            };
+        }
             
             [p.weapon, p.armor, p.accessory].forEach(gear => {
                 if (gear && gear.stats) {
@@ -492,7 +504,9 @@
 }
         function spawnMonster(isBankBattle) {
             const pStats = getPlayerTotalStats();
+            const baseStats = getBaseStats();
             const pCP = calculateCP(pStats);
+            const baseCP = calculateCP(baseStats);
             const lv = store.player.level;
             let targetTemplate = null;
             let cpRatio = 1.0;
@@ -546,11 +560,11 @@
                 }
             }
 
-            const targetCP = pCP * cpRatio;
+            const targetCP = baseCP * cpRatio * 0.9;
             
-            let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio); 
-            let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio);
-            let mDef = Math.floor(pStats.def * targetTemplate.defRate * cpRatio);
+            let mMaxHp = Math.floor(baseStats.maxHp * targetTemplate.hpRate * cpRatio * 0.9); 
+            let mAtk = Math.floor(baseStats.atk * targetTemplate.atkRate * cpRatio * 0.9);
+            let mDef = Math.floor(baseStats.def * targetTemplate.defRate * cpRatio * 0.9);
 
             let baseExp = Math.floor((targetCP * 0.08 + 10) * targetTemplate.rewardRate);
             let baseGold = Math.floor((targetCP * 0.08 + 5) * targetTemplate.rewardRate);
@@ -576,6 +590,7 @@
             const p = store.player;
             const pStats = getPlayerTotalStats();
 
+            // 1. 은행 방어(입금) 전투 승리 처리
             if (isBankBattle) {
                 p.gold -= store.pendingDeposit; 
                 p.bank += store.pendingDeposit;
@@ -584,6 +599,11 @@
                 return;
             }
 
+            // 2. 일반 전투 승리 카운트 증가 (추가된 부분)
+            p.battles.total++;
+            p.battles.win++;
+
+            // 3. 보상 획득 및 메시지 출력
             const earnedExp = Math.floor(m.exp * (1 + pStats.lukBonus));
             const earnedGold = Math.floor(m.gold * (1 + pStats.lukBonus));
 
@@ -596,13 +616,25 @@
                 addLog(` > 보상 : ${earnedExp} EXP / ${earnedGold} G`);
             }
             
+            // 4. 레벨업 및 직업별 능력치 상승 (수정된 부분)
             let leveledUp = false;
             while (p.exp >= p.maxExp) {
                 p.exp -= p.maxExp; p.level++; p.sp++; p.maxExp = Math.floor(10 + (p.level * 8) + Math.pow(p.level, 1.7));
                 
                 let upStats = [], flatStats = [];
                 const tryStat = (name, val) => {
-                    if(Math.random() < 0.6) { upStats.push(name); return val + 1; }
+                    let prob = 0.6; // 0클래스 기본 확률
+                    let gain = 1;   // 0클래스 기본 배율
+                    
+                    if (p.classTier >= 1) {
+                        gain = 2; // 클래스 전직 시 능력치 상승폭 증가
+                        if (p.job === '가드' && (name === 'STR' || name === 'VIT')) prob = 0.85;
+                        else if (p.job === '아처' && (name === 'DEX' || name === 'LUK')) prob = 0.85;
+                        else if (p.job === '캐스터' && (name === 'INT' || name === 'CHA')) prob = 0.85;
+                        else prob = 0.4;
+                    }
+
+                    if(Math.random() < prob) { upStats.push(name); return val + gain; }
                     else { flatStats.push(name); return val; }
                 };
                 
@@ -625,10 +657,18 @@
 
         function loseBattle(isBankBattle) {
             const p = store.player;
+            
+            // 일반 전투 패배 카운트 증가 (Time Out 포함 모든 패배 상황에 적용)
+            if (!isBankBattle) { 
+                p.battles.total++; 
+                p.battles.lose++; 
+            }
+
             const lossRate = isBankBattle ? 0.3 : 0.2; 
             const lostGold = Math.floor(p.gold * lossRate);
             p.gold -= lostGold;
             p.hp = getPlayerTotalStats().maxHp; 
+            
             if(isBankBattle) store.pendingDeposit = 0;
             addLog(` > 패배 페널티 : ${lostGold} G 손실 및 체력 초기화`);
         }
@@ -732,11 +772,40 @@
             const cp = calculateCP(stats);
             if(p.maxExp === undefined || p.maxExp === 15) p.maxExp = getRequiredExp(p.level);
 
+            const hpPercent = Math.min(100, Math.max(0, (p.hp / stats.maxHp) * 100));
+            const expPercent = Math.min(100, Math.max(0, (p.exp / p.maxExp) * 100));
+            
+            let winRate = p.battles.total > 0 ? ((p.battles.win / p.battles.total) * 100).toFixed(1) : 0;
+            
+            let advanceHtml = '';
+            if (p.level >= 100 && p.classTier === 0) {
+                advanceHtml = `<button class="btn-main" onclick="advanceClass()" style="width:100%; margin-bottom:10px; background-color:#d6b800; border-color:#d6b800; color:#333;">1차 직업 전직 가능!</button>`;
+            } else if (p.level >= 200 && p.classTier === 1) {
+                advanceHtml = `<button class="btn-main" onclick="advanceClass(2)" style="width:100%; margin-bottom:10px; background-color:#d6b800; border-color:#d6b800; color:#333;">2차 직업 전직 가능!</button>`;
+            }
+
             document.getElementById('player-status').innerHTML = `
+                ${advanceHtml}
+                <div class="class-badge">Tier ${p.classTier} | ${p.job}</div>
                 <div class="status-line" style="font-weight:bold; color:#107c41;"><span>전투력(CP)</span> <span>${cp}</span></div>
                 <div class="status-line"><span>레벨(Lv)</span> <span>${p.level}</span></div>
-                <div class="status-line"><span>체력(HP)</span> <span>${p.hp} / ${stats.maxHp}</span></div>
-                <div class="status-line"><span>경험치(EXP)</span> <span>${p.exp} / ${p.maxExp}</span></div>
+                
+                <div style="margin: 6px 0;">
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:2px;"><span>체력(HP)</span></div>
+                    <div class="progress-bg">
+                        <div class="progress-fill fill-hp" style="width: ${hpPercent}%"></div>
+                        <div class="progress-text">${p.hp} / ${stats.maxHp}</div>
+                    </div>
+                </div>
+                
+                <div style="margin: 6px 0;">
+                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:2px;"><span>경험치(EXP)</span></div>
+                    <div class="progress-bg">
+                        <div class="progress-fill fill-exp" style="width: ${expPercent}%"></div>
+                        <div class="progress-text">${p.exp} / ${p.maxExp}</div>
+                    </div>
+                </div>
+                
                 <div class="status-line"><span>소지금(Gold)</span> <span>${p.gold} G</span></div>
                 
                 <div class="status-block" style="background:#eaf2ea; border-color:#c3d8c3;">
@@ -750,23 +819,6 @@
                     <div style="display:flex; justify-content:space-between;">
                         <span>CRIT: ${stats.crt}%</span> <span>MaxHP: ${stats.maxHp}</span>
                     </div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:4px;">
-                        <span style="color:#0078d4">Skill 확률: ${stats.skillChance}%</span> 
-                        <span style="color:#107c41">보상 보너스: +${Math.floor(stats.lukBonus * 100)}%</span>
-                    </div>
-                </div>
-
-                <div class="status-block">
-                    <strong>[순수 능력치]</strong>
-                    <div style="display:flex; justify-content:space-between; margin-top:4px;">
-                        <span>STR: ${p.str}</span> <span>INT: ${p.int}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>VIT: ${p.vit}</span> <span>DEX: ${p.dex}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; color:#8a8886;">
-                        <span>CHA: ${p.cha}</span> <span>LUK: ${p.luk}</span>
-                    </div>
                 </div>
             `;
 
@@ -777,7 +829,39 @@
                 무기: ${formatGear(p.weapon)}<br>
                 방어: ${formatGear(p.armor)}<br>
                 장식: ${formatGear(p.accessory)}
+                <div style="border-top: 1px dashed #ccc; margin-top: 8px; padding-top: 5px; text-align: center; font-weight: bold; font-size: 11px;">
+                    ${p.battles.total}전 ${p.battles.win}승 ${p.battles.lose}패 (승률 ${winRate}%)
+                </div>
             `;
+        }
+
+        function advanceClass(targetTier = 1) {
+            const p = store.player;
+            let choice = prompt(`${targetTier}차 직업으로 전직합니다.\n원하는 직업을 입력하세요 (가드 / 아처 / 캐스터)\n※ 레벨과 능력치가 초기화됩니다.`);
+            
+            if (['가드', '아처', '캐스터'].includes(choice)) {
+                // 2차 전직 시 최소 스탯 조건 예시 (기본적인 방어 기제)
+                if (targetTier === 2) {
+                    if (choice === '가드' && p.str < 100) return sysMsg("가드 이직 실패: 순수 STR 100 이상 필요");
+                    if (choice === '아처' && p.dex < 100) return sysMsg("아처 이직 실패: 순수 DEX 100 이상 필요");
+                    if (choice === '캐스터' && p.int < 100) return sysMsg("캐스터 이직 실패: 순수 INT 100 이상 필요");
+                }
+
+                p.classTier = targetTier;
+                p.job = choice;
+                p.level = 1;
+                p.exp = 0;
+                p.str = 5; p.int = 5; p.vit = 5; p.dex = 5; p.cha = 5; p.luk = 5;
+                
+                const maxHp = getPlayerTotalStats().maxHp;
+                p.hp = maxHp;
+                
+                saveGame();
+                renderPlayerStatus();
+                sysMsg(`[${choice}] 직업으로 전직했습니다! 능력치가 초기화되며 성장률이 극대화됩니다.`);
+            } else {
+                sysMsg("올바른 직업 명칭을 입력하지 않아 취소되었습니다.");
+            }
         }
 
         function renderMonsterStatus() {
@@ -835,6 +919,9 @@
             if (store.player.maxExp === undefined || store.player.maxExp === 15) store.player.maxExp = getRequiredExp(store.player.level);
             if (store.player.cha === undefined) store.player.cha = 5;
             if (store.player.luk === undefined) store.player.luk = 5;
+            if (store.player.classTier === undefined) store.player.classTier = 0;
+            if (store.player.job === undefined) store.player.job = '초보자';
+            if (store.player.battles === undefined) store.player.battles = { total: 0, win: 0, lose: 0 };
         }
         
         function resetData() {
