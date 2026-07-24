@@ -99,6 +99,7 @@
                 <button onclick="openShop()">자산 상점 조회</button>
                 <button onclick="openSkills()" class="btn-skill" style="background-color: #0078d4; color: white; border-color: #0078d4; text-align: center; font-weight: bold;">스킬 관리 (SP)</button>
                 <button onclick="changeView('bank')">사내 금고 (은행)</button>
+                <button onclick="openHome()">자택 (하우징)</button>
                 <button onclick="openSync()">데이터 동기화</button>
                 <button class="btn-danger" onclick="resetData()">데이터 초기화</button>
             </div>
@@ -154,6 +155,25 @@
                     </div>
                 </div>
 
+                <div id="view-home" class="view">
+                <h2>자택 (장비 창고)</h2>
+                <p style="color: #666;">전직 시 착용 레벨이 맞지 않는 장비를 안전하게 보관할 수 있습니다. (최대 3슬롯)</p>
+                
+                <div style="background:#f3f2f1; padding:10px; border:1px solid #ddd; margin-bottom: 15px;">
+                    <strong>현재 착용중인 장비 (보관하기)</strong>
+                    <div id="home-equipped" style="margin-top: 10px;"></div>
+                </div>
+
+                <div style="background:#f3f2f1; padding:10px; border:1px solid #ddd;">
+                    <strong>보관된 장비 (꺼내기) - <span id="storage-count">0</span> / 3 슬롯</strong>
+                    <div id="home-storage" style="margin-top: 10px;"></div>
+                </div>
+
+                <div class="row-buttons" style="margin-top:15px;">
+                    <button class="btn-main" onclick="changeView('main')">집에서 나가기</button>
+                </div>
+            </div>
+                
                 <div style="background:#f3f2f1; padding:10px; border:1px solid #ddd;">
                     <strong>출금 업무 (안전)</strong>
                     <input type="number" id="withdraw-amt" placeholder="출금액 입력" style="margin-bottom: 5px; width:100%; box-sizing:border-box;">
@@ -569,12 +589,22 @@
             // [핵심 변경점] 체력을 플레이어의 약 2.2배로 증량하여 1턴 킬을 방지하고 3~5턴 공방 유도
             const targetCP = pCP * cpRatio * 1.1;
             
-            let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio * 2.2); 
-            let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio * 1.0);
-            let mDef = Math.floor(pStats.def * targetTemplate.defRate * cpRatio * 0.9);
+            // 1-4. 초보자의 가호 스탯 디버프 수치 설정
+            let statNerf = 1.0;
+            let rewardBuff = 1.0;
+            if (lv <= 25) { statNerf = 0.90; rewardBuff = 1.30; }
+            else if (lv <= 50) { statNerf = 0.95; rewardBuff = 1.15; }
 
-            let baseExp = Math.floor((targetCP * 0.08 + 10) * targetTemplate.rewardRate);
-            let baseGold = Math.floor((targetCP * 0.08 + 5) * targetTemplate.rewardRate);
+            let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio * 2.2 * statNerf); 
+            let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio * 1.0 * statNerf);
+            let mDef = Math.floor(pStats.def * targetTemplate.defRate * cpRatio * 0.9 * statNerf);
+
+            // 2-2. 적 보상 체계를 CP가 아닌 레벨 및 클래스 티어 기반으로 변경
+            let baseRewardValue = (lv * 3) + 10;
+            let tierMultiplier = 1 + (store.player.classTier * 1.5); 
+            
+            let baseExp = Math.floor(baseRewardValue * tierMultiplier * targetTemplate.rewardRate * rewardBuff);
+            let baseGold = Math.floor((baseRewardValue * 0.8) * tierMultiplier * targetTemplate.rewardRate * rewardBuff);
 
             if (isTreasure) {
                 if (treasureType === 'exp') baseExp *= 10;
@@ -698,16 +728,18 @@
             const p = store.player;
             const item = store.equipments.find(e => e.id === id);
             
-            if (!confirm(`[${item.name}] 장비를 정말 구매하시겠습니까?\n(구매 시 비용 차감 및 기존 장비는 50% 환급됩니다)`)) {
+            let refund = 0;
+            if (p[item.type]) {
+                refund = Math.floor(p[item.type].price * 0.5);
+            }
+
+            if (!confirm(`[${item.name}] 장비를 구매하시겠습니까?\n(비용: ${item.price}G / 현재소지: ${p.gold}G + 환급예정: ${refund}G)`)) {
                 return;
             }
 
-            if (p.gold >= item.price) {
-                let refund = 0;
-                if (p[item.type]) {
-                    refund = Math.floor(p[item.type].price * 0.5);
-                    p.gold += refund;
-                }
+            // 합산 금액으로 구매 가능 여부 판별
+            if (p.gold + refund >= item.price) {
+                p.gold += refund;
                 p.gold -= item.price;
                 p[item.type] = item;
                 
@@ -716,7 +748,9 @@
 
                 sysMsg(`[${item.name}] 장착 완료. ${refund > 0 ? '(기존 처분: +'+refund+'G)' : ''}`);
                 renderPlayerStatus(); saveGame(); openShop(); 
-            } else { sysMsg("골드가 부족합니다."); }
+            } else { 
+                sysMsg(`골드가 부족합니다. (필요: ${item.price - (p.gold + refund)}G)`); 
+            }
         }
 
         function updateBankUI() {
@@ -784,6 +818,19 @@
             
             let winRate = p.battles.total > 0 ? ((p.battles.win / p.battles.total) * 100).toFixed(1) : 0;
             
+            let buffMsg = "없음";
+            let buffColor = "#eaf2ea";
+            let buffBorder = "#c3d8c3";
+            let buffText = "#333";
+            
+            if (p.level <= 25) {
+                buffMsg = "초보자의 가호 I (보상+30%, 조우 적 스탯-10%)";
+                buffColor = "#e0f7fa"; buffBorder = "#b2ebf2"; buffText = "#006064";
+            } else if (p.level <= 50) {
+                buffMsg = "초보자의 가호 II (보상+15%, 조우 적 스탯-5%)";
+                buffColor = "#e0f7fa"; buffBorder = "#b2ebf2"; buffText = "#006064";
+            }
+
             let advanceHtml = '';
             if (p.level >= 100 && p.classTier === 0) {
                 advanceHtml = `<button class="btn-main" onclick="advanceClass()" style="width:100%; margin-bottom:10px; background-color:#d6b800; border-color:#d6b800; color:#333;">1차 직업 전직 가능!</button>`;
@@ -815,6 +862,10 @@
                 
                 <div class="status-line"><span>소지금(Gold)</span> <span>${p.gold} G</span></div>
                 
+                <div class="status-block" style="background:${buffColor}; border-color:${buffBorder}; margin-bottom:5px; color:${buffText};">
+                    <strong>[상태이상]</strong> ${buffMsg}
+                </div>
+
                 <div class="status-block" style="background:#eaf2ea; border-color:#c3d8c3;">
                     <strong>[현재 종합 능력치]</strong>
                     <div style="display:flex; justify-content:space-between; margin-top:4px;">
@@ -868,6 +919,7 @@
                 p.job = choice;
                 p.level = 1;
                 p.exp = 0;
+                p.maxExp = getRequiredExp(1); // 전직 시 필요 경험치 1레벨 기준으로 즉시 동기화
                 p.str = 5; p.int = 5; p.vit = 5; p.dex = 5; p.cha = 5; p.luk = 5;
                 
                 const maxHp = getPlayerTotalStats().maxHp;
@@ -933,12 +985,88 @@
             const saved = localStorage.getItem('work_sys_v2');
             if (saved) store.player = { ...store.player, ...JSON.parse(saved) };
             if (store.player.bank === undefined) store.player.bank = 0;
+            if (store.player.storage === undefined) store.player.storage = []; // 창고 배열 초기화
             if (store.player.maxExp === undefined || store.player.maxExp === 15) store.player.maxExp = getRequiredExp(store.player.level);
             if (store.player.cha === undefined) store.player.cha = 5;
             if (store.player.luk === undefined) store.player.luk = 5;
             if (store.player.classTier === undefined) store.player.classTier = 0;
             if (store.player.job === undefined) store.player.job = '초보자';
             if (store.player.battles === undefined) store.player.battles = { total: 0, win: 0, lose: 0 };
+        }
+
+        function openHome() {
+            changeView('home');
+            renderHome();
+        }
+
+        function renderHome() {
+            const p = store.player;
+            const equipDiv = document.getElementById('home-equipped');
+            const storageDiv = document.getElementById('home-storage');
+            
+            // 1. 착용 장비 렌더링
+            let equipHtml = '';
+            ['weapon', 'armor', 'accessory'].forEach(type => {
+                if (p[type]) {
+                    equipHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center; border-bottom:1px dashed #ccc; padding-bottom:5px;">
+                        <span>[${p[type].name}] (Lv.${p[type].reqLevel})</span>
+                        <button onclick="storeItem('${type}')" style="padding:2px 8px;">보관</button>
+                    </div>`;
+                }
+            });
+            equipDiv.innerHTML = equipHtml || '<span style="color:#999;">착용중인 장비가 없습니다.</span>';
+
+            // 2. 창고 장비 렌더링
+            document.getElementById('storage-count').innerText = p.storage.length;
+            let storageHtml = '';
+            p.storage.forEach((item, index) => {
+                const canEquip = p.level >= item.reqLevel;
+                const btnStyle = canEquip ? '' : 'color:#999; cursor:not-allowed;';
+                storageHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:5px; align-items:center; border-bottom:1px dashed #ccc; padding-bottom:5px;">
+                    <span style="${canEquip ? '' : 'color:#a4262c;'}">[${item.name}] (요구 Lv.${item.reqLevel})</span>
+                    <button onclick="retrieveItem(${index})" style="padding:2px 8px; ${btnStyle}" ${canEquip ? '' : 'disabled'}>장착</button>
+                </div>`;
+            });
+            storageDiv.innerHTML = storageHtml || '<span style="color:#999;">보관된 장비가 없습니다.</span>';
+        }
+
+        function storeItem(type) {
+            const p = store.player;
+            if (p.storage.length >= 3) {
+                sysMsg("창고가 가득 찼습니다. (최대 3개)"); return;
+            }
+            if (p[type]) {
+                p.storage.push(p[type]);
+                p[type] = null;
+                sysMsg("장비를 창고에 보관했습니다.");
+                saveGame(); renderPlayerStatus(); renderHome();
+            }
+        }
+
+        function retrieveItem(index) {
+            const p = store.player;
+            const item = p.storage[index];
+            
+            if (p.level < item.reqLevel) {
+                sysMsg(`착용 레벨이 부족합니다. (필요 Lv.${item.reqLevel})`); return;
+            }
+
+            // 착용하려는 부위에 이미 장비가 있다면, 서로 교체
+            const currentEquipped = p[item.type];
+            p[item.type] = item;
+            
+            if (currentEquipped) {
+                p.storage[index] = currentEquipped;
+                sysMsg(`[${currentEquipped.name}] 장비와 교체하여 착용했습니다.`);
+            } else {
+                p.storage.splice(index, 1);
+                sysMsg(`[${item.name}] 장비를 꺼내 착용했습니다.`);
+            }
+            
+            const maxHp = getPlayerTotalStats().maxHp;
+            if(p.hp > maxHp) p.hp = maxHp;
+
+            saveGame(); renderPlayerStatus(); renderHome();
         }
         
         function resetData() {
