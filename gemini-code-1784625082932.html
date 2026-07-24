@@ -692,19 +692,22 @@
                 let logLines = [];
                 
                 const tryStat = (name, val) => {
-                    let prob = 0.6; // 0클래스 기본 확률
-                    let gain = 1;   // 0클래스 기본 배율
+                    // 1. 클래스 티어에 따른 기본 확률 설정
+                    let baseProb = 0.30; // 0클래스 (30%)
+                    if (p.classTier === 1) baseProb = 0.35; // 1클래스 (35%)
+                    else if (p.classTier >= 2) baseProb = 0.40; // 2클래스 이상 (40%)
                     
-                    if (p.classTier >= 1) {
-                        gain = 2; // 클래스 전직 시 능력치 상승폭 증가
-                        if (p.job === '가드' && (name === 'STR' || name === 'VIT')) prob = 0.85;
-                        else if (p.job === '아처' && (name === 'DEX' || name === 'LUK')) prob = 0.85;
-                        else if (p.job === '캐스터' && (name === 'INT' || name === 'CHA')) prob = 0.85;
-                        else prob = 0.4;
-                    }
+                    // 2. 행운(LUK) 스탯 보정: LUK 1당 0.05% (0.0005) 추가
+                    let lukBonus = (p.luk || 0) * 0.0005;
+                    
+                    // 3. 최종 확률 계산 및 최대 상한(Cap) 60% 적용
+                    let finalProb = Math.min(0.60, baseProb + lukBonus);
+                    
+                    // 상승 수치(gain)는 기존과 동일하게 클래스 전직 시 2, 미전직 시 1 적용
+                    let gain = (p.classTier >= 1) ? 2 : 1; 
 
                     const kName = statNames[name];
-                    if(Math.random() < prob) { 
+                    if (Math.random() < finalProb) { 
                         logLines.push(` > <span class="log-stat">${kName}(이)가 ${gain} 올랐습니다.</span>`);
                         return val + gain; 
                     } else { 
