@@ -90,8 +90,12 @@
     <div class="container" id="app-container">
         <div id="left-panel">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #107c41; margin-bottom: 10px; padding-bottom: 4px;">
-                <h2 style="border:none; margin:0; padding:0;">User Status</h2>
-                <button onclick="changeName()" style="background:none; border:none; cursor:pointer; font-size:14px; padding:0;" title="닉네임 변경">⚙️</button>
+                <div style="display:flex; align-items:center; flex-grow:1; min-width:0;">
+                    <span id="player-nickname-display" style="font-weight:bold; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition: font-size 0.2s;">플레이어</span>
+                    <span style="margin:0 8px; color:#ccc;">|</span>
+                    <h2 style="border:none; margin:0; padding:0; font-size:16px; white-space:nowrap;">User Status</h2>
+                </div>
+                <button onclick="changeName()" style="background:none; border:none; cursor:pointer; font-size:14px; padding:0 0 0 5px; flex-shrink:0;" title="닉네임 변경">⚙️</button>
             </div>
             <div id="player-status"></div>
             <div class="status-block" id="player-equip"></div>
@@ -380,9 +384,17 @@
         function sysMsg(msg) { document.getElementById('sys-msg').innerHTML = msg; }
         
         function changeName() {
-            const newName = prompt("새로운 닉네임을 입력하세요:", store.player.name);
+            const newName = prompt("새로운 닉네임을 입력하세요 (최대 12글자):", store.player.name || "");
             if (newName && newName.trim() !== '') {
-                store.player.name = newName.trim();
+                const trimmedName = newName.trim();
+                
+                // 12글자 제한 로직
+                if (trimmedName.length > 12) {
+                    alert("닉네임은 최대 12글자까지만 설정 가능합니다.");
+                    return;
+                }
+                
+                store.player.name = trimmedName;
                 saveGame();
                 renderPlayerStatus();
                 sysMsg("닉네임이 성공적으로 변경되었습니다.");
@@ -928,6 +940,12 @@
                     ${p.battles.total}전 ${p.battles.win}승 ${p.battles.lose}패 (승률 ${winRate}%)
                 </div>
             `;
+            // 닉네임 화면 출력 및 글자 수 비례 폰트 크기 조정
+        const nickEl = document.getElementById('player-nickname-display');
+        if (nickEl) {
+            nickEl.textContent = store.player.name || '플레이어';
+            nickEl.style.fontSize = (store.player.name && store.player.name.length > 8) ? '13px' : '16px';
+        }
         }
 
         function advanceClass(targetTier = 1) {
