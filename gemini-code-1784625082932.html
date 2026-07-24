@@ -89,7 +89,10 @@
 <body id="app-body">
     <div class="container" id="app-container">
         <div id="left-panel">
-            <h2>User Status</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #107c41; margin-bottom: 10px; padding-bottom: 4px;">
+                <h2 style="border:none; margin:0; padding:0;">User Status</h2>
+                <button onclick="changeName()" style="background:none; border:none; cursor:pointer; font-size:14px; padding:0;" title="닉네임 변경">⚙️</button>
+            </div>
             <div id="player-status"></div>
             <div class="status-block" id="player-equip"></div>
 
@@ -376,6 +379,16 @@
 
         function sysMsg(msg) { document.getElementById('sys-msg').innerHTML = msg; }
         
+        function changeName() {
+            const newName = prompt("새로운 닉네임을 입력하세요:", store.player.name);
+            if (newName && newName.trim() !== '') {
+                store.player.name = newName.trim();
+                saveGame();
+                renderPlayerStatus();
+                sysMsg("닉네임이 성공적으로 변경되었습니다.");
+            }
+        }
+
         function changeView(viewId) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.getElementById(`view-${viewId}`).classList.add('active');
@@ -658,7 +671,14 @@
             while (p.exp >= p.maxExp) {
                 p.exp -= p.maxExp; p.level++; p.sp++; p.maxExp = Math.floor(10 + (p.level * 8) + Math.pow(p.level, 1.7));
                 
-                let upStats = [], flatStats = [];
+                const statNames = { STR: '근력', INT: '지능', VIT: '체력', DEX: '민첩', CHA: '매력', LUK: '행운' };
+                const failMsgs = [
+                    "오르락 내리락 지랄을 합니다.", "오른 척을 합니다.", "오른 줄 알았지? 아니야!!", 
+                    "오르지 않았습니다.", "올랐다가 다시 내렸습니다.", "오를까말까 오를까말까 합니다.", "갈팡질팡 합니다."
+                ];
+                
+                let logLines = [];
+                
                 const tryStat = (name, val) => {
                     let prob = 0.6; // 0클래스 기본 확률
                     let gain = 1;   // 0클래스 기본 배율
@@ -671,9 +691,19 @@
                         else prob = 0.4;
                     }
 
-                    if(Math.random() < prob) { upStats.push(name); return val + gain; }
-                    else { flatStats.push(name); return val; }
+                    const kName = statNames[name];
+                    if(Math.random() < prob) { 
+                        logLines.push(` > <span class="log-stat">${kName}(이)가 ${gain} 올랐습니다.</span>`);
+                        return val + gain; 
+                    } else { 
+                        const failMsg = failMsgs[Math.floor(Math.random() * failMsgs.length)];
+                        logLines.push(` > <span style="color:#888;">${kName}(이)가 ${failMsg}</span>`);
+                        return val; 
+                    }
                 };
+                
+                leveledUp = true;
+                addLog(` > <span class="log-victory">레벨업! Lv.${p.level}</span>`);
                 
                 p.str = tryStat('STR', p.str);
                 p.int = tryStat('INT', p.int);
@@ -682,10 +712,7 @@
                 p.cha = tryStat('CHA', p.cha); 
                 p.luk = tryStat('LUK', p.luk); 
                 
-                leveledUp = true;
-                addLog(` > <span class="log-victory">레벨업! Lv.${p.level}</span>`);
-                addLog(` > <span class="log-stat">상승: ${upStats.length ? upStats.join(', ') : '없음'}</span>`);
-                addLog(` > <span style="color:#888;">유지: ${flatStats.length ? flatStats.join(', ') : '없음'}</span>`);
+                logLines.forEach(line => addLog(line));
             }
             if (leveledUp) {
                 p.hp = getPlayerTotalStats().maxHp; 
