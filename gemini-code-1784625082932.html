@@ -229,14 +229,15 @@
                 sp: 0, skills: { dash: 0, multiHit: 0, lifesteal: 0 },
                 classTier: 0, job: '인턴', battles: { total: 0, win: 0, lose: 0 }
             },
+            // [기존 코드 덮어쓰기: skillsData 내부]
             skillsData: {
                 dash: { id: 'dash', name: '강타', reqLv: 10, desc: '강력한 공격을 가함 (피해량 대폭 증가)' },
                 multiHit: { id: 'multiHit', name: '연속공격', reqLv: 24, desc: '빠르게 연속 타격을 가함' },
                 lifesteal: { id: 'lifesteal', name: '흡혈', reqLv: 50, desc: '피해량의 많은 부분을 체력으로 회복' },
-                // 1차 전직 전용 스킬 정식 등록
-                overtime: { id: 'overtime', name: '포괄임금제', reqLv: 1, reqJob: '현장직', desc: '치명상 입을 시 확률적으로 HP 1로 생존' },
-                nightWork: { id: 'nightWork', name: '야근의 힘', reqLv: 1, reqJob: '사무직', desc: '공격 시 추가 피해를 입힘' },
-                taskShare: { id: 'taskShare', name: '업무 분담', reqLv: 1, reqJob: '관리직', desc: '받는 피해량을 일정 비율 감소' }
+                // 신규 추가: 1차 전직 전용 패시브 스킬
+                field_passive: { id: 'field_passive', name: '포괄임금제', reqLv: 30, reqJob: '현장직', desc: '[현장직] 패배 위기 시 30% 확률로 HP 1로 1회 생존' },
+                office_passive: { id: 'office_passive', name: '법인카드', reqLv: 30, reqJob: '사무직', desc: '[사무직] 전투 승리 시 골드 획득량 20% 증가' },
+                admin_passive: { id: 'admin_passive', name: '마이크로매니징', reqLv: 30, reqJob: '관리직', desc: '[관리직] 명중률 대폭 보정' }
             },
             equipments: [
                 // Lv 1~10 무기 (문구/완구류)
@@ -636,19 +637,22 @@
                 }
             }
 
-            // [핵심 변경점] 체력을 플레이어의 약 2.2배로 증량하여 1턴 킬을 방지하고 3~5턴 공방 유도
+            // [기존 코드 덮어쓰기: spawnMonster 내부 스탯 공식 파트]
+            
+            // [핵심 변경점] 체력 계수를 2.2에서 4.5로 증량하여 전투를 5~10턴으로 연장
             const targetCP = pCP * cpRatio * 1.1;
             
-            // 초보자의 가호 스탯 디버프 강화 (초반 승률 60% 이상으로 상향)
             let statNerf = 1.0;
             let rewardBuff = 1.0;
-            if (lv <= 25) { statNerf = 0.75; rewardBuff = 1.30; }
-            else if (lv <= 50) { statNerf = 0.85; rewardBuff = 1.15; }
+            if (lv <= 25) { statNerf = 0.90; rewardBuff = 1.30; }
+            else if (lv <= 50) { statNerf = 0.95; rewardBuff = 1.15; }
 
-            // 몬스터 체력 계수를 2.2배에서 1.3배로 조절하여 5~6턴 공방 유도
-            let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio * 1.3 * statNerf); 
-            let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio * 0.55 * statNerf);
-            let mDef = Math.floor(pStats.def * targetTemplate.defRate * cpRatio * 0.7 * statNerf);
+            // 몬스터 HP는 2배 이상 늘리고, 공격력 계수는 낮춰서 안정적인 공방 유도
+            let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio * 4.5 * statNerf); 
+            let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio * 0.7 * statNerf);
+            
+            // 불사신 몬스터 방지: 몬스터 방어력을 '플레이어의 공격력(atk)'에 비례하도록 변경하여 무조건 피해가 들어가도록 수정
+            let mDef = Math.floor(pStats.atk * 0.5 * targetTemplate.defRate * cpRatio * statNerf);
 
             // 2-2. 적 보상 체계를 CP가 아닌 레벨 및 클래스 티어 기반으로 변경
             let baseRewardValue = (lv * 3) + 10;
@@ -1077,18 +1081,20 @@
 
         function saveGame() { localStorage.setItem('work_sys_v2', JSON.stringify(store.player)); }
         
+        // [기존 코드 덮어쓰기: loadGame() 함수 내부 하단]
         function loadGame() {
             const saved = localStorage.getItem('work_sys_v2');
             if (saved) store.player = { ...store.player, ...JSON.parse(saved) };
             if (store.player.bank === undefined) store.player.bank = 0;
-            if (store.player.storage === undefined) store.player.storage = [];
+            if (store.player.storage === undefined) store.player.storage = []; 
             if (store.player.maxExp === undefined || store.player.maxExp === 15) store.player.maxExp = getRequiredExp(store.player.level);
             if (store.player.cha === undefined) store.player.cha = 5;
             if (store.player.luk === undefined) store.player.luk = 5;
             if (store.player.classTier === undefined) store.player.classTier = 0;
             
-            // 직업명 표기 오류 보정 ('초보자' 또는 빈 값을 '인턴'으로 교정)
-            if (!store.player.job || store.player.job === '초보자') store.player.job = '인턴';
+            // 버그 수정: 0티어일 경우 무조건 '인턴'으로 고정하여 초보자 표기 방지
+            if (store.player.classTier === 0) store.player.job = '인턴';
+            else if (store.player.job === undefined) store.player.job = '인턴';
             
             if (store.player.battles === undefined) store.player.battles = { total: 0, win: 0, lose: 0 };
         }
