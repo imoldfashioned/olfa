@@ -232,7 +232,11 @@
             skillsData: {
                 dash: { id: 'dash', name: '강타', reqLv: 10, desc: '강력한 공격을 가함 (피해량 대폭 증가)' },
                 multiHit: { id: 'multiHit', name: '연속공격', reqLv: 24, desc: '빠르게 연속 타격을 가함' },
-                lifesteal: { id: 'lifesteal', name: '흡혈', reqLv: 50, desc: '피해량의 많은 부분을 체력으로 회복' }
+                lifesteal: { id: 'lifesteal', name: '흡혈', reqLv: 50, desc: '피해량의 많은 부분을 체력으로 회복' },
+                // 1차 전직 전용 스킬 정식 등록
+                overtime: { id: 'overtime', name: '포괄임금제', reqLv: 1, reqJob: '현장직', desc: '치명상 입을 시 확률적으로 HP 1로 생존' },
+                nightWork: { id: 'nightWork', name: '야근의 힘', reqLv: 1, reqJob: '사무직', desc: '공격 시 추가 피해를 입힘' },
+                taskShare: { id: 'taskShare', name: '업무 분담', reqLv: 1, reqJob: '관리직', desc: '받는 피해량을 일정 비율 감소' }
             },
             equipments: [
                 // Lv 1~10 무기 (문구/완구류)
@@ -284,42 +288,42 @@
                 { id: 'ac32', name: '무한동력 커피머신', type: 'accessory', price: 50000, reqLevel: 65, stats: { crt: 20, eva: 20, maxHp: 800 } }
             ],
             monsters: [
-                // 1~30 구간 몬스터
-                { name: '하루살이', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.1, atkRate: 0.5, defRate: 0.1, eva: 60, rewardRate: 0.5 },
-                { name: '콩벌레', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.1, atkRate: 0.4, defRate: 1.8, eva: 0, rewardRate: 0.8 },
-                { name: '들개', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.7, atkRate: 1.2, defRate: 0.6, eva: 10, rewardRate: 0.9 },
-                { name: '잼민이', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.4, atkRate: 2.2, defRate: 0.2, eva: 15, rewardRate: 1.1 },
-                { name: '중삐리', type: 'normal', minLv: 3, maxLv: 30, hpRate: 0.9, atkRate: 0.9, defRate: 0.8, eva: 5, rewardRate: 1.0 },
-                { name: '파오후', type: 'normal', minLv: 5, maxLv: 30, hpRate: 1.8, atkRate: 0.6, defRate: 0.5, eva: -20, rewardRate: 1.2 },
-                { name: '고삐리', type: 'strong', minLv: 10, maxLv: 30, hpRate: 1.1, atkRate: 1.2, defRate: 0.9, eva: 5, rewardRate: 1.5 },
-                { name: '양키', type: 'strong', minLv: 15, maxLv: 30, hpRate: 1.0, atkRate: 1.4, defRate: 0.8, eva: 15, rewardRate: 1.8 },
-                { name: '일진', type: 'boss', minLv: 20, maxLv: 30, hpRate: 1.5, atkRate: 1.5, defRate: 1.0, eva: 10, rewardRate: 2.5 },
+                // 1~30 구간 몬스터 (공격력 계수 하향으로 초반 승률 확보)
+                { name: '하루살이', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.8, atkRate: 0.3, defRate: 0.1, eva: 10, rewardRate: 0.5 },
+                { name: '콩벌레', type: 'normal', minLv: 1, maxLv: 30, hpRate: 1.0, atkRate: 0.25, defRate: 0.8, eva: 0, rewardRate: 0.8 },
+                { name: '들개', type: 'normal', minLv: 1, maxLv: 30, hpRate: 1.1, atkRate: 0.4, defRate: 0.3, eva: 5, rewardRate: 0.9 },
+                { name: '잼민이', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.9, atkRate: 0.5, defRate: 0.2, eva: 8, rewardRate: 1.1 },
+                { name: '중삐리', type: 'normal', minLv: 3, maxLv: 30, hpRate: 1.2, atkRate: 0.45, defRate: 0.4, eva: 5, rewardRate: 1.0 },
+                { name: '파오후', type: 'normal', minLv: 5, maxLv: 30, hpRate: 1.8, atkRate: 0.4, defRate: 0.5, eva: -10, rewardRate: 1.2 },
+                { name: '고삐리', type: 'strong', minLv: 10, maxLv: 30, hpRate: 1.5, atkRate: 0.6, defRate: 0.5, eva: 5, rewardRate: 1.5 },
+                { name: '양키', type: 'strong', minLv: 15, maxLv: 30, hpRate: 1.6, atkRate: 0.65, defRate: 0.5, eva: 10, rewardRate: 1.8 },
+                { name: '일진', type: 'boss', minLv: 20, maxLv: 30, hpRate: 2.2, atkRate: 0.75, defRate: 0.6, eva: 8, rewardRate: 2.5 },
 
                 // 20~50 구간 몬스터
-                { name: '백수', type: 'normal', minLv: 20, maxLv: 50, hpRate: 1.5, atkRate: 0.5, defRate: 0.5, eva: 0, rewardRate: 0.9 },
-                { name: '재수생', type: 'normal', minLv: 20, maxLv: 50, hpRate: 0.8, atkRate: 1.1, defRate: 1.5, eva: 0, rewardRate: 1.0 },
-                { name: '미미짱', type: 'normal', minLv: 20, maxLv: 50, hpRate: 0.3, atkRate: 0.9, defRate: 0.4, eva: 50, rewardRate: 1.2 },
-                { name: '취준생', type: 'normal', minLv: 22, maxLv: 50, hpRate: 1.1, atkRate: 1.0, defRate: 0.9, eva: 5, rewardRate: 1.1 },
-                { name: '라면가이더', type: 'normal', minLv: 25, maxLv: 50, hpRate: 0.6, atkRate: 1.8, defRate: 0.5, eva: 25, rewardRate: 1.3 },
-                { name: '헬린이', type: 'strong', minLv: 30, maxLv: 50, hpRate: 2.5, atkRate: 1.2, defRate: 1.2, eva: -5, rewardRate: 1.8 },
-                { name: '야타족', type: 'strong', minLv: 35, maxLv: 50, hpRate: 0.9, atkRate: 1.5, defRate: 0.8, eva: 25, rewardRate: 2.0 },
-                { name: '조기축구 아저씨', type: 'boss', minLv: 40, maxLv: 50, hpRate: 1.8, atkRate: 1.4, defRate: 1.3, eva: 15, rewardRate: 3.0 },
+                { name: '백수', type: 'normal', minLv: 20, maxLv: 50, hpRate: 1.3, atkRate: 0.4, defRate: 0.4, eva: 0, rewardRate: 0.9 },
+                { name: '재수생', type: 'normal', minLv: 20, maxLv: 50, hpRate: 1.1, atkRate: 0.45, defRate: 0.8, eva: 0, rewardRate: 1.0 },
+                { name: '미미짱', type: 'normal', minLv: 20, maxLv: 50, hpRate: 0.8, atkRate: 0.5, defRate: 0.3, eva: 25, rewardRate: 1.2 },
+                { name: '취준생', type: 'normal', minLv: 22, maxLv: 50, hpRate: 1.2, atkRate: 0.5, defRate: 0.5, eva: 5, rewardRate: 1.1 },
+                { name: '라면가이더', type: 'normal', minLv: 25, maxLv: 50, hpRate: 1.0, atkRate: 0.6, defRate: 0.4, eva: 15, rewardRate: 1.3 },
+                { name: '헬린이', type: 'strong', minLv: 30, maxLv: 50, hpRate: 2.2, atkRate: 0.7, defRate: 0.8, eva: -5, rewardRate: 1.8 },
+                { name: '야타족', type: 'strong', minLv: 35, maxLv: 50, hpRate: 1.5, atkRate: 0.75, defRate: 0.5, eva: 15, rewardRate: 2.0 },
+                { name: '조기축구 아저씨', type: 'boss', minLv: 40, maxLv: 50, hpRate: 2.5, atkRate: 0.85, defRate: 0.8, eva: 10, rewardRate: 3.0 },
 
-                // 40~99 구간 몬스터 (기존 사내 몬스터군 상향 배치)
-                { name: '지각한 인턴', type: 'normal', minLv: 40, maxLv: 99, hpRate: 0.6, atkRate: 1.5, defRate: 0.4, eva: 30, rewardRate: 1.1 },
-                { name: '슬라임 사원', type: 'normal', minLv: 40, maxLv: 99, hpRate: 1.0, atkRate: 1.0, defRate: 1.0, eva: 0, rewardRate: 1.0 },
-                { name: '파견직 사원', type: 'normal', minLv: 42, maxLv: 99, hpRate: 1.1, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.2 },
-                { name: '까칠한 디자이너', type: 'normal', minLv: 45, maxLv: 99, hpRate: 0.8, atkRate: 1.3, defRate: 0.7, eva: 15, rewardRate: 1.4 },
-                { name: '불만많은 고객', type: 'normal', minLv: 48, maxLv: 99, hpRate: 1.3, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.5 },
-                { name: '늑대 대리', type: 'strong', minLv: 50, maxLv: 99, hpRate: 1.2, atkRate: 1.4, defRate: 1.0, eva: 15, rewardRate: 2.0 },
-                { name: '고블린 횡령범', type: 'strong', minLv: 55, maxLv: 99, hpRate: 0.9, atkRate: 1.8, defRate: 0.8, eva: 25, rewardRate: 2.3 },
-                { name: '오크 주임', type: 'strong', minLv: 60, maxLv: 99, hpRate: 1.8, atkRate: 1.2, defRate: 1.5, eva: 0, rewardRate: 2.2 },
-                { name: '보안팀장', type: 'boss', minLv: 65, maxLv: 99, hpRate: 2.0, atkRate: 1.3, defRate: 2.5, eva: 5, rewardRate: 3.5 },
-                { name: '광분한 차장', type: 'boss', minLv: 70, maxLv: 99, hpRate: 0.5, atkRate: 3.5, defRate: 0.5, eva: 10, rewardRate: 3.8 },
-                { name: '영업부 과장', type: 'boss', minLv: 75, maxLv: 99, hpRate: 1.5, atkRate: 1.6, defRate: 1.2, eva: 10, rewardRate: 3.0 },
-                { name: '스켈레톤 팀장', type: 'boss', minLv: 80, maxLv: 99, hpRate: 1.3, atkRate: 1.8, defRate: 1.1, eva: 20, rewardRate: 4.0 },
-                { name: '데스나이트 부장', type: 'boss', minLv: 85, maxLv: 99, hpRate: 2.2, atkRate: 1.8, defRate: 1.5, eva: 10, rewardRate: 5.0 },
-                { name: '감사팀 임원', type: 'boss', minLv: 90, maxLv: 99, hpRate: 3.0, atkRate: 2.0, defRate: 2.0, eva: 15, rewardRate: 7.0 }
+                // 40~99 구간 몬스터 (과도한 공격력 수치 하향 조정)
+                { name: '지각한 인턴', type: 'normal', minLv: 40, maxLv: 99, hpRate: 1.1, atkRate: 0.6, defRate: 0.4, eva: 15, rewardRate: 1.1 },
+                { name: '슬라임 사원', type: 'normal', minLv: 40, maxLv: 99, hpRate: 1.4, atkRate: 0.55, defRate: 0.6, eva: 0, rewardRate: 1.0 },
+                { name: '파견직 사원', type: 'normal', minLv: 42, maxLv: 99, hpRate: 1.3, atkRate: 0.6, defRate: 0.5, eva: 5, rewardRate: 1.2 },
+                { name: '까칠한 디자이너', type: 'normal', minLv: 45, maxLv: 99, hpRate: 1.1, atkRate: 0.7, defRate: 0.4, eva: 10, rewardRate: 1.4 },
+                { name: '불만많은 고객', type: 'normal', minLv: 48, maxLv: 99, hpRate: 1.5, atkRate: 0.65, defRate: 0.6, eva: 5, rewardRate: 1.5 },
+                { name: '늑대 대리', type: 'strong', minLv: 50, maxLv: 99, hpRate: 1.8, atkRate: 0.8, defRate: 0.7, eva: 10, rewardRate: 2.0 },
+                { name: '고블린 횡령범', type: 'strong', minLv: 55, maxLv: 99, hpRate: 1.4, atkRate: 0.9, defRate: 0.5, eva: 15, rewardRate: 2.3 },
+                { name: '오크 주임', type: 'strong', minLv: 60, maxLv: 99, hpRate: 2.2, atkRate: 0.75, defRate: 1.0, eva: 0, rewardRate: 2.2 },
+                { name: '보안팀장', type: 'boss', minLv: 65, maxLv: 99, hpRate: 2.6, atkRate: 0.9, defRate: 1.2, eva: 5, rewardRate: 3.5 },
+                { name: '광분한 차장', type: 'boss', minLv: 70, maxLv: 99, hpRate: 1.8, atkRate: 1.2, defRate: 0.6, eva: 10, rewardRate: 3.8 },
+                { name: '영업부 과장', type: 'boss', minLv: 75, maxLv: 99, hpRate: 2.2, atkRate: 1.0, defRate: 0.8, eva: 8, rewardRate: 3.0 },
+                { name: '스켈레톤 팀장', type: 'boss', minLv: 80, maxLv: 99, hpRate: 2.0, atkRate: 1.1, defRate: 0.8, eva: 12, rewardRate: 4.0 },
+                { name: '데스나이트 부장', type: 'boss', minLv: 85, maxLv: 99, hpRate: 2.8, atkRate: 1.2, defRate: 1.0, eva: 8, rewardRate: 5.0 },
+                { name: '감사팀 임원', type: 'boss', minLv: 90, maxLv: 99, hpRate: 3.2, atkRate: 1.3, defRate: 1.2, eva: 10, rewardRate: 7.0 }
             ],
             currentMonster: null, logs: []
         };
@@ -457,7 +461,8 @@
                 addLog(`[시스템] 대상 '${m.name}'(CP: ${m.cp}) 조우. (나의 CP: ${calculateCP(pStats)})`);
             }
 
-            for (let turn = 1; turn <= 10; turn++) {
+            // 공방 유도를 위해 최대 턴을 15턴으로 확장
+            for (let turn = 1; turn <= 15; turn++) {
                 addLog(`<span class="log-turn">▶ Turn ${turn}</span>`);
                 
                 // 1. 플레이어 공격 연산
@@ -466,6 +471,13 @@
 
                 if (Math.random() * 100 <= (pStats.acc - m.eva)) {
                     let baseDmg = pStats.atk * (0.8 + Math.random() * 0.4);
+                    
+                    // 사무직 스킬: 야근의 힘 (스킬 배운 경우만 추가 피해)
+                    if (p.job === '사무직' && (p.skills.nightWork || 0) > 0) {
+                        const bonusDmg = (p.skills.nightWork * 5);
+                        baseDmg += bonusDmg;
+                    }
+
                     pDmg = Math.max(1, Math.floor(baseDmg - m.def));
                     
                     pCrit = Math.random() * 100 <= pStats.crt;
@@ -480,6 +492,13 @@
                 let mDmg = 0, mMiss = false;
                 if (Math.random() * 100 <= (m.acc - pStats.eva)) {
                     let baseDmg = m.atk * (0.8 + Math.random() * 0.4);
+                    
+                    // 관리직 스킬: 업무 분담 (스킬 배운 경우만 데미지 경감)
+                    if (p.job === '관리직' && (p.skills.taskShare || 0) > 0) {
+                        const reduceRatio = 0.05 * p.skills.taskShare;
+                        baseDmg *= (1 - reduceRatio);
+                    }
+
                     mDmg = Math.max(1, Math.floor(baseDmg - pStats.def));
                 } else {
                     mMiss = true;
@@ -500,8 +519,7 @@
                     addLog(` - 반격 : ${mDmg} 피해`);
                 }
 
-                // [판정 원칙 반영]
-                // 1. 크로스 카운터 포함, 몬스터가 쓰러졌다면 플레이어 무조건 승리
+                // 판정 처리
                 if (m.hp <= 0) {
                     if (p.hp <= 0) {
                         p.hp = pStats.maxHp;
@@ -513,13 +531,13 @@
                     battleEnded = true; 
                     break;
                 } 
-                // 2. 몬스터는 살고 플레이어만 쓰러진 경우 패배 (스킬 발동 판정 포함)
                 else if (p.hp <= 0) {
-                    // [1클래스 테스트 스킬] 현장직 패시브: 포괄임금제 (30% 확률로 1턴 생존)
-                    if (p.job === '현장직' && Math.random() < 0.3) {
+                    // 현장직 스킬: 포괄임금제 (스킬 배운 경우만 HP 1 생존 발동)
+                    const overtimeRank = p.skills.overtime || 0;
+                    if (p.job === '현장직' && overtimeRank > 0 && Math.random() < (0.15 + overtimeRank * 0.05)) {
                         p.hp = 1; 
                         addLog(` - <span style="color:#d6b800; font-weight:bold;">[포괄임금제 발동!] 야근 수당 없이 버텨냅니다! (HP 1로 생존)</span>`);
-                        continue; // 패배 처리하지 않고 전투 속행
+                        continue; 
                     }
 
                     addLog(`<span class="log-result log-defeat">[연산 종료] 실패 - 체력 소진</span>`);
@@ -529,7 +547,6 @@
                 }
             }
 
-            // [판정 원칙 반영] 10턴 초과(타임아웃) 시 플레이어 패배 처리
             if (!battleEnded) {
                 addLog(`<span class="log-result log-defeat">[연산 종료] Time Out - 턴 초과 (전투 패배)</span>`);
                 loseBattle(isBankBattle); 
@@ -622,15 +639,16 @@
             // [핵심 변경점] 체력을 플레이어의 약 2.2배로 증량하여 1턴 킬을 방지하고 3~5턴 공방 유도
             const targetCP = pCP * cpRatio * 1.1;
             
-            // 1-4. 초보자의 가호 스탯 디버프 수치 설정
+            // 초보자의 가호 스탯 디버프 강화 (초반 승률 60% 이상으로 상향)
             let statNerf = 1.0;
             let rewardBuff = 1.0;
-            if (lv <= 25) { statNerf = 0.90; rewardBuff = 1.30; }
-            else if (lv <= 50) { statNerf = 0.95; rewardBuff = 1.15; }
+            if (lv <= 25) { statNerf = 0.75; rewardBuff = 1.30; }
+            else if (lv <= 50) { statNerf = 0.85; rewardBuff = 1.15; }
 
-            let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio * 2.2 * statNerf); 
-            let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio * 1.0 * statNerf);
-            let mDef = Math.floor(pStats.def * targetTemplate.defRate * cpRatio * 0.9 * statNerf);
+            // 몬스터 체력 계수를 2.2배에서 1.3배로 조절하여 5~6턴 공방 유도
+            let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio * 1.3 * statNerf); 
+            let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio * 0.55 * statNerf);
+            let mDef = Math.floor(pStats.def * targetTemplate.defRate * cpRatio * 0.7 * statNerf);
 
             // 2-2. 적 보상 체계를 CP가 아닌 레벨 및 클래스 티어 기반으로 변경
             let baseRewardValue = (lv * 3) + 10;
@@ -716,11 +734,11 @@
 
                     const kName = statNames[name];
                     if (Math.random() < finalProb) { 
-                        logLines.push(` > <span class="log-stat">${kName}(이)가 ${gain} 올랐습니다.</span>`);
+                        logLines.push(` > <span class="log-stat">${kName}이 ${gain} 올랐습니다.</span>`);
                         return val + gain; 
                     } else { 
                         const failMsg = failMsgs[Math.floor(Math.random() * failMsgs.length)];
-                        logLines.push(` > <span style="color:#888;">${kName}(이)가 ${failMsg}</span>`);
+                        logLines.push(` > <span style="color:#888;">${kName}이 ${failMsg}</span>`);
                         return val; 
                     }
                 };
@@ -735,13 +753,13 @@
                 p.cha = tryStat('CHA', p.cha); 
                 p.luk = tryStat('LUK', p.luk); 
                 
-                // 1클래스 직업별 레벨업 시 특화 스탯 보정 추가
+                // 1클래스 직업별 레벨업 시 특화 스탯 보정 (음수 차감 버그 수정)
                 if (p.job === '현장직') {
-                    p.vit += 1; p.str += 1; p.dex = Math.max(0, p.dex - 1);
+                    p.vit += 1; p.str += 1;
                 } else if (p.job === '사무직') {
-                    p.cha += 1; p.str += 1; p.vit = Math.max(0, p.vit - 1);
+                    p.cha += 1; p.str += 1;
                 } else if (p.job === '관리직') {
-                    p.dex += 1; p.str += 1; p.cha = Math.max(0, p.cha - 1);
+                    p.dex += 1; p.str += 1;
                 }
 
                 logLines.forEach(line => addLog(line));
@@ -970,8 +988,12 @@
 
         function advanceClass(targetTier = 1) {
             const p = store.player;
-            let choice = prompt(`${targetTier}차 직업으로 전직합니다.\n원하는 부서를 입력하세요 (현장직 / 사무직 / 관리직)\n※ 레벨과 능력치가 초기화됩니다.`);
+            const warningMsg = `[전직 경고]\n※ 전직 시, 착용중인 모든 장비를 50% 가격에 자동 매각합니다.\n자택 창고에 보관했는지 확인 필수!\n\n${targetTier}차 직업으로 전직하시겠습니까?\n원하는 부서를 입력하세요 (현장직 / 사무직 / 관리직)`;
             
+            let choice = prompt(warningMsg);
+            if (!choice) return;
+
+            choice = choice.trim();
             if (['현장직', '사무직', '관리직'].includes(choice)) {
                 if (targetTier === 2) {
                     if (choice === '현장직' && p.vit < 100) return sysMsg("현장직 이직 실패: 순수 VIT 100 이상 필요");
@@ -979,11 +1001,21 @@
                     if (choice === '관리직' && p.dex < 100) return sysMsg("관리직 이직 실패: 순수 DEX 100 이상 필요");
                 }
 
+                // 착용중인 모든 장비 50% 환급 매각
+                let refundTotal = 0;
+                ['weapon', 'armor', 'accessory'].forEach(type => {
+                    if (p[type]) {
+                        refundTotal += Math.floor((p[type].price || 0) * 0.5);
+                        p[type] = null;
+                    }
+                });
+
                 p.classTier = targetTier;
                 p.job = choice;
                 p.level = 1;
                 p.exp = 0;
-                p.maxExp = getRequiredExp(1); // 전직 시 필요 경험치 1레벨 기준으로 즉시 동기화
+                p.gold += refundTotal;
+                p.maxExp = getRequiredExp(1);
                 p.str = 5; p.int = 5; p.vit = 5; p.dex = 5; p.cha = 5; p.luk = 5;
                 
                 const maxHp = getPlayerTotalStats().maxHp;
@@ -991,7 +1023,7 @@
                 
                 saveGame();
                 renderPlayerStatus();
-                sysMsg(`[${choice}] 직업으로 전직했습니다! 능력치가 초기화되며 성장률이 극대화됩니다.`);
+                sysMsg(`[${choice}] 직업으로 전직했습니다! (착용 장비 자동 매각 환급금: +${refundTotal}G)`);
             } else {
                 sysMsg("올바른 직업 명칭을 입력하지 않아 취소되었습니다.");
             }
@@ -1049,12 +1081,15 @@
             const saved = localStorage.getItem('work_sys_v2');
             if (saved) store.player = { ...store.player, ...JSON.parse(saved) };
             if (store.player.bank === undefined) store.player.bank = 0;
-            if (store.player.storage === undefined) store.player.storage = []; // 창고 배열 초기화
+            if (store.player.storage === undefined) store.player.storage = [];
             if (store.player.maxExp === undefined || store.player.maxExp === 15) store.player.maxExp = getRequiredExp(store.player.level);
             if (store.player.cha === undefined) store.player.cha = 5;
             if (store.player.luk === undefined) store.player.luk = 5;
             if (store.player.classTier === undefined) store.player.classTier = 0;
-            if (store.player.job === undefined) store.player.job = '인턴';
+            
+            // 직업명 표기 오류 보정 ('초보자' 또는 빈 값을 '인턴'으로 교정)
+            if (!store.player.job || store.player.job === '초보자') store.player.job = '인턴';
+            
             if (store.player.battles === undefined) store.player.battles = { total: 0, win: 0, lose: 0 };
         }
 
@@ -1155,32 +1190,36 @@
         loadGame(); renderPlayerStatus();
         const Ranks = ['미습득', 'F', 'E', 'D', 'C', 'B', 'A', 'S'];
 
-function openSkills() {
-    changeView('skills');
-    document.getElementById('sp-display').innerText = store.player.sp;
-    let html = '';
-    Object.keys(store.skillsData).forEach(key => {
-        const s = store.skillsData[key];
-        const currentRank = store.player.skills[key] || 0;
-        const isUnlocked = store.player.level >= s.reqLv;
-        
-        html += `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #ddd; background: #fff; margin-bottom: 5px; opacity: ${isUnlocked ? '1' : '0.5'}">
-            <div>
-                <strong>${s.name}</strong> <span style="font-size:10px; color:#666;">(Lv.${s.reqLv} 해금)</span><br>
-                <span style="font-weight: bold; color: #0078d4;">[${Ranks[currentRank]}]</span>
-                <span style="font-size:11px; color:#555;">${s.desc}</span>
-            </div>
-            <button class="btn-skill" style="background-color: #0078d4; color: white;" onclick="upgradeSkill('${key}')" 
-            ${(!isUnlocked || store.player.sp < 1 || currentRank >= 7) ? 'disabled' : ''}>
-            ${currentRank >= 7 ? 'MAX' : '강화 (1 SP)'}
-            </button>
-        </div>`;
-    });
-    document.getElementById('skills-container').innerHTML = html;
-}
+        function openSkills() {
+            changeView('skills');
+            document.getElementById('sp-display').innerText = store.player.sp;
+            let html = '';
+            Object.keys(store.skillsData).forEach(key => {
+                const s = store.skillsData[key];
+                
+                // 직업 전용 스킬 필터링 (본인 직업 스킬만 표시)
+                if (s.reqJob && store.player.job !== s.reqJob) return;
 
-function upgradeSkill(key) {
+                const currentRank = store.player.skills[key] || 0;
+                const isUnlocked = store.player.level >= s.reqLv;
+                
+                html += `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #ddd; background: #fff; margin-bottom: 5px; opacity: ${isUnlocked ? '1' : '0.5'}">
+                    <div>
+                        <strong>${s.name}</strong> <span style="font-size:10px; color:#666;">(Lv.${s.reqLv} 해금)</span><br>
+                        <span style="font-weight: bold; color: #0078d4;">[${Ranks[currentRank]}]</span>
+                        <span style="font-size:11px; color:#555;">${s.desc}</span>
+                    </div>
+                    <button class="btn-skill" style="background-color: #0078d4; color: white;" onclick="upgradeSkill('${key}')" 
+                    ${(!isUnlocked || store.player.sp < 1 || currentRank >= 7) ? 'disabled' : ''}>
+                    ${currentRank >= 7 ? 'MAX' : '강화 (1 SP)'}
+                    </button>
+                </div>`;
+            });
+            document.getElementById('skills-container').innerHTML = html || '<p style="color:#999;">현재 배울 수 있는 직업 스킬이 없습니다.</p>';
+        }
+
+        function upgradeSkill(key) {
     const currentRank = store.player.skills[key] || 0;
     let nextRank = currentRank + 1;
     let requiredSp = Math.min(3, Math.ceil(nextRank / 2)); // 랭크업에 1~3 SP 가변 소모
@@ -1194,6 +1233,7 @@ function upgradeSkill(key) {
         sysMsg(`SP가 부족합니다. (필요 SP: ${requiredSp}, 현재 잔여: ${store.player.sp})`);
     }
 }
+
     </script>
 </body>
 </html>
