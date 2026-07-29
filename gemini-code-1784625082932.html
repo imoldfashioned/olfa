@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>업무 관리 시스템 v2.7</title>
+    <title>업무 관리 시스템 v2.8</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f3f2f1; color: #333; font-size: 12px; margin: 0; }
@@ -32,7 +32,7 @@
         #sys-msg { margin-top: 15px; color: #a4262c; font-size: 11px; min-height: 20px; font-weight:bold; word-break: keep-all; }
         #battle-log { margin-top: 10px; padding: 10px; border: 1px solid #cccccc; background-color: #ffffff; height: 350px; overflow-y: auto; font-family: 'Consolas', monospace; font-size: 11px; color: #333; line-height: 1.5; }
         
-        .log-turn { color: #107c41; font-weight: bold; }
+        .log-turn { color: #107c41; font-weight: bold; margin-top: 5px; display: inline-block;}
         .log-crit { color: #a4262c; font-weight: bold; }
         .log-miss { color: #8a8886; }
         .log-stat { color: #0078d4; }
@@ -115,8 +115,39 @@
         
         <div id="right-panel">
             <div id="view-main" class="view active">
-                <h2>대기 화면</h2>
-                <p style="color: #666;">좌측 메뉴에서 작업을 선택하십시오. (V2.6 대규모 데이터베이스 탑재)</p>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #107c41; padding-bottom: 5px; margin-bottom: 15px;">
+                    <h2 style="border:none; margin:0; padding:0;">대기 화면 (사내 인트라넷)</h2>
+                    <span style="font-weight:bold; color:#107c41; font-size:14px;">현재 버전: v2.8</span>
+                </div>
+                
+                <div style="background:#eaf2ea; padding:15px; border:1px solid #c3d8c3; margin-bottom: 15px;">
+                    <h3 style="margin-top:0; color:#107c41; font-size:13px;">버전별 업데이트 요약</h3>
+                    <ul style="margin-bottom:0; padding-left:20px; line-height:1.6; font-size:12px;">
+                        <li><strong>[v2.8] 2026-07-29:</strong> 1클래스 직업별 스킬 트리 대규모 추가, 몬스터 스케일링/전투 밸런스 2차 조정, 대기화면 및 턴 판정 개편</li>
+                        <li><strong>[v2.7] 2026-07-20:</strong> 모바일/PC 반응형 UI 강제 토글 버튼 추가, 장비 매각 로직 적용</li>
+                        <li><strong>[v2.6] 2026-07-15:</strong> 대규모 몬스터 데이터베이스 탑재, 자택(창고) 시스템 오픈</li>
+                    </ul>
+                </div>
+
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:200px; background:#f3f2f1; padding:10px; border:1px solid #ddd;">
+                        <h3 style="margin-top:0; border-bottom:1px solid #ccc; padding-bottom:3px;">공지사항</h3>
+                        <ul style="padding-left:20px; line-height:1.5; margin-bottom:0; font-size:11px;">
+                            <li>1클래스 전직 시 스킬 랭크와 SP가 정상적으로 <strong>초기화</strong>되도록 수정되었습니다.</li>
+                            <li>방어구 착용 시 몬스터가 비정상적으로 강해져 잡을 수 없게 되던 현상이 완화되었습니다.</li>
+                            <li>전투 중 스킬 발동 여부가 공격/방어 이전에 명확히 표시됩니다.</li>
+                            <li>레벨 100 달성 시 사내 인사팀을 통해 1클래스 전직이 가능합니다. (장비 매각 주의)</li>
+                        </ul>
+                    </div>
+                    <div style="flex:1; min-width:200px; background:#f3f2f1; padding:10px; border:1px solid #ddd;">
+                        <h3 style="margin-top:0; border-bottom:1px solid #ccc; padding-bottom:3px;">매뉴얼 및 공략</h3>
+                        <ul style="padding-left:20px; line-height:1.5; margin-bottom:0; font-size:11px;">
+                            <li><strong>스킬 발동:</strong> 전투 시 매 턴 <u>지능(INT)에 비례</u>하여 스킬이 자동 발동합니다.</li>
+                            <li><strong>생존 우선:</strong> 초반에는 무기보다 방어구와 악세사리를 먼저 맞추는 것이 유리합니다.</li>
+                            <li><strong>장비 매각:</strong> 전직 시 착용 중인 장비는 50% 가격에 강제 매각되므로, 유지할 장비는 반드시 자택(창고)에 보관하세요.</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
             
             <div id="view-battle" class="view">
@@ -136,15 +167,15 @@
                 </div>
             </div>
             <div id="view-skills" class="view">
-    <h2>스킬 관리 (자동 발동)</h2>
-    <p style="color: #666;">레벨업 시 획득하는 SP로 스킬을 강화합니다.<br>
-    전투 중 <strong>지능(INT) 수치에 비례하여 자동으로 발동</strong>합니다.<br>
-    <strong>잔여 SP : <span id="sp-display" style="color:#0078d4; font-weight:bold; font-size:14px;"></span></strong></p>
-    <div id="skills-container" style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px; background:#f9f9f9;"></div>
-    <div class="row-buttons">
-        <button class="btn-main" onclick="changeView('main')">이전 화면으로</button>
-    </div>
-</div>
+                <h2>스킬 관리 (자동 발동)</h2>
+                <p style="color: #666;">레벨업 시 획득하는 SP로 스킬을 강화합니다.<br>
+                전투 중 <strong>지능(INT) 수치에 비례하여 자동으로 발동</strong>합니다.<br>
+                <strong>잔여 SP : <span id="sp-display" style="color:#0078d4; font-weight:bold; font-size:14px;"></span></strong></p>
+                <div id="skills-container" style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px; background:#f9f9f9;"></div>
+                <div class="row-buttons">
+                    <button class="btn-main" onclick="changeView('main')">이전 화면으로</button>
+                </div>
+            </div>
 
             <div id="view-bank" class="view">
                 <h2>사내 금고 (은행)</h2>
@@ -230,37 +261,41 @@
                 classTier: 0, job: '인턴', battles: { total: 0, win: 0, lose: 0 }
             },
             skillsData: {
-                dash: { id: 'dash', name: '강타', reqLv: 10, desc: '강력한 공격을 가함 (피해량 대폭 증가)' },
-                multiHit: { id: 'multiHit', name: '연속공격', reqLv: 24, desc: '빠르게 연속 타격을 가함' },
-                lifesteal: { id: 'lifesteal', name: '흡혈', reqLv: 50, desc: '피해량의 많은 부분을 체력으로 회복' },
-                overtimePay: { id: 'overtimePay', name: '포괄임금제', reqLv: 10, job: '현장직', desc: '[현장직 전용] 체력이 0이 되어도 랭크에 비례한 확률로 야근을 강행해 HP 1로 생존한다' }
+                dash: { id: 'dash', name: '강타', reqLv: 10, desc: '강력한 공격을 가함 (피해량 증가)' },
+                multiHit: { id: 'multiHit', name: '연속공격', reqLv: 24, desc: '빠르게 연속 타격을 가함 (피해량 증가)' },
+                lifesteal: { id: 'lifesteal', name: '흡혈', reqLv: 50, desc: '피해량의 일부를 체력으로 회복' },
+                
+                // [신규] 1차 전직 직업별 스킬 3종 추가
+                overtimePay: { id: 'overtimePay', name: '포괄임금제', reqLv: 10, job: '현장직', desc: '[패시브] 체력이 0이 되어도 랭크에 비례한 확률로 야근을 강행해 HP 1로 생존' },
+                safetyFirst: { id: 'safetyFirst', name: '안전제일', reqLv: 25, job: '현장직', desc: '이번 턴 적에게 받는 피해를 크게 감소시킨다' },
+                strike: { id: 'strike', name: '연장근무', reqLv: 40, job: '현장직', desc: '분노를 담아 적에게 치명적인 막대한 피해를 입힌다' },
+
+                coffeeBreak: { id: 'coffeeBreak', name: '커피수혈', reqLv: 10, job: '사무직', desc: '공격 명중 시 적에게 입힌 피해의 일부를 체력으로 회복' },
+                paperWork: { id: 'paperWork', name: '서류의 산', reqLv: 25, job: '사무직', desc: '서류를 던져 적중시키고 추가 피해를 입힌다' },
+                blameShift: { id: 'blameShift', name: '책임전가', reqLv: 40, job: '사무직', desc: '교묘한 말솜씨로 이번 턴 적의 공격을 무효화/회피한다' },
+
+                micromanage: { id: 'micromanage', name: '업무지시', reqLv: 10, job: '관리직', desc: '적의 약점을 찔러 추가 피해를 입힌다' },
+                meeting: { id: 'meeting', name: '긴급회의', reqLv: 25, job: '관리직', desc: '적을 회의실로 끌고 가 이번 턴 반격을 불가능하게 만든다' },
+                performanceReview: { id: 'performanceReview', name: '고과삭감', reqLv: 40, job: '관리직', desc: '적의 의지를 꺾어버리는 파멸적인 일격을 가한다' }
             },
             equipments: [
-                // Lv 1~10 무기 (문구/완구류)
+                // 기존 데이터 유지
                 { id: 'w01', name: '몽당연필', type: 'weapon', price: 20, reqLevel: 1, stats: { atk: 3 } },
                 { id: 'w02', name: '지우개 가루 뭉치', type: 'weapon', price: 40, reqLevel: 2, stats: { atk: 5, crt: 1 } },
                 { id: 'w03', name: '제도샤프', type: 'weapon', price: 100, reqLevel: 4, stats: { atk: 12, crt: 3 } },
                 { id: 'w04', name: '굴렁쇠', type: 'weapon', price: 250, reqLevel: 6, stats: { atk: 18, eva: 2 } },
                 { id: 'w05', name: '탑블레이드', type: 'weapon', price: 400, reqLevel: 9, stats: { atk: 25, crt: 5 } },
-                
-                // Lv 11~25 무기 (사무용품)
                 { id: 'w11', name: '커터칼', type: 'weapon', price: 600, reqLevel: 12, stats: { atk: 40, crt: 5 } },
                 { id: 'w12', name: '두꺼운 사전', type: 'weapon', price: 850, reqLevel: 15, stats: { atk: 55, maxHp: 20 } },
                 { id: 'w13', name: '날렵한 만년필', type: 'weapon', price: 1300, reqLevel: 19, stats: { atk: 80, crt: 10 } },
                 { id: 'w14', name: '기계식 키보드', type: 'weapon', price: 2200, reqLevel: 24, stats: { atk: 120, crt: 8 } },
-                
-                // Lv 26~45 무기 (현대 테크/명품)
                 { id: 'w21', name: '명품 클러치백', type: 'weapon', price: 3500, reqLevel: 28, stats: { atk: 180, crt: 12, eva: -2 } },
                 { id: 'w22', name: '최고급 만년필', type: 'weapon', price: 5000, reqLevel: 33, stats: { atk: 250, acc: 10 } },
                 { id: 'w23', name: 'USB-C 마법검', type: 'weapon', price: 8000, reqLevel: 39, stats: { atk: 380, crt: 15 } },
                 { id: 'w24', name: '레이저 포인터 완드', type: 'weapon', price: 12000, reqLevel: 44, stats: { atk: 520, acc: 20 } },
-
-                // Lv 46~70 무기 (판타지 혼합형/하이엔드)
                 { id: 'w31', name: '양자컴퓨터 서버검', type: 'weapon', price: 25000, reqLevel: 52, stats: { atk: 850, crt: 20 } },
                 { id: 'w32', name: '회장님의 골프채', type: 'weapon', price: 45000, reqLevel: 61, stats: { atk: 1400, crt: 25, eva: -5 } },
                 { id: 'w33', name: '전설의 인감도장', type: 'weapon', price: 80000, reqLevel: 70, stats: { atk: 2200, acc: 30, crt: 30 } },
-
-                // 방어구
                 { id: 'a01', name: '종이 박스', type: 'armor', price: 30, reqLevel: 1, stats: { def: 2 } },
                 { id: 'a02', name: '신발주머니', type: 'armor', price: 80, reqLevel: 3, stats: { def: 5, eva: 1 } },
                 { id: 'a03', name: '교과서 갑옷', type: 'armor', price: 200, reqLevel: 7, stats: { def: 12, eva: -1 } },
@@ -272,8 +307,6 @@
                 { id: 'a31', name: '두랄루민 사슬갑옷', type: 'armor', price: 15000, reqLevel: 45, stats: { def: 550, maxHp: 200 } },
                 { id: 'a32', name: '나노머신 방호복', type: 'armor', price: 35000, reqLevel: 58, stats: { def: 950, eva: 15 } },
                 { id: 'a33', name: 'CEO의 절대방벽', type: 'armor', price: 70000, reqLevel: 68, stats: { def: 1600, maxHp: 500, eva: 10 } },
-
-                // 장신구
                 { id: 'ac01', name: '지우개', type: 'accessory', price: 50, reqLevel: 2, stats: { maxHp: 10 } },
                 { id: 'ac02', name: '지점토 목걸이', type: 'accessory', price: 150, reqLevel: 5, stats: { maxHp: 30, acc: 2 } },
                 { id: 'ac03', name: '콩순이 노트북', type: 'accessory', price: 350, reqLevel: 8, stats: { crt: 3, acc: 5 } },
@@ -285,7 +318,6 @@
                 { id: 'ac32', name: '무한동력 커피머신', type: 'accessory', price: 50000, reqLevel: 65, stats: { crt: 20, eva: 20, maxHp: 800 } }
             ],
             monsters: [
-                // 1~30 구간 몬스터
                 { name: '하루살이', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.1, atkRate: 0.5, defRate: 0.1, eva: 38, rewardRate: 0.5 },
                 { name: '콩벌레', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.1, atkRate: 0.4, defRate: 1.4, eva: 0, rewardRate: 0.8 },
                 { name: '들개', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.7, atkRate: 1.2, defRate: 0.6, eva: 10, rewardRate: 0.9 },
@@ -295,8 +327,6 @@
                 { name: '고삐리', type: 'strong', minLv: 10, maxLv: 30, hpRate: 1.1, atkRate: 1.2, defRate: 0.9, eva: 5, rewardRate: 1.5 },
                 { name: '양키', type: 'strong', minLv: 15, maxLv: 30, hpRate: 1.0, atkRate: 1.4, defRate: 0.8, eva: 15, rewardRate: 1.8 },
                 { name: '일진', type: 'boss', minLv: 20, maxLv: 30, hpRate: 1.5, atkRate: 1.5, defRate: 1.0, eva: 10, rewardRate: 2.5 },
-
-                // 20~50 구간 몬스터
                 { name: '백수', type: 'normal', minLv: 20, maxLv: 50, hpRate: 1.5, atkRate: 0.5, defRate: 0.5, eva: 0, rewardRate: 0.9 },
                 { name: '재수생', type: 'normal', minLv: 20, maxLv: 50, hpRate: 0.8, atkRate: 1.1, defRate: 1.5, eva: 0, rewardRate: 1.0 },
                 { name: '미미짱', type: 'normal', minLv: 20, maxLv: 50, hpRate: 0.3, atkRate: 0.9, defRate: 0.4, eva: 50, rewardRate: 1.2 },
@@ -306,21 +336,21 @@
                 { name: '야타족', type: 'strong', minLv: 35, maxLv: 50, hpRate: 0.9, atkRate: 1.5, defRate: 0.8, eva: 25, rewardRate: 2.0 },
                 { name: '조기축구 아저씨', type: 'boss', minLv: 40, maxLv: 50, hpRate: 1.8, atkRate: 1.4, defRate: 1.3, eva: 15, rewardRate: 3.0 },
 
-                // 40~99 구간 몬스터 (기존 사내 몬스터군 상향 배치)
-                { name: '지각한 인턴', type: 'normal', minLv: 40, maxLv: 99, hpRate: 0.6, atkRate: 1.5, defRate: 0.4, eva: 30, rewardRate: 1.1 },
-                { name: '슬라임 사원', type: 'normal', minLv: 40, maxLv: 99, hpRate: 1.0, atkRate: 1.0, defRate: 1.0, eva: 0, rewardRate: 1.0 },
-                { name: '파견직 사원', type: 'normal', minLv: 42, maxLv: 99, hpRate: 1.1, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.2 },
-                { name: '까칠한 디자이너', type: 'normal', minLv: 45, maxLv: 99, hpRate: 0.8, atkRate: 1.3, defRate: 0.7, eva: 15, rewardRate: 1.4 },
-                { name: '불만많은 고객', type: 'normal', minLv: 48, maxLv: 99, hpRate: 1.3, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.5 },
-                { name: '늑대 대리', type: 'strong', minLv: 50, maxLv: 99, hpRate: 1.2, atkRate: 1.4, defRate: 1.0, eva: 15, rewardRate: 2.0 },
-                { name: '고블린 횡령범', type: 'strong', minLv: 55, maxLv: 99, hpRate: 0.9, atkRate: 1.8, defRate: 0.8, eva: 25, rewardRate: 2.3 },
-                { name: '오크 주임', type: 'strong', minLv: 60, maxLv: 99, hpRate: 1.8, atkRate: 1.2, defRate: 1.5, eva: 0, rewardRate: 2.2 },
-                { name: '보안팀장', type: 'boss', minLv: 65, maxLv: 99, hpRate: 2.0, atkRate: 1.3, defRate: 1.6, eva: 5, rewardRate: 3.5 },
-                { name: '광분한 차장', type: 'boss', minLv: 70, maxLv: 99, hpRate: 0.5, atkRate: 3.5, defRate: 0.5, eva: 10, rewardRate: 3.8 },
-                { name: '영업부 과장', type: 'boss', minLv: 75, maxLv: 99, hpRate: 1.5, atkRate: 1.6, defRate: 1.2, eva: 10, rewardRate: 3.0 },
-                { name: '스켈레톤 팀장', type: 'boss', minLv: 80, maxLv: 99, hpRate: 1.3, atkRate: 1.8, defRate: 1.1, eva: 20, rewardRate: 4.0 },
-                { name: '데스나이트 부장', type: 'boss', minLv: 85, maxLv: 99, hpRate: 2.2, atkRate: 1.8, defRate: 1.5, eva: 10, rewardRate: 5.0 },
-                { name: '감사팀 임원', type: 'boss', minLv: 90, maxLv: 99, hpRate: 3.0, atkRate: 2.0, defRate: 1.4, eva: 15, rewardRate: 7.0 }
+                // [버그 패치] maxLv을 999로 상향하여 100레벨 이후에도 다양한 몬스터가 출현하도록 조정
+                { name: '지각한 인턴', type: 'normal', minLv: 40, maxLv: 999, hpRate: 0.6, atkRate: 1.5, defRate: 0.4, eva: 30, rewardRate: 1.1 },
+                { name: '슬라임 사원', type: 'normal', minLv: 40, maxLv: 999, hpRate: 1.0, atkRate: 1.0, defRate: 1.0, eva: 0, rewardRate: 1.0 },
+                { name: '파견직 사원', type: 'normal', minLv: 42, maxLv: 999, hpRate: 1.1, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.2 },
+                { name: '까칠한 디자이너', type: 'normal', minLv: 45, maxLv: 999, hpRate: 0.8, atkRate: 1.3, defRate: 0.7, eva: 15, rewardRate: 1.4 },
+                { name: '불만많은 고객', type: 'normal', minLv: 48, maxLv: 999, hpRate: 1.3, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.5 },
+                { name: '늑대 대리', type: 'strong', minLv: 50, maxLv: 999, hpRate: 1.2, atkRate: 1.4, defRate: 1.0, eva: 15, rewardRate: 2.0 },
+                { name: '고블린 횡령범', type: 'strong', minLv: 55, maxLv: 999, hpRate: 0.9, atkRate: 1.8, defRate: 0.8, eva: 25, rewardRate: 2.3 },
+                { name: '오크 주임', type: 'strong', minLv: 60, maxLv: 999, hpRate: 1.8, atkRate: 1.2, defRate: 1.5, eva: 0, rewardRate: 2.2 },
+                { name: '보안팀장', type: 'boss', minLv: 65, maxLv: 999, hpRate: 2.0, atkRate: 1.3, defRate: 1.6, eva: 5, rewardRate: 3.5 },
+                { name: '광분한 차장', type: 'boss', minLv: 70, maxLv: 999, hpRate: 0.5, atkRate: 3.5, defRate: 0.5, eva: 10, rewardRate: 3.8 },
+                { name: '영업부 과장', type: 'boss', minLv: 75, maxLv: 999, hpRate: 1.5, atkRate: 1.6, defRate: 1.2, eva: 10, rewardRate: 3.0 },
+                { name: '스켈레톤 팀장', type: 'boss', minLv: 80, maxLv: 999, hpRate: 1.3, atkRate: 1.8, defRate: 1.1, eva: 20, rewardRate: 4.0 },
+                { name: '데스나이트 부장', type: 'boss', minLv: 85, maxLv: 999, hpRate: 2.2, atkRate: 1.8, defRate: 1.5, eva: 10, rewardRate: 5.0 },
+                { name: '감사팀 임원', type: 'boss', minLv: 90, maxLv: 999, hpRate: 3.0, atkRate: 2.0, defRate: 1.4, eva: 15, rewardRate: 7.0 }
             ],
             currentMonster: null, logs: []
         };
@@ -340,11 +370,9 @@
                 maxHp: 60 + Math.floor(p.vit * 15),
                 acc: 85 + Math.floor(p.dex * 2.0),
                 eva: Math.floor(p.dex * 1.5),
-                skillChance: Math.floor(p.int * 2.0), 
                 crt: Math.floor(p.cha * 1.5),         
                 crtDmg: 150 + Math.floor(p.cha * 2.0),
                 lukBonus: p.luk * 0.01,
-                // 주의: 기존 코드에 skillChance가 중복 선언되어 있었으나 로직 유지를 위해 그대로 둡니다.
                 skillChance: 10 + Math.floor(p.int * 2.0)
             };
             
@@ -361,7 +389,6 @@
             return total;
         }
 
-        // 장비 능력치를 제외한 순수 능력치 (독립된 함수로 이동)
         function getBaseStats() {
             const p = store.player;
             return {
@@ -379,8 +406,6 @@
 
         function calculateCP(stats, isPlayer = true) {
             const hp = isPlayer ? stats.maxHp : stats.hp;
-            // [밸런스 수정] 치명타 확률/피해량이 CP 계산에서 빠져있던 문제 수정.
-            // 크리티컬 위주 장비를 착용해도 몬스터가 그만큼 강해지지 않아 체감 승률이 과도하게 치솟던 원인 중 하나였음.
             const critFactor = 1 + ((stats.crt || 0) / 100) * (((stats.crtDmg || 100) / 100) - 1);
             const effectiveAtk = stats.atk * critFactor;
             return Math.floor((hp * 0.3) + (effectiveAtk * 2) + (stats.def * 1.5) + (stats.acc * 0.5) + (stats.eva * 0.5));
@@ -392,13 +417,10 @@
             const newName = prompt("새로운 닉네임을 입력하세요 (최대 12글자):", store.player.name || "");
             if (newName && newName.trim() !== '') {
                 const trimmedName = newName.trim();
-                
-                // 12글자 제한 로직
                 if (trimmedName.length > 12) {
                     alert("닉네임은 최대 12글자까지만 설정 가능합니다.");
                     return;
                 }
-                
                 store.player.name = trimmedName;
                 saveGame();
                 renderPlayerStatus();
@@ -463,15 +485,54 @@
             }
 
             for (let turn = 1; turn <= 15; turn++) {
-                addLog(`<span class="log-turn">▶ Turn ${turn}</span>`);
+                addLog(`<br><span class="log-turn">▶ Turn ${turn}</span>`);
                 
+                // [신규] 매 턴 스킬 발동 판정 및 시각화 로직 적용
+                let pDmgMult = 1.0;
+                let mDmgMult = 1.0;
+                let healRate = 0;
+                let skipEnemy = false;
+                let activeSkill = null;
+
+                // 보유 액티브 스킬 필터링
+                let availableSkills = Object.keys(p.skills).filter(k => 
+                    p.skills[k] > 0 && 
+                    k !== 'overtimePay' && 
+                    store.skillsData[k] &&
+                    (!store.skillsData[k].job || store.skillsData[k].job === p.job)
+                );
+
+                if (availableSkills.length > 0 && Math.random() * 100 <= pStats.skillChance) {
+                    let skillKey = availableSkills[Math.floor(Math.random() * availableSkills.length)];
+                    activeSkill = store.skillsData[skillKey];
+                    let rank = p.skills[skillKey];
+                    
+                    addLog(` <span style="background-color:#0078d4; color:#fff; padding:2px 5px; border-radius:3px; font-size:10px; font-weight:bold; margin-bottom: 2px; display:inline-block;">[스킬 발동] ${activeSkill.name}</span>`);
+                    
+                    // 스킬별 효과 맵핑
+                    if (skillKey === 'dash') pDmgMult = 1.5 + (rank * 0.1);
+                    else if (skillKey === 'multiHit') pDmgMult = 1.2 + (rank * 0.05); 
+                    else if (skillKey === 'lifesteal') healRate = 0.2 + (rank * 0.05);
+                    else if (skillKey === 'safetyFirst') mDmgMult = Math.max(0.1, 0.7 - (rank * 0.05));
+                    else if (skillKey === 'strike') pDmgMult = 1.8 + (rank * 0.2);
+                    else if (skillKey === 'coffeeBreak') healRate = 0.15 + (rank * 0.05);
+                    else if (skillKey === 'paperWork') pDmgMult = 1.3 + (rank * 0.1);
+                    else if (skillKey === 'blameShift') skipEnemy = true;
+                    else if (skillKey === 'micromanage') pDmgMult = 1.5 + (rank * 0.15);
+                    else if (skillKey === 'meeting') skipEnemy = true;
+                    else if (skillKey === 'performanceReview') pDmgMult = 2.0 + (rank * 0.2);
+                } else {
+                    addLog(` <span style="color:#999; font-size:10px; border:1px solid #ddd; padding:1px 4px; border-radius:2px;">[스킬 판정] 발동 안함 (일반 공격)</span>`);
+                }
+
                 // 1. 플레이어 공격 연산
                 let pDmg = 0;
                 let pCrit = false, pMiss = false;
 
                 if (Math.random() * 100 <= (pStats.acc - m.eva)) {
                     let baseDmg = pStats.atk * (0.8 + Math.random() * 0.4);
-                    pDmg = Math.max(1, Math.floor(baseDmg - m.def));
+                    // 스킬 배율 적용
+                    pDmg = Math.max(1, Math.floor((baseDmg * pDmgMult) - m.def));
                     
                     pCrit = Math.random() * 100 <= pStats.crt;
                     if (pCrit) pDmg = Math.floor(pDmg * (pStats.crtDmg / 100));
@@ -481,32 +542,49 @@
 
                 m.hp -= pDmg;
 
-                // 2. 몬스터 반격 연산
-                let mDmg = 0, mMiss = false;
-                if (Math.random() * 100 <= (m.acc - pStats.eva)) {
-                    let baseDmg = m.atk * (0.8 + Math.random() * 0.4);
-                    mDmg = Math.max(1, Math.floor(baseDmg - pStats.def));
-                } else {
-                    mMiss = true;
-                }
-
-                p.hp -= mDmg;
-
-                // 로그 출력
+                // 플레이어 공격 로그 출력
                 if (pMiss) {
                     addLog(` - 공격 : <span class="log-miss">Miss</span>`);
                 } else {
                     addLog(` - 공격 : ${pDmg} 피해 ${pCrit ? '<span class="log-crit">(Critical!)</span>' : ''}`);
+                    if (healRate > 0) {
+                        let healAmt = Math.floor(pDmg * healRate);
+                        if (healAmt > 0) {
+                            p.hp = Math.min(pStats.maxHp, p.hp + healAmt);
+                            addLog(` &nbsp;&nbsp;↳ <span style="color:#107c41; font-weight:bold;">스킬 효과: ${healAmt} HP 회복!</span>`);
+                        }
+                    }
                 }
 
-                if (mMiss) {
-                    addLog(` - 반격 : <span class="log-miss">Miss (회피함)</span>`);
+                // 2. 몬스터 반격 연산
+                let mDmg = 0, mMiss = false;
+                
+                if (skipEnemy) {
+                    addLog(` - 반격 : <span class="log-stat">스킬 효과로 인해 적이 행동하지 못함!</span>`);
                 } else {
-                    addLog(` - 반격 : ${mDmg} 피해`);
+                    if (Math.random() * 100 <= (m.acc - pStats.eva)) {
+                        let baseDmg = m.atk * (0.8 + Math.random() * 0.4);
+                        mDmg = Math.max(1, Math.floor(baseDmg - pStats.def));
+                        // 몬스터 데미지에 스킬 방어 효과 적용
+                        mDmg = Math.floor(mDmg * mDmgMult);
+                    } else {
+                        mMiss = true;
+                    }
+
+                    p.hp -= mDmg;
+
+                    // 몬스터 반격 로그 출력
+                    if (mMiss) {
+                        addLog(` - 반격 : <span class="log-miss">Miss (회피함)</span>`);
+                    } else {
+                        addLog(` - 반격 : ${mDmg} 피해`);
+                        if (mDmgMult < 1.0) {
+                            addLog(` &nbsp;&nbsp;↳ <span style="color:#0078d4; font-weight:bold;">스킬 방어 효과 적용됨!</span>`);
+                        }
+                    }
                 }
 
-                // [판정 원칙 반영]
-                // 1. 크로스 카운터 포함, 몬스터가 쓰러졌다면 플레이어 무조건 승리
+                // 승패 판정
                 if (m.hp <= 0) {
                     if (p.hp <= 0) {
                         p.hp = pStats.maxHp;
@@ -518,16 +596,13 @@
                     battleEnded = true; 
                     break;
                 } 
-                // 2. 몬스터는 살고 플레이어만 쓰러진 경우 패배 (스킬 발동 판정 포함)
                 else if (p.hp <= 0) {
-                    // [버그 수정] 스킬을 배우지 않았거나(랭크0) 요구 레벨 미달이어도 직업명만으로 무조건 발동하던 문제 수정.
-                    // 이제 스킬 관리 화면에서 실제로 SP를 투자해 올린 랭크만큼만(랭크 x 5%) 발동한다.
                     const owRank = p.skills.overtimePay || 0;
                     const owUnlocked = p.level >= store.skillsData.overtimePay.reqLv;
                     if (p.job === '현장직' && owUnlocked && owRank > 0 && Math.random() < (owRank * 0.05)) {
                         p.hp = 1; 
-                        addLog(` - <span style="color:#d6b800; font-weight:bold;">[포괄임금제 발동!] 야근 수당 없이 버텨냅니다! (HP 1로 생존)</span>`);
-                        continue; // 패배 처리하지 않고 전투 속행
+                        addLog(` - <span style="color:#d6b800; font-weight:bold; background-color:#fff3cd; padding:2px;">[포괄임금제 발동!] 야근 수당 없이 버텨냅니다! (HP 1로 생존)</span>`);
+                        continue; 
                     }
 
                     addLog(`<span class="log-result log-defeat">[연산 종료] 실패 - 체력 소진</span>`);
@@ -537,7 +612,6 @@
                 }
             }
 
-            // [판정 원칙 반영] 15턴 초과(타임아웃) 시 플레이어 패배 처리
             if (!battleEnded) {
                 addLog(`<span class="log-result log-defeat">[연산 종료] Time Out - 턴 초과 (전투 패배)</span>`);
                 loseBattle(isBankBattle); 
@@ -549,30 +623,23 @@
         }
 
         function performAttack(pStats, m, mult) {
-    const p = store.player;
-    // 무기를 착용하지 않았을 경우 '맨주먹'으로 출력
-    const wName = p.weapon ? p.weapon.name : '맨주먹';
-    
-    // 회피 판정 (Miss)
-    if (Math.random() * 100 > (pStats.acc - m.eva)) {
-        addLog(` - 적은 여유롭게 몸을 비틀어 가뿐히 회피했다.. <span class="log-miss">(Miss)</span>`);
-        return 0;
-    }
-    
-    // 명중 및 피해량 계산
-    let dmg = Math.max(1, Math.floor((pStats.atk * mult * (0.8 + Math.random() * 0.4)) - m.def));
-    
-    // 치명타 판정
-    if (Math.random() * 100 <= pStats.crt) {
-        dmg = Math.floor(dmg * (pStats.crtDmg / 100));
-        addLog(` - ${p.name}은(는) ${m.name}을(를) 향해 ${wName}을(를) 세차게 휘둘렀다! <span class="log-crit">치명적인 일격! ${dmg}의 피해를 입혔다!</span>`);
-    } else {
-        addLog(` - ${p.name}은(는) ${m.name}을(를) 향해 ${wName}을(를) 세차게 휘둘렀다! ${dmg}의 피해를 입혔다!`);
-    }
-    
-    m.hp -= dmg;
-    return dmg;
-}
+            const p = store.player;
+            const wName = p.weapon ? p.weapon.name : '맨주먹';
+            if (Math.random() * 100 > (pStats.acc - m.eva)) {
+                addLog(` - 적은 여유롭게 몸을 비틀어 가뿐히 회피했다.. <span class="log-miss">(Miss)</span>`);
+                return 0;
+            }
+            let dmg = Math.max(1, Math.floor((pStats.atk * mult * (0.8 + Math.random() * 0.4)) - m.def));
+            if (Math.random() * 100 <= pStats.crt) {
+                dmg = Math.floor(dmg * (pStats.crtDmg / 100));
+                addLog(` - ${p.name}은(는) ${m.name}을(를) 향해 ${wName}을(를) 세차게 휘둘렀다! <span class="log-crit">치명적인 일격! ${dmg}의 피해를 입혔다!</span>`);
+            } else {
+                addLog(` - ${p.name}은(는) ${m.name}을(를) 향해 ${wName}을(를) 세차게 휘둘렀다! ${dmg}의 피해를 입혔다!`);
+            }
+            m.hp -= dmg;
+            return dmg;
+        }
+
         function spawnMonster(isBankBattle) {
             const pStats = getPlayerTotalStats();
             const pCP = calculateCP(pStats);
@@ -583,7 +650,6 @@
             let treasureType = '';
 
             if (isBankBattle) {
-                // 은행 몬스터 스케일링 (승률 약 80%를 위해 스탯 계수 대폭 하향)
                 targetTemplate = { name: '악덕 소매치기', hpRate: 0.2, atkRate: 0.5, defRate: 0.4, eva: 0, rewardRate: 0 };
                 cpRatio = 1.0;
             } else {
@@ -610,15 +676,9 @@
 
                     let pool = store.monsters.filter(m => lv >= m.minLv && lv <= m.maxLv && m.type === mType);
                     
-                    if (pool.length === 0) {
-                        pool = store.monsters.filter(m => lv >= m.minLv && lv <= m.maxLv);
-                    }
-                                       
-                    if (pool.length === 0) {
-                        targetTemplate = store.monsters[store.monsters.length - 1];
-                    } else {
-                        targetTemplate = pool[Math.floor(Math.random() * pool.length)];
-                    }
+                    if (pool.length === 0) pool = store.monsters.filter(m => lv >= m.minLv && lv <= m.maxLv);
+                    if (pool.length === 0) targetTemplate = store.monsters[store.monsters.length - 1];
+                    else targetTemplate = pool[Math.floor(Math.random() * pool.length)];
 
                     const rollCP = Math.random() * 100;
                     if (rollCP < 10) cpRatio = 0.85;       
@@ -627,21 +687,19 @@
                 }
             }
 
-            // [밸런스 수정] 2~3턴 만에 승패가 갈리던 문제 완화: 몬스터 체력 배율 상향(2.2→3.2), 공격력 배율 소폭 하향(1.0→0.85)
-            // 목표: 일반 몬스터 5~6턴, 강적/보스 조우 시 8~10턴 선에서 승부가 나도록 시뮬레이션으로 검증한 수치
             const targetCP = pCP * cpRatio * 1.1;
             
-            // 1-4. 초보자의 가호 스탯 디버프 수치 설정
             let statNerf = 1.0;
             let rewardBuff = 1.0;
             if (lv <= 25) { statNerf = 0.90; rewardBuff = 1.30; }
             else if (lv <= 50) { statNerf = 0.95; rewardBuff = 1.15; }
 
-            let mMaxHp = Math.floor(pStats.maxHp * targetTemplate.hpRate * cpRatio * 3.2 * statNerf); 
+            // [버그 패치] 플레이어의 방어력 스탯이 몬스터의 방어력과 체력을 과하게 올리는 현상 수정.
+            // 몬스터의 맷집을 플레이어 공격력(ATK)에 기반하도록 변경하여 밸런스 조정.
+            let mMaxHp = Math.floor((100 + pStats.atk * 3) * targetTemplate.hpRate * cpRatio * statNerf); 
             let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio * 0.85 * statNerf);
-            let mDef = Math.floor(pStats.def * targetTemplate.defRate * cpRatio * 0.85 * statNerf);
+            let mDef = Math.floor(pStats.atk * 0.3 * targetTemplate.defRate * cpRatio * statNerf);
 
-            // 2-2. 적 보상 체계를 CP가 아닌 레벨 및 클래스 티어 기반으로 변경
             let baseRewardValue = (lv * 3) + 10;
             let tierMultiplier = 1 + (store.player.classTier * 1.5); 
             
@@ -658,14 +716,8 @@
                 cp: Math.floor(targetCP),
                 maxHp: Math.max(20, mMaxHp), hp: Math.max(20, mMaxHp),
                 atk: Math.max(5, mAtk), def: Math.max(0, mDef),
-                // [버그 수정] 몬스터 명중률이 "플레이어 자신의" 명중 스탯을 그대로 복사해오던 문제 수정.
-                // 기존 방식은 플레이어가 DEX(명중+회피)를 투자할수록 명중은 2배속, 회피는 1.5배속으로 올라
-                // 결과적으로 몬스터의 명중률(=플레이어 acc 그대로)이 회피보다 더 빨리 따라 올라가는 역효과가 있었음.
-                // 플레이어 스탯과 무관하게 조우 난이도(cpRatio)에만 연동되는 독립 수치로 분리.
                 acc: Math.floor(80 * cpRatio), eva: targetTemplate.eva,
-                exp: baseExp,
-                gold: baseGold,
-                isTreasure: isTreasure
+                exp: baseExp, gold: baseGold, isTreasure: isTreasure
             };
         }
 
@@ -673,7 +725,6 @@
             const p = store.player;
             const pStats = getPlayerTotalStats();
 
-            // 1. 은행 방어(입금) 전투 승리 처리
             if (isBankBattle) {
                 p.gold -= store.pendingDeposit; 
                 p.bank += store.pendingDeposit;
@@ -682,11 +733,9 @@
                 return;
             }
 
-            // 2. 일반 전투 승리 카운트 증가 (추가된 부분)
             p.battles.total++;
             p.battles.win++;
 
-            // 3. 보상 획득 및 메시지 출력
             const earnedExp = Math.floor(m.exp * (1 + pStats.lukBonus));
             const earnedGold = Math.floor(m.gold * (1 + pStats.lukBonus));
 
@@ -699,7 +748,6 @@
                 addLog(` > 보상 : ${earnedExp} EXP / ${earnedGold} G`);
             }
             
-            // 4. 레벨업 및 직업별 능력치 상승 (수정된 부분)
             let leveledUp = false;
             while (p.exp >= p.maxExp) {
                 p.exp -= p.maxExp; p.level++; p.sp++; p.maxExp = Math.floor(10 + (p.level * 8) + Math.pow(p.level, 1.7));
@@ -713,18 +761,12 @@
                 let logLines = [];
                 
                 const tryStat = (name, val) => {
-                    // 1. 클래스 티어에 따른 기본 확률 설정
-                    let baseProb = 0.30; // 0클래스 (30%)
-                    if (p.classTier === 1) baseProb = 0.35; // 1클래스 (35%)
-                    else if (p.classTier >= 2) baseProb = 0.40; // 2클래스 이상 (40%)
+                    let baseProb = 0.30; 
+                    if (p.classTier === 1) baseProb = 0.35; 
+                    else if (p.classTier >= 2) baseProb = 0.40; 
                     
-                    // 2. 행운(LUK) 스탯 보정: LUK 1당 0.05% (0.0005) 추가
                     let lukBonus = (p.luk || 0) * 0.0005;
-                    
-                    // 3. 최종 확률 계산 및 최대 상한(Cap) 60% 적용
                     let finalProb = Math.min(0.60, baseProb + lukBonus);
-                    
-                    // 상승 수치(gain)는 기존과 동일하게 클래스 전직 시 2, 미전직 시 1 적용
                     let gain = (p.classTier >= 1) ? 2 : 1; 
 
                     const kName = statNames[name];
@@ -741,16 +783,8 @@
                 leveledUp = true;
                 addLog(` > <span class="log-victory">레벨업! Lv.${p.level}</span>`);
                 
-                p.str = tryStat('STR', p.str);
-                p.int = tryStat('INT', p.int);
-                p.vit = tryStat('VIT', p.vit);
-                p.dex = tryStat('DEX', p.dex);
-                p.cha = tryStat('CHA', p.cha); 
-                p.luk = tryStat('LUK', p.luk); 
-                
-                // [버그 수정] 이 직업별 특성 보정이 기존에는 "레벨업마다" 중복 적용되어,
-                // 예) 현장직은 민첩이 5레벨 이내로 0까지 떨어져버리는 문제가 있었음.
-                // → 전직 시점에 1회만 적용되도록 advanceClass() 함수로 이동함.
+                p.str = tryStat('STR', p.str); p.int = tryStat('INT', p.int); p.vit = tryStat('VIT', p.vit);
+                p.dex = tryStat('DEX', p.dex); p.cha = tryStat('CHA', p.cha); p.luk = tryStat('LUK', p.luk); 
 
                 logLines.forEach(line => addLog(line));
             }
@@ -761,13 +795,10 @@
 
         function loseBattle(isBankBattle) {
             const p = store.player;
-            
-            // 일반 전투 패배 카운트 증가 (Time Out 포함 모든 패배 상황에 적용)
             if (!isBankBattle) { 
                 p.battles.total++; 
                 p.battles.lose++; 
             }
-
             const lossRate = isBankBattle ? 0.3 : 0.2; 
             const lostGold = Math.floor(p.gold * lossRate);
             p.gold -= lostGold;
@@ -804,7 +835,6 @@
                 return;
             }
 
-            // 합산 금액으로 구매 가능 여부 판별
             if (p.gold + refund >= item.price) {
                 p.gold += refund;
                 p.gold -= item.price;
@@ -831,19 +861,11 @@
 
         function initiateDeposit(isMax) {
             if (Date.now() < store.cooldownEnd) {
-                sysMsg("아직 탐색 쿨타임이 지나지 않았습니다.");
-                return;
+                sysMsg("아직 탐색 쿨타임이 지나지 않았습니다."); return;
             }
-
             const p = store.player;
             const limit = p.level * 1000;
-            let amt = 0;
-
-            if (isMax) {
-                amt = Math.min(p.gold, limit - p.bank);
-            } else {
-                amt = parseInt(document.getElementById('deposit-amt').value) || 0;
-            }
+            let amt = isMax ? Math.min(p.gold, limit - p.bank) : (parseInt(document.getElementById('deposit-amt').value) || 0);
 
             if (amt <= 0) { sysMsg("유효한 금액을 입력하세요."); return; }
             if (amt > p.gold) { sysMsg("소지금이 부족합니다."); return; }
@@ -857,19 +879,12 @@
         function initiateWithdraw(isMax) {
             const p = store.player;
             if (p.bank <= 0) { sysMsg("출금할 자산이 없습니다."); return; }
-            
-            let amt = 0;
-            if (isMax) {
-                amt = p.bank;
-            } else {
-                amt = parseInt(document.getElementById('withdraw-amt').value) || 0;
-            }
+            let amt = isMax ? p.bank : (parseInt(document.getElementById('withdraw-amt').value) || 0);
 
             if (amt <= 0) { sysMsg("유효한 금액을 입력하세요."); return; }
             if (amt > p.bank) { sysMsg("예치금이 부족합니다. (최대 " + p.bank + "G)"); return; }
 
-            p.gold += amt; 
-            p.bank -= amt;
+            p.gold += amt; p.bank -= amt;
             sysMsg(`${amt}G 안전하게 출금 완료되었습니다.`); 
             updateBankUI(); renderPlayerStatus(); saveGame();
         }
@@ -882,14 +897,9 @@
 
             const hpPercent = Math.min(100, Math.max(0, (p.hp / stats.maxHp) * 100));
             const expPercent = Math.min(100, Math.max(0, (p.exp / p.maxExp) * 100));
-            
             let winRate = p.battles.total > 0 ? ((p.battles.win / p.battles.total) * 100).toFixed(1) : 0;
             
-            let buffMsg = "없음";
-            let buffColor = "#eaf2ea";
-            let buffBorder = "#c3d8c3";
-            let buffText = "#333";
-            
+            let buffMsg = "없음"; let buffColor = "#eaf2ea"; let buffBorder = "#c3d8c3"; let buffText = "#333";
             if (p.level <= 25) {
                 buffMsg = "초보자의 가호 I (보상+30%, 조우 적 스탯-10%)";
                 buffColor = "#e0f7fa"; buffBorder = "#b2ebf2"; buffText = "#006064";
@@ -968,12 +978,11 @@
                     ${p.battles.total}전 ${p.battles.win}승 ${p.battles.lose}패 (승률 ${winRate}%)
                 </div>
             `;
-            // 닉네임 화면 출력 및 글자 수 비례 폰트 크기 조정
-        const nickEl = document.getElementById('player-nickname-display');
-        if (nickEl) {
-            nickEl.textContent = store.player.name || '플레이어';
-            nickEl.style.fontSize = (store.player.name && store.player.name.length > 8) ? '13px' : '16px';
-        }
+            const nickEl = document.getElementById('player-nickname-display');
+            if (nickEl) {
+                nickEl.textContent = store.player.name || '플레이어';
+                nickEl.style.fontSize = (store.player.name && store.player.name.length > 8) ? '13px' : '16px';
+            }
         }
 
         function advanceClass(targetTier = 1) {
@@ -987,7 +996,6 @@
                     if (choice === '관리직' && p.dex < 100) return sysMsg("관리직 이직 실패: 순수 DEX 100 이상 필요");
                 }
 
-                // [신규 시스템] 전직 시 착용중인 모든 장비를 50% 가격에 매각 (자택 창고 보관 장비는 영향 없음)
                 let sellTotal = 0;
                 ['weapon', 'armor', 'accessory'].forEach(type => {
                     if (p[type]) {
@@ -1001,10 +1009,13 @@
                 p.job = choice;
                 p.level = 1;
                 p.exp = 0;
-                p.maxExp = getRequiredExp(1); // 전직 시 필요 경험치 1레벨 기준으로 즉시 동기화
+                p.maxExp = getRequiredExp(1); 
                 p.str = 5; p.int = 5; p.vit = 5; p.dex = 5; p.cha = 5; p.luk = 5;
 
-                // [버그 수정] 직업별 특성 보정(기존엔 레벨업마다 중복 적용되던 것)을 전직 시점 1회만 적용
+                // [버그 패치] 전직 시 스킬 랭크 및 SP 정상 초기화 추가
+                p.sp = 0;
+                p.skills = {};
+
                 if (choice === '현장직') {
                     p.vit += 1; p.str += 1; p.dex = Math.max(0, p.dex - 1);
                 } else if (choice === '사무직') {
@@ -1076,21 +1087,17 @@
             const saved = localStorage.getItem('work_sys_v2');
             if (saved) store.player = { ...store.player, ...JSON.parse(saved) };
             if (store.player.bank === undefined) store.player.bank = 0;
-            if (store.player.storage === undefined) store.player.storage = []; // 창고 배열 초기화
+            if (store.player.storage === undefined) store.player.storage = []; 
             if (store.player.maxExp === undefined || store.player.maxExp === 15) store.player.maxExp = getRequiredExp(store.player.level);
             if (store.player.cha === undefined) store.player.cha = 5;
             if (store.player.luk === undefined) store.player.luk = 5;
             if (store.player.classTier === undefined) store.player.classTier = 0;
-            if (store.player.job === undefined) store.player.job = '인턴';
-            // [버그 대응] 구버전에서 0티어 직업명이 '초보자'로 저장되어 있던 세이브 데이터를 '인턴'으로 이관
-            if (store.player.job === '초보자') store.player.job = '인턴';
+            if (store.player.job === undefined || store.player.job === '초보자') store.player.job = '인턴';
             if (store.player.battles === undefined) store.player.battles = { total: 0, win: 0, lose: 0 };
-            if (store.player.skills.overtimePay === undefined) store.player.skills.overtimePay = 0;
         }
 
         function openHome() {
-            changeView('home');
-            renderHome();
+            changeView('home'); renderHome();
         }
 
         function renderHome() {
@@ -1098,7 +1105,6 @@
             const equipDiv = document.getElementById('home-equipped');
             const storageDiv = document.getElementById('home-storage');
             
-            // 1. 착용 장비 렌더링
             let equipHtml = '';
             ['weapon', 'armor', 'accessory'].forEach(type => {
                 if (p[type]) {
@@ -1110,7 +1116,6 @@
             });
             equipDiv.innerHTML = equipHtml || '<span style="color:#999;">착용중인 장비가 없습니다.</span>';
 
-            // 2. 창고 장비 렌더링
             document.getElementById('storage-count').innerText = p.storage.length;
             let storageHtml = '';
             p.storage.forEach((item, index) => {
@@ -1130,8 +1135,7 @@
                 sysMsg("창고가 가득 찼습니다. (최대 3개)"); return;
             }
             if (p[type]) {
-                p.storage.push(p[type]);
-                p[type] = null;
+                p.storage.push(p[type]); p[type] = null;
                 sysMsg("장비를 창고에 보관했습니다.");
                 saveGame(); renderPlayerStatus(); renderHome();
             }
@@ -1140,15 +1144,11 @@
         function retrieveItem(index) {
             const p = store.player;
             const item = p.storage[index];
-            
             if (p.level < item.reqLevel) {
                 sysMsg(`착용 레벨이 부족합니다. (필요 Lv.${item.reqLevel})`); return;
             }
-
-            // 착용하려는 부위에 이미 장비가 있다면, 서로 교체
             const currentEquipped = p[item.type];
             p[item.type] = item;
-            
             if (currentEquipped) {
                 p.storage[index] = currentEquipped;
                 sysMsg(`[${currentEquipped.name}] 장비와 교체하여 착용했습니다.`);
@@ -1156,17 +1156,14 @@
                 p.storage.splice(index, 1);
                 sysMsg(`[${item.name}] 장비를 꺼내 착용했습니다.`);
             }
-            
             const maxHp = getPlayerTotalStats().maxHp;
             if(p.hp > maxHp) p.hp = maxHp;
-
             saveGame(); renderPlayerStatus(); renderHome();
         }
         
         function resetData() {
             if (confirm("경고: 모든 플레이 데이터가 삭제되고 1레벨부터 다시 시작합니다.\n정말 삭제하시겠습니까?")) {
-                localStorage.removeItem('work_sys_v2');
-                location.reload();
+                localStorage.removeItem('work_sys_v2'); location.reload();
             }
         }
 
@@ -1185,47 +1182,50 @@
         loadGame(); renderPlayerStatus();
         const Ranks = ['미습득', 'F', 'E', 'D', 'C', 'B', 'A', 'S'];
 
-function openSkills() {
-    changeView('skills');
-    document.getElementById('sp-display').innerText = store.player.sp;
-    let html = '';
-    Object.keys(store.skillsData).forEach(key => {
-        const s = store.skillsData[key];
-        // [버그 수정] 특정 직업 전용 스킬(job 지정)은 해당 직업일 때만 목록에 노출
-        if (s.job && s.job !== store.player.job) return;
-        const currentRank = store.player.skills[key] || 0;
-        const isUnlocked = store.player.level >= s.reqLv;
-        
-        html += `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #ddd; background: #fff; margin-bottom: 5px; opacity: ${isUnlocked ? '1' : '0.5'}">
-            <div>
-                <strong>${s.name}</strong> <span style="font-size:10px; color:#666;">(Lv.${s.reqLv} 해금)</span><br>
-                <span style="font-weight: bold; color: #0078d4;">[${Ranks[currentRank]}]</span>
-                <span style="font-size:11px; color:#555;">${s.desc}</span>
-            </div>
-            <button class="btn-skill" style="background-color: #0078d4; color: white;" onclick="upgradeSkill('${key}')" 
-            ${(!isUnlocked || store.player.sp < 1 || currentRank >= 7) ? 'disabled' : ''}>
-            ${currentRank >= 7 ? 'MAX' : '강화 (1 SP)'}
-            </button>
-        </div>`;
-    });
-    document.getElementById('skills-container').innerHTML = html;
-}
+        function openSkills() {
+            changeView('skills');
+            document.getElementById('sp-display').innerText = store.player.sp;
+            let html = '';
+            Object.keys(store.skillsData).forEach(key => {
+                const s = store.skillsData[key];
+                if (s.job && s.job !== store.player.job) return;
+                
+                const currentRank = store.player.skills[key] || 0;
+                const isUnlocked = store.player.level >= s.reqLv;
+                // [버그 패치] 스킬 랭크업에 소모되는 실제 비용 산출 및 버튼 표기
+                let nextRank = currentRank + 1;
+                let requiredSp = Math.min(3, Math.ceil(nextRank / 2)); 
+                
+                html += `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #ddd; background: #fff; margin-bottom: 5px; opacity: ${isUnlocked ? '1' : '0.5'}">
+                    <div>
+                        <strong>${s.name}</strong> <span style="font-size:10px; color:#666;">(Lv.${s.reqLv} 해금)</span><br>
+                        <span style="font-weight: bold; color: #0078d4;">[${Ranks[currentRank]}]</span>
+                        <span style="font-size:11px; color:#555;">${s.desc}</span>
+                    </div>
+                    <button class="btn-skill" style="background-color: #0078d4; color: white; min-width:80px;" onclick="upgradeSkill('${key}')" 
+                    ${(!isUnlocked || store.player.sp < requiredSp || currentRank >= 7) ? 'disabled' : ''}>
+                    ${currentRank >= 7 ? 'MAX' : '강화 (' + requiredSp + ' SP)'}
+                    </button>
+                </div>`;
+            });
+            document.getElementById('skills-container').innerHTML = html;
+        }
 
-function upgradeSkill(key) {
-    const currentRank = store.player.skills[key] || 0;
-    let nextRank = currentRank + 1;
-    let requiredSp = Math.min(3, Math.ceil(nextRank / 2)); // 랭크업에 1~3 SP 가변 소모
+        function upgradeSkill(key) {
+            const currentRank = store.player.skills[key] || 0;
+            let nextRank = currentRank + 1;
+            let requiredSp = Math.min(3, Math.ceil(nextRank / 2)); 
 
-    if (store.player.sp >= requiredSp && currentRank < 7) {
-        store.player.sp -= requiredSp; 
-        store.player.skills[key] = nextRank;
-        saveGame(); openSkills(); renderPlayerStatus();
-        sysMsg(`${store.skillsData[key].name} 랭크가 상승했습니다. (소모 SP: ${requiredSp})`);
-    } else if (currentRank < 7) {
-        sysMsg(`SP가 부족합니다. (필요 SP: ${requiredSp}, 현재 잔여: ${store.player.sp})`);
-    }
-}
+            if (store.player.sp >= requiredSp && currentRank < 7) {
+                store.player.sp -= requiredSp; 
+                store.player.skills[key] = nextRank;
+                saveGame(); openSkills(); renderPlayerStatus();
+                sysMsg(`${store.skillsData[key].name} 랭크가 상승했습니다. (소모 SP: ${requiredSp})`);
+            } else if (currentRank < 7) {
+                sysMsg(`SP가 부족합니다. (필요 SP: ${requiredSp}, 현재 잔여: ${store.player.sp})`);
+            }
+        }
     </script>
 </body>
 </html>
