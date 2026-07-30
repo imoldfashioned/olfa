@@ -327,6 +327,24 @@
                 { id: 'ac22', name: '한정판 향수', type: 'accessory', price: 8000, reqLevel: 38, stats: { eva: 15, acc: 10 } },
                 { id: 'ac31', name: '블루투스 수정구', type: 'accessory', price: 20000, reqLevel: 48, stats: { crt: 12, acc: 20, maxHp: 300 } },
                 { id: 'ac32', name: '무한동력 커피머신', type: 'accessory', price: 50000, reqLevel: 65, stats: { crt: 20, eva: 20, maxHp: 800 } }
+
+                // 무기 데이터 추가
+                { id: 'w41', name: '법인카드 엑스칼리버', type: 'weapon', price: 150000, reqLevel: 85, stats: { atk: 3500, crt: 35, acc: 20 } },
+                { id: 'w42', name: '블랙컨슈머의 확성기', type: 'weapon', price: 300000, reqLevel: 110, stats: { atk: 5800, crt: 40, eva: -5 } },
+                { id: 'w43', name: '주총꾼의 결재서류', type: 'weapon', price: 650000, reqLevel: 140, stats: { atk: 9500, acc: 40, crt: 45 } },
+                { id: 'w44', name: '초합금 마스터키', type: 'weapon', price: 1200000, reqLevel: 180, stats: { atk: 18000, acc: 50, crt: 50 } },
+
+        
+                // 방어구 데이터 추가
+                { id: 'a41', name: '철야의 수면바지', type: 'armor', price: 120000, reqLevel: 80, stats: { def: 2800, maxHp: 1000, eva: 15 } },
+                { id: 'a42', name: '임원 전용 안마의자', type: 'armor', price: 280000, reqLevel: 115, stats: { def: 4500, maxHp: 2500, eva: -5 } },
+                { id: 'a43', name: '사내정치 방탄조끼', type: 'armor', price: 600000, reqLevel: 145, stats: { def: 8500, maxHp: 5000, eva: 20 } },
+                { id: 'a44', name: '명예퇴직 방호복', type: 'armor', price: 1100000, reqLevel: 175, stats: { def: 15000, maxHp: 10000, eva: 25 } },
+
+                // 악세사리 데이터 추가
+                { id: 'ac41', name: '주가폭등 부적', type: 'accessory', price: 100000, reqLevel: 80, stats: { crt: 25, eva: 20, maxHp: 1500 } },
+                { id: 'ac42', name: '외제차 스마트키', type: 'accessory', price: 250000, reqLevel: 120, stats: { crt: 30, acc: 30, maxHp: 4000 } },
+                { id: 'ac43', name: '무제한 연차 결재권', type: 'accessory', price: 800000, reqLevel: 160, stats: { crt: 40, eva: 40, maxHp: 8000, acc: 20 } }
             ],
             monsters: [
                 { name: '하루살이', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.1, atkRate: 0.5, defRate: 0.1, eva: 38, rewardRate: 0.5 },
@@ -362,6 +380,14 @@
                 { name: '스켈레톤 팀장', type: 'boss', minLv: 80, maxLv: 999, hpRate: 1.3, atkRate: 1.8, defRate: 1.1, eva: 20, rewardRate: 4.0 },
                 { name: '데스나이트 부장', type: 'boss', minLv: 85, maxLv: 999, hpRate: 2.2, atkRate: 1.8, defRate: 1.5, eva: 10, rewardRate: 5.0 },
                 { name: '감사팀 임원', type: 'boss', minLv: 90, maxLv: 999, hpRate: 3.0, atkRate: 2.0, defRate: 1.4, eva: 15, rewardRate: 7.0 }
+
+                { name: '낙하산 신입', type: 'normal', minLv: 95, maxLv: 999, hpRate: 2.5, atkRate: 1.5, defRate: 1.2, eva: 25, rewardRate: 5.0 },
+                { name: '분노한 주주', type: 'strong', minLv: 110, maxLv: 999, hpRate: 3.0, atkRate: 2.5, defRate: 1.5, eva: 10, rewardRate: 8.0 },
+                { name: '악성 콜센터 진상', type: 'strong', minLv: 130, maxLv: 999, hpRate: 2.8, atkRate: 3.0, defRate: 1.0, eva: 40, rewardRate: 12.0 },
+                { name: '사내 정치꾼', type: 'boss', minLv: 150, maxLv: 999, hpRate: 4.5, atkRate: 2.2, defRate: 2.5, eva: 30, rewardRate: 18.0 },
+                { name: '경쟁사 산업스파이', type: 'strong', minLv: 170, maxLv: 999, hpRate: 3.5, atkRate: 3.8, defRate: 1.8, eva: 50, rewardRate: 25.0 },
+                { name: '노조위원장', type: 'boss', minLv: 190, maxLv: 999, hpRate: 6.0, atkRate: 3.5, defRate: 3.0, eva: 20, rewardRate: 40.0 },
+                { name: '국세청 특별조사관', type: 'boss', minLv: 220, maxLv: 999, hpRate: 8.0, atkRate: 5.0, defRate: 4.5, eva: 35, rewardRate: 80.0 }
             ],
             currentMonster: null, logs: []
         };
