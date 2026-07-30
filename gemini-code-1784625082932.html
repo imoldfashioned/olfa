@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>업무 관리 시스템 v2.8</title>
+    <title>업무 관리 시스템 v2.9</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f3f2f1; color: #333; font-size: 12px; margin: 0; }
@@ -95,7 +95,7 @@
                     <span style="margin:0 8px; color:#ccc;">|</span>
                     <h2 style="border:none; margin:0; padding:0; font-size:16px; white-space:nowrap;">User Status</h2>
                 </div>
-                <button onclick="changeName()" style="background:none; border:none; cursor:pointer; font-size:14px; padding:0 0 0 5px; flex-shrink:0;" title="닉네임 변경">⚙️</button>
+                <button onclick="openSettingsMenu()" style="background:none; border:none; cursor:pointer; font-size:14px; padding:0 0 0 5px; flex-shrink:0;" title="환경 설정">⚙️</button>
             </div>
             <div id="player-status"></div>
             <div class="status-block" id="player-equip"></div>
@@ -107,8 +107,6 @@
                 <button onclick="openSkills()" class="btn-skill" style="background-color: #0078d4; color: white; border-color: #0078d4; text-align: center; font-weight: bold;">스킬 관리 (SP)</button>
                 <button onclick="changeView('bank')">사내 금고 (은행)</button>
                 <button onclick="openHome()">자택 (하우징)</button>
-                <button onclick="openSync()">데이터 동기화</button>
-                <button class="btn-danger" onclick="resetData()">데이터 초기화</button>
             </div>
             <div id="sys-msg"></div>
         </div>
@@ -117,12 +115,13 @@
             <div id="view-main" class="view active">
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #107c41; padding-bottom: 5px; margin-bottom: 15px;">
                     <h2 style="border:none; margin:0; padding:0;">대기 화면 (사내 인트라넷)</h2>
-                    <span style="font-weight:bold; color:#107c41; font-size:14px;">현재 버전: v2.8</span>
+                    <span style="font-weight:bold; color:#107c41; font-size:14px;">현재 버전: v2.9</span>
                 </div>
                 
                 <div style="background:#eaf2ea; padding:15px; border:1px solid #c3d8c3; margin-bottom: 15px;">
                     <h3 style="margin-top:0; color:#107c41; font-size:13px;">버전별 업데이트 요약</h3>
                     <ul style="margin-bottom:0; padding-left:20px; line-height:1.6; font-size:12px;">
+                        <li><strong>[v2.9] 2026-07-30:</strong> 설정 메뉴 개편(톱니바퀴 팝업), 전직 조건 개편(1차 Lv.50+능력치24, 1클래스 내 타 직군 전직 신설), 고레벨 장비 시 승률 100%대에 근접하던 밸런스 재조정, 1차 전직 이후 필요 경험치 상승</li>
                         <li><strong>[v2.8] 2026-07-29:</strong> 1클래스 직업별 스킬 트리 대규모 추가, 몬스터 스케일링/전투 밸런스 2차 조정, 대기화면 및 턴 판정 개편</li>
                         <li><strong>[v2.7] 2026-07-20:</strong> 모바일/PC 반응형 UI 강제 토글 버튼 추가, 장비 매각 로직 적용</li>
                         <li><strong>[v2.6] 2026-07-15:</strong> 대규모 몬스터 데이터베이스 탑재, 자택(창고) 시스템 오픈</li>
@@ -133,18 +132,20 @@
                     <div style="flex:1; min-width:200px; background:#f3f2f1; padding:10px; border:1px solid #ddd;">
                         <h3 style="margin-top:0; border-bottom:1px solid #ccc; padding-bottom:3px;">공지사항</h3>
                         <ul style="padding-left:20px; line-height:1.5; margin-bottom:0; font-size:11px;">
-                            <li>1클래스 전직 시 스킬 랭크와 SP가 정상적으로 <strong>초기화</strong>되도록 수정되었습니다.</li>
-                            <li>방어구 착용 시 몬스터가 비정상적으로 강해져 잡을 수 없게 되던 현상이 완화되었습니다.</li>
-                            <li>전투 중 스킬 발동 여부가 공격/방어 이전에 명확히 표시됩니다.</li>
-                            <li>레벨 100 달성 시 사내 인사팀을 통해 1클래스 전직이 가능합니다. (장비 매각 주의)</li>
+                            <li>닉네임 변경 · 전직 · 데이터 동기화 · 초기화는 좌측 상단 <strong>톱니바퀴(⚙️)</strong> 메뉴로 이동했습니다.</li>
+                            <li>1차 전직 기준이 <strong>레벨 50</strong>으로 하향되었고, 지원 부서의 메인 능력치가 24 이상이어야 합니다.</li>
+                            <li>1클래스에서도 레벨 50부터 같은 1클래스 내 타 직군으로 전직할 수 있습니다.</li>
+                            <li>고레벨 장비 착용 시 승률이 100%에 근접하던 현상을 완화했습니다. (스킬 발동확률 상한 적용 등)</li>
+                            <li>1차 전직 이후에는 0클래스보다 필요 경험치가 다소 높게 책정됩니다.</li>
                         </ul>
                     </div>
                     <div style="flex:1; min-width:200px; background:#f3f2f1; padding:10px; border:1px solid #ddd;">
                         <h3 style="margin-top:0; border-bottom:1px solid #ccc; padding-bottom:3px;">매뉴얼 및 공략</h3>
                         <ul style="padding-left:20px; line-height:1.5; margin-bottom:0; font-size:11px;">
-                            <li><strong>스킬 발동:</strong> 전투 시 매 턴 <u>지능(INT)에 비례</u>하여 스킬이 자동 발동합니다.</li>
+                            <li><strong>스킬 발동:</strong> 전투 시 매 턴 <u>지능(INT)에 비례</u>하여 스킬이 자동 발동합니다. (최대 25%)</li>
                             <li><strong>생존 우선:</strong> 초반에는 무기보다 방어구와 악세사리를 먼저 맞추는 것이 유리합니다.</li>
                             <li><strong>장비 매각:</strong> 전직 시 착용 중인 장비는 50% 가격에 강제 매각되므로, 유지할 장비는 반드시 자택(창고)에 보관하세요.</li>
+                            <li><strong>전직 경로:</strong> 0클래스 → 1클래스(Lv.50+능력치24) → 1클래스 내 타 직군(Lv.50) → 2클래스(Lv.200+능력치100)</li>
                         </ul>
                     </div>
                 </div>
@@ -243,6 +244,16 @@
         <button onclick="setScreenMode('pc')" style="padding:2px 6px; font-size:10px;">PC 모드</button>
         <button onclick="setScreenMode('mobile')" style="padding:2px 6px; font-size:10px;">모바일 모드</button>
         <button onclick="setScreenMode('auto')" style="padding:2px 6px; font-size:10px;">자동(반응형)</button>
+    </div>
+
+    <div id="settings-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;" onclick="if(event.target===this) closeSettingsMenu()">
+        <div style="background:#fff; border:1px solid #8a8886; padding:18px; width:280px; max-width:85%; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #107c41; padding-bottom:8px; margin-bottom:12px;">
+                <h2 style="border:none; margin:0; padding:0; font-size:14px;">환경 설정</h2>
+                <button onclick="closeSettingsMenu()" style="border:none; background:none; cursor:pointer; font-size:15px; padding:0;" title="닫기">✕</button>
+            </div>
+            <div class="button-group" id="settings-menu-buttons" style="margin-top:0;"></div>
+        </div>
     </div>
 
     <script>
@@ -373,7 +384,9 @@
                 crt: Math.floor(p.cha * 1.5),         
                 crtDmg: 150 + Math.floor(p.cha * 2.0),
                 lukBonus: p.luk * 0.01,
-                skillChance: 10 + Math.floor(p.int * 2.0)
+                // [밸런스 수정] 상한 없이 10+INT*2로 계속 오르기만 하던 구조라 고레벨에서 매턴 100% 발동(사실상 무조건 발동)이
+                // 되어버려 승률이 100%에 근접하는 핵심 원인이었음. 25%를 상한으로 고정.
+                skillChance: Math.min(25, 10 + Math.floor(p.int * 2.0))
             };
             
             [p.weapon, p.armor, p.accessory].forEach(gear => {
@@ -400,8 +413,10 @@
             };
         }
 
-        function getRequiredExp(level) {
-            return Math.floor(10 + (level * 8) + Math.pow(level, 1.7));
+        function getRequiredExp(level, classTier = 0) {
+            // [신규] 1차/2차 전직 이후에는 필요 경험치가 다소 상승하도록 티어별 배율 적용
+            const tierMult = 1 + ((classTier || 0) * 0.35);
+            return Math.floor((10 + (level * 8) + Math.pow(level, 1.7)) * tierMult);
         }
 
         function calculateCP(stats, isPlayer = true) {
@@ -426,6 +441,25 @@
                 renderPlayerStatus();
                 sysMsg("닉네임이 성공적으로 변경되었습니다.");
             }
+        }
+
+        function openSettingsMenu() {
+            renderSettingsMenu();
+            document.getElementById('settings-modal-overlay').style.display = 'flex';
+        }
+
+        function closeSettingsMenu() {
+            document.getElementById('settings-modal-overlay').style.display = 'none';
+        }
+
+        function renderSettingsMenu() {
+            const elig = getAdvanceEligibility();
+            document.getElementById('settings-menu-buttons').innerHTML = `
+                <button onclick="closeSettingsMenu(); changeName();">닉네임 변경</button>
+                <button onclick="closeSettingsMenu(); advanceClass(${elig.targetTier ?? 1});" ${elig.eligible ? '' : 'disabled'} title="${elig.eligible ? '' : '조건을 만족하면 활성화됩니다'}">${elig.label}</button>
+                <button onclick="closeSettingsMenu(); openSync();">데이터 동기화</button>
+                <button class="btn-danger" onclick="closeSettingsMenu(); resetData();">데이터 초기화</button>
+            `;
         }
 
         function changeView(viewId) {
@@ -699,11 +733,13 @@
             if (lv <= 25) { statNerf = 0.90; rewardBuff = 1.30; }
             else if (lv <= 50) { statNerf = 0.95; rewardBuff = 1.15; }
 
-            // [버그 패치] 플레이어의 방어력 스탯이 몬스터의 방어력과 체력을 과하게 올리는 현상 수정.
-            // 몬스터의 맷집을 플레이어 공격력(ATK)에 기반하도록 변경하여 밸런스 조정.
-            let mMaxHp = Math.floor((100 + pStats.atk * 3) * targetTemplate.hpRate * cpRatio * statNerf); 
-            let mAtk = Math.floor(pStats.atk * targetTemplate.atkRate * cpRatio * 0.85 * statNerf);
-            let mDef = Math.floor(pStats.atk * 0.3 * targetTemplate.defRate * cpRatio * statNerf);
+            // [밸런스 재조정] 이전 버전(atk*3 + 고정치 100)은 고레벨 구간에서 고정치의 영향이 희석되며
+            // 스킬 시스템과 겹쳐 승률이 100%에 근접하는 문제가 있었음. 시뮬레이션으로 재검증한 계수로 교체.
+            // (플레이어 자신의 방어 스탯이 아닌 '공격 지표'에 몬스터의 체력/방어를, '생존 지표'에 몬스터의 공격력을
+            //  연동시켜, 장비 하나를 바꿨을 때 조우 난이도가 엉뚱하게 튀는 현상도 함께 방지)
+            let mMaxHp = Math.floor(pStats.atk * targetTemplate.hpRate * cpRatio * 6.5 * statNerf); 
+            let mAtk = Math.floor(pStats.maxHp * targetTemplate.atkRate * cpRatio * 1.0 * statNerf);
+            let mDef = Math.floor(pStats.atk * 0.8 * targetTemplate.defRate * cpRatio * statNerf);
 
             let baseRewardValue = (lv * 3) + 10;
             let tierMultiplier = 1 + (store.player.classTier * 1.5); 
@@ -755,7 +791,7 @@
             
             let leveledUp = false;
             while (p.exp >= p.maxExp) {
-                p.exp -= p.maxExp; p.level++; p.sp++; p.maxExp = Math.floor(10 + (p.level * 8) + Math.pow(p.level, 1.7));
+                p.exp -= p.maxExp; p.level++; p.sp++; p.maxExp = getRequiredExp(p.level, p.classTier);
                 
                 const statNames = { STR: '근력', INT: '지능', VIT: '체력', DEX: '민첩', CHA: '매력', LUK: '행운' };
                 const failMsgs = [
@@ -898,7 +934,7 @@
             const p = store.player;
             const stats = getPlayerTotalStats();
             const cp = calculateCP(stats);
-            if(p.maxExp === undefined || p.maxExp === 15) p.maxExp = getRequiredExp(p.level);
+            if(p.maxExp === undefined || p.maxExp === 15) p.maxExp = getRequiredExp(p.level, p.classTier);
 
             const hpPercent = Math.min(100, Math.max(0, (p.hp / stats.maxHp) * 100));
             const expPercent = Math.min(100, Math.max(0, (p.exp / p.maxExp) * 100));
@@ -913,15 +949,9 @@
                 buffColor = "#e0f7fa"; buffBorder = "#b2ebf2"; buffText = "#006064";
             }
 
-            let advanceHtml = '';
-            if (p.level >= 100 && p.classTier === 0) {
-                advanceHtml = `<button class="btn-main" onclick="advanceClass()" style="width:100%; margin-bottom:10px; background-color:#d6b800; border-color:#d6b800; color:#333;">1차 직업 전직 가능!</button>`;
-            } else if (p.level >= 200 && p.classTier === 1) {
-                advanceHtml = `<button class="btn-main" onclick="advanceClass(2)" style="width:100%; margin-bottom:10px; background-color:#d6b800; border-color:#d6b800; color:#333;">2차 직업 전직 가능!</button>`;
-            }
+            // [메뉴 정리] 전직 버튼은 상태 패널이 아닌 톱니바퀴(⚙️) 팝업 메뉴로 일원화됨 (getAdvanceEligibility 참고)
 
             document.getElementById('player-status').innerHTML = `
-                ${advanceHtml}
                 <div class="class-badge">Tier ${p.classTier} | ${p.job}</div>
                 <div class="status-line" style="font-weight:bold; color:#107c41;"><span>전투력(CP)</span> <span>${cp}</span></div>
                 <div class="status-line"><span>레벨(Lv)</span> <span>${p.level}</span></div>
@@ -990,11 +1020,37 @@
             }
         }
 
-        function advanceClass(targetTier = 1) {
+        function getAdvanceEligibility() {
             const p = store.player;
-            let choice = prompt(`${targetTier}차 직업으로 전직합니다.\n원하는 부서를 입력하세요 (현장직 / 사무직 / 관리직)\n\n⚠ 전직 시, 착용중인 모든 장비를 매각합니다. 자택 창고에 보관했는지 확인 필수\n※ 레벨과 능력치가 초기화됩니다.`);
+            if (p.classTier === 0) {
+                if (p.level >= 50) return { eligible: true, targetTier: 1, label: '1차 전직 가능' };
+                return { eligible: false, targetTier: 1, label: `1차 전직 (Lv.50 필요 / 현재 Lv.${p.level})` };
+            } else if (p.classTier === 1) {
+                if (p.level >= 200) return { eligible: true, targetTier: 2, label: '2차 전직 가능' };
+                if (p.level >= 50) return { eligible: true, targetTier: 1, label: '타 직군 전직 가능 (1클래스 내)' };
+                return { eligible: false, targetTier: 1, label: `타 직군 전직 (Lv.50 필요 / 현재 Lv.${p.level})` };
+            }
+            return { eligible: false, targetTier: null, label: '전직 불가 (최종 티어)' };
+        }
+
+        function advanceClass(targetTier) {
+            const p = store.player;
+            if (targetTier === undefined) targetTier = (p.classTier === 1 && p.level >= 200) ? 2 : 1;
+            const isLateral = (p.classTier === 1 && targetTier === 1); // [신규] 1클래스 내 타 직군 전직
+
+            const levelReq = (targetTier === 2) ? 200 : 50;
+            if (p.level < levelReq) return sysMsg(`전직 실패: 레벨 ${levelReq} 이상 필요 (현재 Lv.${p.level})`);
+
+            const promptTitle = isLateral ? `1클래스 내 타 직군으로 전직합니다.` : `${targetTier}차 직업으로 전직합니다.`;
+            let choice = prompt(`${promptTitle}\n원하는 부서를 입력하세요 (현장직 / 사무직 / 관리직)\n\n⚠ 전직 시, 착용중인 모든 장비를 매각합니다. 자택 창고에 보관했는지 확인 필수\n※ 레벨과 능력치, 스킬(SP 포함)이 초기화됩니다.`);
             
             if (['현장직', '사무직', '관리직'].includes(choice)) {
+                // [신규] 0→1클래스 전직 시 선택한 부서의 메인 능력치가 24 이상이어야 함 (레벨 기준 100→50 하향에 따른 보완 조건)
+                if (targetTier === 1 && !isLateral) {
+                    if (choice === '현장직' && p.vit < 24) return sysMsg("현장직 전직 실패: VIT 24 이상 필요");
+                    if (choice === '사무직' && p.cha < 24) return sysMsg("사무직 전직 실패: CHA 24 이상 필요");
+                    if (choice === '관리직' && p.dex < 24) return sysMsg("관리직 전직 실패: DEX 24 이상 필요");
+                }
                 if (targetTier === 2) {
                     if (choice === '현장직' && p.vit < 100) return sysMsg("현장직 이직 실패: 순수 VIT 100 이상 필요");
                     if (choice === '사무직' && p.cha < 100) return sysMsg("사무직 이직 실패: 순수 CHA 100 이상 필요");
@@ -1014,10 +1070,9 @@
                 p.job = choice;
                 p.level = 1;
                 p.exp = 0;
-                p.maxExp = getRequiredExp(1); 
+                p.maxExp = getRequiredExp(1, targetTier); 
                 p.str = 5; p.int = 5; p.vit = 5; p.dex = 5; p.cha = 5; p.luk = 5;
 
-                // [버그 패치] 전직 시 스킬 랭크 및 SP 정상 초기화 추가
                 p.sp = 0;
                 p.skills = {};
 
