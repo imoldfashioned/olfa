@@ -1012,7 +1012,7 @@
         function updateBankUI() {
             const p = store.player;
             if(p.bank === undefined) p.bank = 0;
-            document.getElementById('bank-limit').innerText = p.level * 1000;
+            document.getElementById('bank-limit').innerText = p.level * 100000;
             document.getElementById('bank-balance').innerText = p.bank + " G";
             document.getElementById('deposit-amt').value = '';
             document.getElementById('withdraw-amt').value = '';
@@ -1023,7 +1023,7 @@
                 sysMsg("아직 탐색 쿨타임이 지나지 않았습니다."); return;
             }
             const p = store.player;
-            const limit = p.level * 1000;
+            const limit = p.level * 100000;
             let amt = isMax ? Math.min(p.gold, limit - p.bank) : (parseInt(document.getElementById('deposit-amt').value) || 0);
 
             if (amt <= 0) { sysMsg("유효한 금액을 입력하세요."); return; }
