@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>업무 관리 시스템 v2.9</title>
+    <title>업무 관리 시스템 v3.0</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f3f2f1; color: #333; font-size: 12px; margin: 0; }
@@ -115,13 +115,14 @@
             <div id="view-main" class="view active">
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #107c41; padding-bottom: 5px; margin-bottom: 15px;">
                     <h2 style="border:none; margin:0; padding:0;">대기 화면 (사내 인트라넷)</h2>
-                    <span style="font-weight:bold; color:#107c41; font-size:14px;">현재 버전: v2.9</span>
+                    <span style="font-weight:bold; color:#107c41; font-size:14px;">현재 버전: v3.0</span>
                 </div>
                 
                 <div style="background:#eaf2ea; padding:15px; border:1px solid #c3d8c3; margin-bottom: 15px;">
                     <h3 style="margin-top:0; color:#107c41; font-size:13px;">버전별 업데이트 요약</h3>
                     <ul style="margin-bottom:0; padding-left:20px; line-height:1.6; font-size:12px;">
-                        <li><strong>[v2.9] 2026-07-30:</strong> 설정 메뉴 개편(톱니바퀴 팝업), 전직 조건 개편(1차 Lv.50+능력치24, 1클래스 내 타 직군 전직 신설), 고레벨 장비 시 승률 100%대에 근접하던 밸런스 재조정, 1차 전직 이후 필요 경험치 상승</li>
+                        <li><strong>[v3.0] 2026-07-31:</strong> 전투력 산출 방식 전면 재설계(목표 승률: 초보자 30%대/1차전직 50%대/Lv.100 고급장비 60~70%대), 직업간 정체성 차등 반영(현장직·사무직·관리직), 1클래스 이상 능력치 상승폭이 행운(LUK) 영향을 받는 1~2 랜덤으로 변경, 육성 가이드 보강</li>
+                        <li><strong>[v2.9] 2026-07-30:</strong> 설정 메뉴 개편(톱니바퀴 팝업), 전직 조건 개편(1차 Lv.50+능력치24, 1클래스 내 타 직군 전직 신설), 1차 전직 이후 필요 경험치 상승</li>
                         <li><strong>[v2.8] 2026-07-29:</strong> 1클래스 직업별 스킬 트리 대규모 추가, 몬스터 스케일링/전투 밸런스 2차 조정, 대기화면 및 턴 판정 개편</li>
                         <li><strong>[v2.7] 2026-07-20:</strong> 모바일/PC 반응형 UI 강제 토글 버튼 추가, 장비 매각 로직 적용</li>
                         <li><strong>[v2.6] 2026-07-15:</strong> 대규모 몬스터 데이터베이스 탑재, 자택(창고) 시스템 오픈</li>
@@ -132,24 +133,26 @@
                     <div style="flex:1; min-width:200px; background:#f3f2f1; padding:10px; border:1px solid #ddd;">
                         <h3 style="margin-top:0; border-bottom:1px solid #ccc; padding-bottom:3px;">공지사항</h3>
                         <ul style="padding-left:20px; line-height:1.5; margin-bottom:0; font-size:11px;">
-                            <li>닉네임 변경 · 전직 · 데이터 동기화 · 초기화는 좌측 상단 <strong>톱니바퀴(⚙️)</strong> 메뉴로 이동했습니다.</li>
-                            <li>1차 전직 기준이 <strong>레벨 50</strong>으로 하향되었고, 지원 부서의 메인 능력치가 24 이상이어야 합니다.</li>
-                            <li>1클래스에서도 레벨 50부터 같은 1클래스 내 타 직군으로 전직할 수 있습니다.</li>
-                            <li>고레벨 장비 착용 시 승률이 100%에 근접하던 현상을 완화했습니다. (스킬 발동확률 상한 적용 등)</li>
-                            <li>1차 전직 이후에는 0클래스보다 필요 경험치가 다소 높게 책정됩니다.</li>
+                            <li>전투력 산출 방식이 바뀌어 체감 승률이 이전과 달라질 수 있습니다. (초보자 구간이 더 팍팍하게, 고레벨 구간은 예전보다 조금 더 도전적으로 조정됨)</li>
+                            <li>이제 방어력/공격력이 아무리 극단적으로 몰려도 "이론상 격파 불가능"한 몬스터는 나오지 않도록 안전장치가 적용되었습니다.</li>
+                            <li>현장직(방어·체력↑/치명타↓), 사무직(공격·치명타↑/체력↓), 관리직(회피·스킬성능↑/명중↓)로 직업별 정체성이 뚜렷해졌습니다.</li>
+                            <li>1클래스 이상부터는 레벨업 능력치 상승폭이 고정 2가 아니라 1~2 랜덤이며, 행운(LUK)이 높을수록 2가 나올 확률이 올라갑니다.</li>
                         </ul>
                     </div>
                     <div style="flex:1; min-width:200px; background:#f3f2f1; padding:10px; border:1px solid #ddd;">
                         <h3 style="margin-top:0; border-bottom:1px solid #ccc; padding-bottom:3px;">매뉴얼 및 공략</h3>
                         <ul style="padding-left:20px; line-height:1.5; margin-bottom:0; font-size:11px;">
-                            <li><strong>스킬 발동:</strong> 전투 시 매 턴 <u>지능(INT)에 비례</u>하여 스킬이 자동 발동합니다. (최대 25%)</li>
+                            <li><strong>최적 승률 팁:</strong> '강적'·'보스'는 조우 확률 자체가 낮고(최대 15%·3%) 유독 어렵게 설계되어 있습니다. 급하지 않다면 '일반' 몹 위주로 안정적으로 반복 사냥하는 편이 효율적입니다.</li>
+                            <li><strong>최단 성장 팁:</strong> 행운(LUK)은 능력치 상승 확률뿐 아니라 1클래스 이상에서는 상승폭(1~2)에도 영향을 주므로, 초반에 일부 투자해두면 이후 성장이 눈덩이처럼 불어납니다.</li>
+                            <li><strong>장비 갱신:</strong> 전투력이 장비에 크게 좌우되므로, 레벨이 오르면 상점에서 새로 구매 가능해진 장비가 있는지 자주 확인하세요.</li>
                             <li><strong>생존 우선:</strong> 초반에는 무기보다 방어구와 악세사리를 먼저 맞추는 것이 유리합니다.</li>
-                            <li><strong>장비 매각:</strong> 전직 시 착용 중인 장비는 50% 가격에 강제 매각되므로, 유지할 장비는 반드시 자택(창고)에 보관하세요.</li>
+                            <li><strong>장비 매각 주의:</strong> 전직 시 착용 중인 장비는 50% 가격에 강제 매각되므로, 유지할 장비는 반드시 자택(창고)에 보관하세요.</li>
                             <li><strong>전직 경로:</strong> 0클래스 → 1클래스(Lv.50+능력치24) → 1클래스 내 타 직군(Lv.50) → 2클래스(Lv.200+능력치100)</li>
                         </ul>
                     </div>
                 </div>
             </div>
+
             
             <div id="view-battle" class="view">
                 <h2>전투 로그 기록</h2>
@@ -420,6 +423,23 @@
                     if (gear.stats.crt) total.crt += gear.stats.crt;
                 }
             });
+
+            // [신규] 직업간 밸런스: 서로 다른 정체성을 갖되 비슷한 총 승률이 나오도록 스탯 배율로 차등화
+            total.skillPowerMult = 1.0;
+            if (p.job === '현장직') {
+                total.def = Math.floor(total.def * 1.25);
+                total.maxHp = Math.floor(total.maxHp * 1.2);
+                total.crt = Math.floor(total.crt * 0.7);
+            } else if (p.job === '사무직') {
+                total.atk = Math.floor(total.atk * 1.2);
+                total.crt = Math.floor(total.crt * 1.3);
+                total.maxHp = Math.floor(total.maxHp * 0.8);
+            } else if (p.job === '관리직') {
+                total.eva = Math.floor(total.eva * 1.4);
+                total.acc = Math.floor(total.acc * 0.75);
+                total.skillPowerMult = 1.25; // 스킬 배율(피해/감소량 등)에 곱연산으로 적용
+            }
+
             return total;
         }
 
@@ -581,6 +601,13 @@
                     else if (skillKey === 'micromanage') pDmgMult = 1.5 + (rank * 0.15);
                     else if (skillKey === 'meeting') skipEnemy = true;
                     else if (skillKey === 'performanceReview') pDmgMult = 2.0 + (rank * 0.2);
+
+                    // [신규] 관리직 "스킬성능 향상" 특성: 스킬 효과치 전반에 배율 적용
+                    if (pStats.skillPowerMult && pStats.skillPowerMult !== 1.0) {
+                        if (pDmgMult > 1.0) pDmgMult = 1.0 + (pDmgMult - 1.0) * pStats.skillPowerMult;
+                        if (mDmgMult < 1.0) mDmgMult = 1.0 - (1.0 - mDmgMult) * pStats.skillPowerMult;
+                        if (healRate > 0) healRate = healRate * pStats.skillPowerMult;
+                    }
                 } else {
                     addLog(` <span style="color:#999; font-size:11px; border:1px solid #ddd; padding:1px 4px; border-radius:2px; opacity: 0.8;">[스킬 판정] 발동 안함 (일반 공격)</span>`);
                 }
@@ -754,18 +781,21 @@
 
             const targetCP = pCP * cpRatio * 1.1;
             
-            let statNerf = 1.0;
             let rewardBuff = 1.0;
-            if (lv <= 25) { statNerf = 0.90; rewardBuff = 1.30; }
-            else if (lv <= 50) { statNerf = 0.95; rewardBuff = 1.15; }
+            if (lv <= 25) { rewardBuff = 1.30; }
+            else if (lv <= 50) { rewardBuff = 1.15; }
 
-            // [밸런스 재조정] 이전 버전(atk*3 + 고정치 100)은 고레벨 구간에서 고정치의 영향이 희석되며
-            // 스킬 시스템과 겹쳐 승률이 100%에 근접하는 문제가 있었음. 시뮬레이션으로 재검증한 계수로 교체.
-            // (플레이어 자신의 방어 스탯이 아닌 '공격 지표'에 몬스터의 체력/방어를, '생존 지표'에 몬스터의 공격력을
-            //  연동시켜, 장비 하나를 바꿨을 때 조우 난이도가 엉뚱하게 튀는 현상도 함께 방지)
-            let mMaxHp = Math.floor(pStats.atk * targetTemplate.hpRate * cpRatio * 6.5 * statNerf); 
-            let mAtk = Math.floor(pStats.maxHp * targetTemplate.atkRate * cpRatio * 1.0 * statNerf);
-            let mDef = Math.floor(pStats.atk * 0.8 * targetTemplate.defRate * cpRatio * statNerf);
+            // [밸런스 전면 재설계] 목표: 초보자(0티어) 약 30%대 / 1차전직 약 50%대 / Lv.100 고급장비 약 60~70%대 승률
+            // 1) hpRate/atkRate/defRate를 제곱근으로 완만하게 반영 -> 몬스터 종류간 승률 편차(일부는 90%+, 일부는 0%)를 크게 완화
+            // 2) 레벨이 오를수록 조우 난이도가 함께 상승하도록 레벨 보정계수 도입(상한 있음 - 과도한 고레벨 폭주 방지)
+            // 3) [안전장치] 방어력/공격력에 상한을 걸어, 어떤 defRate/atkRate 값이 들어와도 "이론상 격파 불가능"한 개체가
+            //    생기지 않도록 함. 향후 신규 몬스터 데이터를 추가해도 이 상한 덕분에 극단적으로 깨지지 않음.
+            const lvFactor = 1 + Math.min(0.9, lv * 0.009);
+            let mMaxHp = Math.floor(pStats.atk * Math.sqrt(targetTemplate.hpRate) * cpRatio * 10.0 * lvFactor);
+            let mAtk = Math.floor(pStats.maxHp * Math.sqrt(targetTemplate.atkRate) * cpRatio * 0.62 * lvFactor);
+            let mDef = Math.floor(pStats.atk * Math.sqrt(targetTemplate.defRate) * cpRatio * 0.73 * lvFactor);
+            mDef = Math.min(mDef, Math.floor(pStats.atk * 0.52));                       // 방어력 상한: 순수피해 최소 48% 관통 보장
+            mAtk = Math.min(mAtk, Math.floor((pStats.maxHp + pStats.def) * 0.36));      // 공격력 상한: 즉사(1~2턴 사망) 방지
 
             let baseRewardValue = (lv * 3) + 10;
             let tierMultiplier = 1 + (store.player.classTier * 1.5); 
@@ -834,7 +864,13 @@
                     
                     let lukBonus = (p.luk || 0) * 0.0005;
                     let finalProb = Math.min(0.60, baseProb + lukBonus);
-                    let gain = (p.classTier >= 1) ? 2 : 1; 
+                    // [신규] 1클래스 이상은 상승폭이 고정 2가 아니라 1~2 사이 랜덤으로 결정되며,
+                    // 행운(LUK) 스탯이 높을수록 2가 나올 확률이 올라감 (0티어는 기존과 동일하게 항상 1)
+                    let gain = 1;
+                    if (p.classTier >= 1) {
+                        const bonusGainChance = Math.min(0.85, 0.35 + (p.luk || 0) * 0.004);
+                        gain = (Math.random() < bonusGainChance) ? 2 : 1;
+                    }
 
                     const kName = statNames[name];
                     if (Math.random() < finalProb) { 
