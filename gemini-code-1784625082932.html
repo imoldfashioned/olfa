@@ -231,13 +231,28 @@
             </div>
             
             <div id="view-sync" class="view">
-                <h2>로컬 데이터 동기화</h2>
-                <textarea id="sync-code" style="width:100%; height:80px; font-family:Consolas, monospace; font-size:11px; margin-bottom:5px; box-sizing:border-box;"></textarea>
-                <div class="row-buttons">
-                    <button onclick="exportData()">데이터 복사</button>
-                    <button class="btn-main" onclick="importData()">데이터 병합</button>
-                    <button onclick="changeView('main')">닫기</button>
+                <h2>데이터 내보내기 및 불러오기</h2>
+                <p style="color: #666;">파일로 데이터를 저장하고 불러와 다른 기기에서도 안전하게 이어서 플레이할 수 있습니다.</p>
+                
+                <div style="background:#f3f2f1; padding:10px; border:1px solid #ddd; margin-bottom: 15px;">
+                    <strong>현재 진행상황 파일로 저장 (내보내기)</strong>
+                    <div class="row-buttons" style="margin-top: 10px;">
+                        <button class="btn-main" onclick="exportDataFile()">데이터 파일 다운로드 (.json)</button>
+                    </div>
                 </div>
+
+                <div style="background:#f3f2f1; padding:10px; border:1px solid #ddd;">
+                    <strong>다른 기기의 데이터 적용 (불러오기)</strong>
+                    <input type="file" id="import-file" accept=".json" style="margin-top: 10px; width: 100%; display: block;">
+                    <div class="row-buttons" style="margin-top: 10px;">
+                        <button class="btn-danger" onclick="importDataFile()" style="margin-top: 0;">선택한 파일로 병합하기</button>
+                    </div>
+                </div>
+
+                <div class="row-buttons" style="margin-top:15px;">
+                    <button onclick="changeView('main')">대기 화면으로</button>
+                </div>
+            </div>
             </div>
         </div>
     </div>
@@ -498,7 +513,7 @@
             document.getElementById('settings-menu-buttons').innerHTML = `
                 <button onclick="closeSettingsMenu(); changeName();">닉네임 변경</button>
                 <button onclick="closeSettingsMenu(); advanceClass(${elig.targetTier ?? 1});" ${elig.eligible ? '' : 'disabled'} title="${elig.eligible ? '' : '조건을 만족하면 활성화됩니다'}">${elig.label}</button>
-                <button onclick="closeSettingsMenu(); openSync();">데이터 동기화</button>
+                <button onclick="closeSettingsMenu(); changeView('sync');">데이터 동기화</button>
                 <button class="btn-danger" onclick="closeSettingsMenu(); resetData();">데이터 초기화</button>
                 <div style="max-width:900px; margin: 10px auto; text-align:right; font-size:11px; color:#666;">
                     <button onclick="setScreenMode('pc')" style="padding:2px 6px; font-size:10px;">PC 모드</button>
@@ -1289,16 +1304,43 @@
             }
         }
 
-        function exportData() {
-            document.getElementById('sync-code').value = btoa(encodeURIComponent(JSON.stringify(store.player)));
-            sysMsg("데이터 코드가 복사되었습니다.");
+        function exportDataFile() {
+            const dataStr = JSON.stringify(store.player);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `office_rpg_save_${new Date().getTime()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            sysMsg("데이터 파일이 성공적으로 다운로드되었습니다.");
         }
         
-        function importData() {
-            try {
-                store.player = { ...store.player, ...JSON.parse(decodeURIComponent(atob(document.getElementById('sync-code').value))) };
-                saveGame(); renderPlayerStatus(); sysMsg("병합 성공.");
-            } catch (e) { sysMsg("유효하지 않은 코드입니다."); }
+        function importDataFile() {
+            const fileInput = document.getElementById('import-file');
+            if (!fileInput.files.length) {
+                sysMsg("불러올 .json 파일을 먼저 선택해주세요.");
+                return;
+            }
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const loadedData = JSON.parse(e.target.result);
+                    if(loadedData && loadedData.level !== undefined) {
+                        store.player = { ...store.player, ...loadedData };
+                        saveGame(); renderPlayerStatus(); changeView('main');
+                        alert("성공적으로 데이터를 불러왔습니다!");
+                    } else {
+                        sysMsg("올바른 저장 파일 형식이 아닙니다.");
+                    }
+                } catch (err) {
+                    sysMsg("파일을 읽는 중 오류가 발생했습니다.");
+                }
+            };
+            reader.readAsText(file);
         }
 
         loadGame(); renderPlayerStatus();
