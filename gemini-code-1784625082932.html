@@ -907,8 +907,8 @@
                 
                 const statNames = { STR: '근력', INT: '지능', VIT: '체력', DEX: '민첩', CHA: '매력', LUK: '행운' };
                 const failMsgs = [
-                    "오르락 내리락 지랄을 합니다.", "오른 척을 합니다.", "오른 줄 알았지? 아니야!!", 
-                    "오르지 않았습니다.", "올랐다가 다시 내렸습니다.", "오를까말까 오를까말까 합니다.", "갈팡질팡 합니다."
+                    "오르락 내리락 지랄을 합니다.", "오른 척을 합니다.", "오른 줄 알았지? 아니야!!", "올랐으면 좋겠습니다.", "오른 줄 알았습니다.", 
+                    "오르지 않았습니다.", "올랐다가 다시 내렸습니다.", "오를까말까 오를까말까 합니다.", "갈팡질팡 합니다.", "오르려고 애를 씁니다."
                 ];
                 
                 let logLines = [];
@@ -930,11 +930,11 @@
 
                     const kName = statNames[name];
                     if (Math.random() < finalProb) { 
-                        logLines.push(` > <span class="log-stat">${kName}(이)가 ${gain} 올랐습니다.</span>`);
+                        logLines.push(` > <span class="log-stat">${kName}이 ${gain} 올랐습니다.</span>`);
                         return val + gain; 
                     } else { 
                         const failMsg = failMsgs[Math.floor(Math.random() * failMsgs.length)];
-                        logLines.push(` > <span style="color:#888;">${kName}(이)가 ${failMsg}</span>`);
+                        logLines.push(` > <span style="color:#888;">${kName}이 ${failMsg}</span>`);
                         return val; 
                     }
                 };
