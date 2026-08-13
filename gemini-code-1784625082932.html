@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>업무 관리 시스템 v3.0</title>
+    <title>업무 관리 시스템 v0.91</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background-color: #f3f2f1; color: #333; font-size: 12px; margin: 0; }
@@ -115,17 +115,17 @@
             <div id="view-main" class="view active">
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #107c41; padding-bottom: 5px; margin-bottom: 15px;">
                     <h2 style="border:none; margin:0; padding:0;">대기 화면 (사내 인트라넷)</h2>
-                    <span style="font-weight:bold; color:#107c41; font-size:14px;">현재 버전: v3.0</span>
+                    <span style="font-weight:bold; color:#107c41; font-size:14px;">현재 버전: v0.9.1</span>
                 </div>
                 
                 <div style="background:#eaf2ea; padding:15px; border:1px solid #c3d8c3; margin-bottom: 15px;">
                     <h3 style="margin-top:0; color:#107c41; font-size:13px;">버전별 업데이트 요약</h3>
                     <ul style="margin-bottom:0; padding-left:20px; line-height:1.6; font-size:12px;">
-                        <li><strong>[v3.0] 2026-07-31:</strong> 전투력 산출 방식 전면 재설계(목표 승률: 초보자 30%대/1차전직 50%대/Lv.100 고급장비 60~70%대), 직업간 정체성 차등 반영(현장직·사무직·관리직), 1클래스 이상 능력치 상승폭이 행운(LUK) 영향을 받는 1~2 랜덤으로 변경, 육성 가이드 보강</li>
-                        <li><strong>[v2.9] 2026-07-30:</strong> 설정 메뉴 개편(톱니바퀴 팝업), 전직 조건 개편(1차 Lv.50+능력치24, 1클래스 내 타 직군 전직 신설), 1차 전직 이후 필요 경험치 상승</li>
-                        <li><strong>[v2.8] 2026-07-29:</strong> 1클래스 직업별 스킬 트리 대규모 추가, 몬스터 스케일링/전투 밸런스 2차 조정, 대기화면 및 턴 판정 개편</li>
-                        <li><strong>[v2.7] 2026-07-20:</strong> 모바일/PC 반응형 UI 강제 토글 버튼 추가, 장비 매각 로직 적용</li>
-                        <li><strong>[v2.6] 2026-07-15:</strong> 대규모 몬스터 데이터베이스 탑재, 자택(창고) 시스템 오픈</li>
+                        <li><strong>[v0.9.1] 2026-08-01:</strong> (마이너 패치, 정식 1.0은 추후 예정) 승률 곡선 재조정(저레벨·저티어 30~40%대 → 중간 50%대 → 고레벨·고티어 60%대로 완만하게 수렴), 장비·몬스터 데이터를 계단식에서 선형/좁은범위 방식으로 전면 재정비, 필요 경험치 곡선을 전투 성능에 맞춰 재산정</li>
+                        <li><strong>[v0.9] 2026-07-31:</strong> 전투력 산출 방식 전면 재설계, 직업간 정체성 차등 반영(현장직·사무직·관리직), 1클래스 이상 능력치 상승폭이 행운(LUK) 영향을 받는 1~2 랜덤으로 변경, 육성 가이드 보강</li>
+                        <li><strong>[v0.8] 2026-07-30:</strong> 설정 메뉴 개편(톱니바퀴 팝업), 전직 조건 개편(1차 Lv.50+능력치24, 1클래스 내 타 직군 전직 신설), 1차 전직 이후 필요 경험치 상승</li>
+                        <li><strong>[v0.7] 2026-07-29:</strong> 1클래스 직업별 스킬 트리 대규모 추가, 몬스터 스케일링/전투 밸런스 2차 조정, 대기화면 및 턴 판정 개편</li>
+                        <li><strong>[v0.6] 2026-07-20:</strong> 모바일/PC 반응형 UI 강제 토글 버튼 추가, 장비 매각 로직 적용</li>
                     </ul>
                 </div>
 
@@ -253,7 +253,6 @@
                     <button onclick="changeView('main')">대기 화면으로</button>
                 </div>
             </div>
-            </div>
         </div>
     </div>
 
@@ -302,149 +301,355 @@
                 meeting: { id: 'meeting', name: '긴급회의', reqLv: 25, job: '관리직', desc: '적을 회의실로 끌고 가 이번 턴 반격을 불가능하게 만든다' },
                 performanceReview: { id: 'performanceReview', name: '고과삭감', reqLv: 40, job: '관리직', desc: '적의 의지를 꺾어버리는 파멸적인 일격을 가한다' }
             },
+
             equipments: [
-                // 기존 데이터 유지
-                { id: 'w01', name: '몽당연필', type: 'weapon', price: 20, reqLevel: 1, stats: { atk: 3 } },
-                { id: 'w02', name: '지우개 가루 뭉치', type: 'weapon', price: 40, reqLevel: 2, stats: { atk: 5, crt: 1 } },
-                { id: 'w03', name: '제도샤프', type: 'weapon', price: 100, reqLevel: 4, stats: { atk: 12, crt: 3 } },
-                { id: 'w04', name: '굴렁쇠', type: 'weapon', price: 250, reqLevel: 6, stats: { atk: 18, eva: 2 } },
-                { id: 'w05', name: '탑블레이드', type: 'weapon', price: 400, reqLevel: 9, stats: { atk: 25, crt: 5 } },
-                { id: 'w11', name: '커터칼', type: 'weapon', price: 600, reqLevel: 12, stats: { atk: 40, crt: 5 } },
-                { id: 'w12', name: '두꺼운 사전', type: 'weapon', price: 850, reqLevel: 15, stats: { atk: 55, maxHp: 20 } },
-                { id: 'w13', name: '날렵한 만년필', type: 'weapon', price: 1300, reqLevel: 19, stats: { atk: 80, crt: 10 } },
-                { id: 'w14', name: '기계식 키보드', type: 'weapon', price: 2200, reqLevel: 24, stats: { atk: 120, crt: 8 } },
-                { id: 'w21', name: '명품 클러치백', type: 'weapon', price: 3500, reqLevel: 28, stats: { atk: 180, crt: 12, eva: -2 } },
-                { id: 'w22', name: '최고급 만년필', type: 'weapon', price: 5000, reqLevel: 33, stats: { atk: 250, acc: 10 } },
-                { id: 'w23', name: 'USB-C 마법검', type: 'weapon', price: 8000, reqLevel: 39, stats: { atk: 380, crt: 15 } },
-                { id: 'w24', name: '레이저 포인터 완드', type: 'weapon', price: 12000, reqLevel: 44, stats: { atk: 520, acc: 20 } },
-                { id: 'w31', name: '양자컴퓨터 서버검', type: 'weapon', price: 25000, reqLevel: 52, stats: { atk: 850, crt: 20 } },
-                { id: 'w32', name: '회장님의 골프채', type: 'weapon', price: 45000, reqLevel: 61, stats: { atk: 1400, crt: 25, eva: -5 } },
-                { id: 'w33', name: '전설의 인감도장', type: 'weapon', price: 80000, reqLevel: 70, stats: { atk: 2200, acc: 30, crt: 30 } },
-                { id: 'a01', name: '종이 박스', type: 'armor', price: 30, reqLevel: 1, stats: { def: 2 } },
-                { id: 'a02', name: '신발주머니', type: 'armor', price: 80, reqLevel: 3, stats: { def: 5, eva: 1 } },
-                { id: 'a03', name: '교과서 갑옷', type: 'armor', price: 200, reqLevel: 7, stats: { def: 12, eva: -1 } },
-                { id: 'a04', name: '책가방 실드', type: 'armor', price: 400, reqLevel: 10, stats: { def: 22, maxHp: 10 } },
-                { id: 'a11', name: '보안 유니폼', type: 'armor', price: 800, reqLevel: 14, stats: { def: 45, eva: 3 } },
-                { id: 'a12', name: '가죽 서류가방', type: 'armor', price: 1500, reqLevel: 20, stats: { def: 80, eva: 5 } },
-                { id: 'a21', name: '수입산 정장', type: 'armor', price: 3000, reqLevel: 27, stats: { def: 150, eva: 8 } },
-                { id: 'a22', name: '스마트 방탄수트', type: 'armor', price: 6500, reqLevel: 35, stats: { def: 280, eva: -2 } },
-                { id: 'a31', name: '두랄루민 사슬갑옷', type: 'armor', price: 15000, reqLevel: 45, stats: { def: 550, maxHp: 200 } },
-                { id: 'a32', name: '나노머신 방호복', type: 'armor', price: 35000, reqLevel: 58, stats: { def: 950, eva: 15 } },
-                { id: 'a33', name: 'CEO의 절대방벽', type: 'armor', price: 70000, reqLevel: 68, stats: { def: 1600, maxHp: 500, eva: 10 } },
-                { id: 'ac01', name: '지우개', type: 'accessory', price: 50, reqLevel: 2, stats: { maxHp: 10 } },
-                { id: 'ac02', name: '지점토 목걸이', type: 'accessory', price: 150, reqLevel: 5, stats: { maxHp: 30, acc: 2 } },
-                { id: 'ac03', name: '콩순이 노트북', type: 'accessory', price: 350, reqLevel: 8, stats: { crt: 3, acc: 5 } },
-                { id: 'ac11', name: '사원증 목걸이', type: 'accessory', price: 700, reqLevel: 13, stats: { maxHp: 80, eva: 2 } },
-                { id: 'ac12', name: '스마트 워치', type: 'accessory', price: 1800, reqLevel: 22, stats: { crt: 5, eva: 8 } },
-                { id: 'ac21', name: '금장 롤렉스', type: 'accessory', price: 4000, reqLevel: 30, stats: { crt: 8, maxHp: 150 } },
-                { id: 'ac22', name: '한정판 향수', type: 'accessory', price: 8000, reqLevel: 38, stats: { eva: 15, acc: 10 } },
-                { id: 'ac31', name: '블루투스 수정구', type: 'accessory', price: 20000, reqLevel: 48, stats: { crt: 12, acc: 20, maxHp: 300 } },
-                { id: 'ac32', name: '무한동력 커피머신', type: 'accessory', price: 50000, reqLevel: 65, stats: { crt: 20, eva: 20, maxHp: 800 } },
-
-                // 무기 데이터 추가
-                { id: 'w41', name: '법인카드 엑스칼리버', type: 'weapon', price: 150000, reqLevel: 85, stats: { atk: 3500, crt: 35, acc: 20 } },
-                { id: 'w42', name: '블랙컨슈머의 확성기', type: 'weapon', price: 300000, reqLevel: 110, stats: { atk: 5800, crt: 40, eva: -5 } },
-                { id: 'w43', name: '주총꾼의 결재서류', type: 'weapon', price: 650000, reqLevel: 140, stats: { atk: 9500, acc: 40, crt: 45 } },
-                { id: 'w44', name: '초합금 마스터키', type: 'weapon', price: 1200000, reqLevel: 180, stats: { atk: 18000, acc: 50, crt: 50 } },
-                /* --- 신규 대량 추가 데이터 (무기) --- */
-                { id: 'w45', name: '빔 프로젝터 바주카', type: 'weapon', price: 25000, reqLevel: 135, stats: { atk: 850, acc: 28, crt: 32 } },
-                { id: 'w46', name: '플래티넘 만년필', type: 'weapon', price: 34000, reqLevel: 150, stats: { atk: 1050, acc: 30, crt: 35 } },
-                { id: 'w47', name: '블랙홀 USB', type: 'weapon', price: 46000, reqLevel: 165, stats: { atk: 1300, acc: 35, crt: 38 } },
-                { id: 'w48', name: '드래곤의 결재서류', type: 'weapon', price: 62000, reqLevel: 180, stats: { atk: 1600, acc: 40, crt: 42 } },
-                { id: 'w49', name: '인공지능 마검', type: 'weapon', price: 85000, reqLevel: 200, stats: { atk: 2000, acc: 45, crt: 45 } },
-                { id: 'w50', name: '주주총회 의사봉', type: 'weapon', price: 120000, reqLevel: 220, stats: { atk: 2500, acc: 50, crt: 50, eva: -5 } },
-                { id: 'w51', name: '성검 CEO칼리버', type: 'weapon', price: 180000, reqLevel: 250, stats: { atk: 3200, acc: 60, crt: 55 } },
-                { id: 'w52', name: '창조주의 타블렛펜', type: 'weapon', price: 280000, reqLevel: 280, stats: { atk: 4500, acc: 80, crt: 65, eva: 10 } },
-        
-                // 방어구 데이터 추가
-                { id: 'a41', name: '철야의 수면바지', type: 'armor', price: 120000, reqLevel: 80, stats: { def: 2800, maxHp: 1000, eva: 15 } },
-                { id: 'a42', name: '임원 전용 안마의자', type: 'armor', price: 280000, reqLevel: 115, stats: { def: 4500, maxHp: 2500, eva: -5 } },
-                { id: 'a43', name: '사내정치 방탄조끼', type: 'armor', price: 600000, reqLevel: 145, stats: { def: 8500, maxHp: 5000, eva: 20 } },
-                { id: 'a44', name: '명예퇴직 방호복', type: 'armor', price: 1100000, reqLevel: 175, stats: { def: 15000, maxHp: 10000, eva: 25 } },
-                /* --- 신규 대량 추가 데이터 (방어구) --- */
-                { id: 'a45', name: '티타늄 서류가방', type: 'armor', price: 30000, reqLevel: 135, stats: { def: 720, maxHp: 1500, eva: 22 } },
-                { id: 'a46', name: '강화 외골격 슈트', type: 'armor', price: 42000, reqLevel: 150, stats: { def: 950, maxHp: 2200, eva: 15 } },
-                { id: 'a47', name: '미스릴 정장', type: 'armor', price: 58000, reqLevel: 165, stats: { def: 1250, maxHp: 3000, eva: 28 } },
-                { id: 'a48', name: '차원 방어막 생성기', type: 'armor', price: 80000, reqLevel: 180, stats: { def: 1600, maxHp: 4000, eva: 32 } },
-                { id: 'a49', name: '절대 회피의 슬리퍼', type: 'armor', price: 110000, reqLevel: 200, stats: { def: 1900, maxHp: 4500, eva: 45 } },
-                { id: 'a50', name: '임원진의 황금갑옷', type: 'armor', price: 150000, reqLevel: 220, stats: { def: 2400, maxHp: 6500, eva: -10 } },
-                { id: 'a51', name: '불사조의 야근복', type: 'armor', price: 220000, reqLevel: 250, stats: { def: 3200, maxHp: 9000, eva: 40 } },
-                { id: 'a52', name: '우주 방위 사령관 슈트', type: 'armor', price: 350000, reqLevel: 280, stats: { def: 4500, maxHp: 15000, eva: 50 } },
-
-                // 악세사리 (초반~극후반 유틸 및 체력 스케일링)
-
-                // 악세사리 데이터 추가
-                { id: 'ac41', name: '주가폭등 부적', type: 'accessory', price: 100000, reqLevel: 80, stats: { crt: 25, eva: 20, maxHp: 1500 } },
-                { id: 'ac42', name: '외제차 스마트키', type: 'accessory', price: 250000, reqLevel: 120, stats: { crt: 30, acc: 30, maxHp: 4000 } },
-                { id: 'ac43', name: '무제한 연차 결재권', type: 'accessory', price: 800000, reqLevel: 160, stats: { crt: 40, eva: 40, maxHp: 8000, acc: 20 } },
-                /* --- 신규 대량 추가 데이터 (악세사리) --- */
-                { id: 'ac44', name: '고농축 텐션 드링크', type: 'accessory', price: 40000, reqLevel: 130, stats: { crt: 22, acc: 25, eva: 22, maxHp: 2000 } },
-                { id: 'ac45', name: '해커의 기계식 마우스', type: 'accessory', price: 65000, reqLevel: 155, stats: { crt: 28, acc: 35, eva: 10, maxHp: 2800 } },
-                { id: 'ac46', name: '주말 출근 면제권', type: 'accessory', price: 95000, reqLevel: 175, stats: { crt: 15, acc: 30, eva: 40, maxHp: 4500 } },
-                { id: 'ac47', name: '마나 깃든 넥타이', type: 'accessory', price: 140000, reqLevel: 200, stats: { crt: 35, acc: 45, eva: 30, maxHp: 6000 } },
-                { id: 'ac48', name: '전설의 퇴사원서', type: 'accessory', price: 210000, reqLevel: 230, stats: { crt: 45, acc: 50, eva: 50, maxHp: 9500 } },
-                { id: 'ac49', name: '초월자의 사원증', type: 'accessory', price: 320000, reqLevel: 260, stats: { crt: 55, acc: 70, eva: 60, maxHp: 15000 } }
+                { id: 'ow01', name: '몽당연필', type: 'weapon', price: 20, reqLevel: 1, stats: { atk: 5 } },
+                { id: 'oa01', name: '면 티셔츠', type: 'armor', price: 20, reqLevel: 1, stats: { def: 3 } },
+                { id: 'oac01', name: '볼펜', type: 'accessory', price: 20, reqLevel: 1, stats: { maxHp: 20 } },
+                { id: 'w001', name: '딱지 한 장', type: 'weapon', price: 20, reqLevel: 1, stats: { atk: 5 } },
+                { id: 'w002', name: '구슬 다섯 알', type: 'weapon', price: 20, reqLevel: 1, stats: { atk: 4, crt: 3 } },
+                { id: 'a001', name: '책가방', type: 'armor', price: 20, reqLevel: 1, stats: { def: 3 } },
+                { id: 'a002', name: '우주소년 헬멧', type: 'armor', price: 20, reqLevel: 1, stats: { def: 2 } },
+                { id: 'ac001', name: '색종이 부적', type: 'accessory', price: 20, reqLevel: 1, stats: { maxHp: 20, crt: 2 } },
+                { id: 'ac002', name: '다마고치', type: 'accessory', price: 20, reqLevel: 1, stats: { eva: 3, acc: 2, maxHp: 20 } },
+                { id: 'ow02', name: '지우개 칼', type: 'weapon', price: 670, reqLevel: 11, stats: { atk: 165, crt: 1 } },
+                { id: 'oa02', name: '츄리닝 바지', type: 'armor', price: 460, reqLevel: 11, stats: { def: 94 } },
+                { id: 'oac02', name: '지우개', type: 'accessory', price: 460, reqLevel: 11, stats: { maxHp: 686, crt: 1 } },
+                { id: 'w003', name: '고무줄 새총', type: 'weapon', price: 670, reqLevel: 11, stats: { atk: 165 } },
+                { id: 'w004', name: '나무젓가락 마검', type: 'weapon', price: 670, reqLevel: 11, stats: { atk: 135, crt: 4 } },
+                { id: 'a003', name: '만화주인공 망토', type: 'armor', price: 460, reqLevel: 11, stats: { def: 94 } },
+                { id: 'a004', name: '태권도 도복', type: 'armor', price: 460, reqLevel: 11, stats: { def: 67, maxHp: 377 } },
+                { id: 'ac003', name: '포켓몬 스티커 앨범', type: 'accessory', price: 460, reqLevel: 11, stats: { maxHp: 686, crt: 3 } },
+                { id: 'ac004', name: '네잎클로버 책갈피', type: 'accessory', price: 460, reqLevel: 11, stats: { eva: 4, acc: 3, maxHp: 274 } },
+                { id: 'ow03', name: '각도기', type: 'weapon', price: 1320, reqLevel: 21, stats: { atk: 325, crt: 2 } },
+                { id: 'oa03', name: '슬리퍼', type: 'armor', price: 920, reqLevel: 21, stats: { def: 185, eva: 1 } },
+                { id: 'oac03', name: '포스트잇', type: 'accessory', price: 920, reqLevel: 21, stats: { maxHp: 1372, crt: 2, acc: 1 } },
+                { id: 'w005', name: '급식판 겸용 목검', type: 'weapon', price: 1320, reqLevel: 21, stats: { atk: 325 } },
+                { id: 'w006', name: '딱지 한 장', type: 'weapon', price: 1320, reqLevel: 21, stats: { atk: 266, crt: 5 } },
+                { id: 'a005', name: '책가방', type: 'armor', price: 920, reqLevel: 21, stats: { def: 185, eva: 1 } },
+                { id: 'a006', name: '우주소년 헬멧', type: 'armor', price: 920, reqLevel: 21, stats: { def: 133, maxHp: 754 } },
+                { id: 'ac005', name: '색종이 부적', type: 'accessory', price: 920, reqLevel: 21, stats: { maxHp: 1372, crt: 4 } },
+                { id: 'ac006', name: '다마고치', type: 'accessory', price: 920, reqLevel: 21, stats: { eva: 5, acc: 4, maxHp: 548 } },
+                { id: 'ow04', name: '커터칼', type: 'weapon', price: 1970, reqLevel: 31, stats: { atk: 485, crt: 3 } },
+                { id: 'oa04', name: '목베개', type: 'armor', price: 1360, reqLevel: 31, stats: { def: 276, eva: 1 } },
+                { id: 'oac04', name: '향균 물티슈', type: 'accessory', price: 1360, reqLevel: 31, stats: { maxHp: 2058, crt: 3, acc: 2 } },
+                { id: 'w007', name: '샤프펜슬 0.3mm', type: 'weapon', price: 1970, reqLevel: 31, stats: { atk: 485 } },
+                { id: 'w008', name: '참고서 둔기', type: 'weapon', price: 1970, reqLevel: 31, stats: { atk: 397, crt: 6 } },
+                { id: 'a007', name: '교복 재킷', type: 'armor', price: 1360, reqLevel: 31, stats: { def: 276, eva: 1 } },
+                { id: 'a008', name: '야자용 담요', type: 'armor', price: 1360, reqLevel: 31, stats: { def: 198, maxHp: 1131 } },
+                { id: 'ac007', name: '초코파이', type: 'accessory', price: 1360, reqLevel: 31, stats: { maxHp: 2058, crt: 5 } },
+                { id: 'ac008', name: 'MP3 플레이어', type: 'accessory', price: 1360, reqLevel: 31, stats: { eva: 6, acc: 5, maxHp: 823 } },
+                { id: 'ow05', name: '형광펜 세트', type: 'weapon', price: 2620, reqLevel: 41, stats: { atk: 645, crt: 4 } },
+                { id: 'oa05', name: '무릎담요', type: 'armor', price: 1820, reqLevel: 41, stats: { def: 367, eva: 2 } },
+                { id: 'oac05', name: '핸드크림', type: 'accessory', price: 1820, reqLevel: 41, stats: { maxHp: 2744, crt: 4, acc: 3 } },
+                { id: 'w009', name: '볼펜깎기 커터', type: 'weapon', price: 2620, reqLevel: 41, stats: { atk: 645 } },
+                { id: 'w010', name: '몰래 듣는 이어폰', type: 'weapon', price: 2620, reqLevel: 41, stats: { atk: 528, crt: 8 } },
+                { id: 'a009', name: '기숙사 잠옷', type: 'armor', price: 1820, reqLevel: 41, stats: { def: 367, eva: 2 } },
+                { id: 'a010', name: '후드 집업', type: 'armor', price: 1820, reqLevel: 41, stats: { def: 264, maxHp: 1509 } },
+                { id: 'ac009', name: '합격기원 부적 스티커', type: 'accessory', price: 1820, reqLevel: 41, stats: { maxHp: 2744, crt: 6 } },
+                { id: 'ac010', name: '급식 카드', type: 'accessory', price: 1820, reqLevel: 41, stats: { eva: 8, acc: 6, maxHp: 1097 } },
+                { id: 'ow06', name: '스테이플러', type: 'weapon', price: 3270, reqLevel: 51, stats: { atk: 805, crt: 5 } },
+                { id: 'oa06', name: '후드집업', type: 'armor', price: 2260, reqLevel: 51, stats: { def: 458, eva: 3 } },
+                { id: 'oac06', name: '블루투스 이어폰', type: 'accessory', price: 2260, reqLevel: 51, stats: { maxHp: 3430, crt: 5, acc: 4 } },
+                { id: 'w011', name: '샤프펜슬 0.3mm', type: 'weapon', price: 3270, reqLevel: 51, stats: { atk: 805 } },
+                { id: 'w012', name: '참고서 둔기', type: 'weapon', price: 3270, reqLevel: 51, stats: { atk: 660, crt: 9 } },
+                { id: 'a011', name: '교복 재킷', type: 'armor', price: 2260, reqLevel: 51, stats: { def: 458, eva: 2 } },
+                { id: 'a012', name: '야자용 담요', type: 'armor', price: 2260, reqLevel: 51, stats: { def: 329, maxHp: 1886 } },
+                { id: 'ac011', name: '초코파이', type: 'accessory', price: 2260, reqLevel: 51, stats: { maxHp: 3430, crt: 7 } },
+                { id: 'ac012', name: 'MP3 플레이어', type: 'accessory', price: 2260, reqLevel: 51, stats: { eva: 9, acc: 7, maxHp: 1372 } },
+                { id: 'ow07', name: '3단 자', type: 'weapon', price: 3920, reqLevel: 61, stats: { atk: 965, crt: 6 } },
+                { id: 'oa07', name: '사원증 목걸이', type: 'armor', price: 2720, reqLevel: 61, stats: { def: 549, eva: 3 } },
+                { id: 'oac07', name: '스마트밴드', type: 'accessory', price: 2720, reqLevel: 61, stats: { maxHp: 4116, crt: 6, acc: 4 } },
+                { id: 'w013', name: '형광펜 3색', type: 'weapon', price: 3920, reqLevel: 61, stats: { atk: 965 } },
+                { id: 'w014', name: '과제용 노트북', type: 'weapon', price: 3920, reqLevel: 61, stats: { atk: 791, crt: 10 } },
+                { id: 'a013', name: '과잠(학과 점퍼)', type: 'armor', price: 2720, reqLevel: 61, stats: { def: 549, eva: 3 } },
+                { id: 'a014', name: '신입생 OT 리본', type: 'armor', price: 2720, reqLevel: 61, stats: { def: 395, maxHp: 2263 } },
+                { id: 'ac013', name: '카페인 텀블러', type: 'accessory', price: 2720, reqLevel: 61, stats: { maxHp: 4116, crt: 8 } },
+                { id: 'ac014', name: '학생할인카드', type: 'accessory', price: 2720, reqLevel: 61, stats: { eva: 10, acc: 8, maxHp: 1646 } },
+                { id: 'ow08', name: '만년필', type: 'weapon', price: 4570, reqLevel: 71, stats: { atk: 1125, crt: 7 } },
+                { id: 'oa08', name: '정장 재킷', type: 'armor', price: 3160, reqLevel: 71, stats: { def: 640, eva: 4 } },
+                { id: 'oac08', name: '가죽 다이어리', type: 'accessory', price: 3160, reqLevel: 71, stats: { maxHp: 4802, crt: 7, acc: 5 } },
+                { id: 'w015', name: '알바 앞치마 채찍', type: 'weapon', price: 4570, reqLevel: 71, stats: { atk: 1125 } },
+                { id: 'w016', name: '형광펜 3색', type: 'weapon', price: 4570, reqLevel: 71, stats: { atk: 922, crt: 12 } },
+                { id: 'a015', name: '알바생 유니폼', type: 'armor', price: 3160, reqLevel: 71, stats: { def: 640, eva: 3 } },
+                { id: 'a016', name: '과잠(학과 점퍼)', type: 'armor', price: 3160, reqLevel: 71, stats: { def: 460, maxHp: 2641 } },
+                { id: 'ac015', name: '삼각김밥', type: 'accessory', price: 3160, reqLevel: 71, stats: { maxHp: 4802, crt: 9 } },
+                { id: 'ac016', name: '카페인 텀블러', type: 'accessory', price: 3160, reqLevel: 71, stats: { eva: 12, acc: 9, maxHp: 1920 } },
+                { id: 'ow09', name: '서류 파쇄기', type: 'weapon', price: 5220, reqLevel: 81, stats: { atk: 1285, crt: 8 } },
+                { id: 'oa09', name: '스마트워치', type: 'armor', price: 3620, reqLevel: 81, stats: { def: 731, eva: 4 } },
+                { id: 'oac09', name: '명품 만년필 세트', type: 'accessory', price: 3620, reqLevel: 81, stats: { maxHp: 5488, crt: 8, acc: 6 } },
+                { id: 'w017', name: '과제용 노트북', type: 'weapon', price: 5220, reqLevel: 81, stats: { atk: 1285 } },
+                { id: 'w018', name: '알바 앞치마 채찍', type: 'weapon', price: 5220, reqLevel: 81, stats: { atk: 1053, crt: 13 } },
+                { id: 'a017', name: '신입생 OT 리본', type: 'armor', price: 3620, reqLevel: 81, stats: { def: 731, eva: 4 } },
+                { id: 'a018', name: '알바생 유니폼', type: 'armor', price: 3620, reqLevel: 81, stats: { def: 526, maxHp: 3018 } },
+                { id: 'ac017', name: '학생할인카드', type: 'accessory', price: 3620, reqLevel: 81, stats: { maxHp: 5488, crt: 10 } },
+                { id: 'ac018', name: '삼각김밥', type: 'accessory', price: 3620, reqLevel: 81, stats: { eva: 13, acc: 10, maxHp: 2195 } },
+                { id: 'ow10', name: '노트북 거치대', type: 'weapon', price: 5870, reqLevel: 91, stats: { atk: 1445, crt: 9 } },
+                { id: 'oa10', name: '노이즈캔슬링 이어폰', type: 'armor', price: 4060, reqLevel: 91, stats: { def: 822, eva: 5 } },
+                { id: 'oac10', name: '금장 커프스', type: 'accessory', price: 4060, reqLevel: 91, stats: { maxHp: 6174, crt: 9, acc: 7 } },
+                { id: 'w019', name: '자소서 만년필', type: 'weapon', price: 5870, reqLevel: 91, stats: { atk: 1445 } },
+                { id: 'w020', name: '이력서 프린터', type: 'weapon', price: 5870, reqLevel: 91, stats: { atk: 1184, crt: 14 } },
+                { id: 'a019', name: '면접용 정장', type: 'armor', price: 4060, reqLevel: 91, stats: { def: 822, eva: 4 } },
+                { id: 'a020', name: '멘탈 방어 슈트', type: 'armor', price: 4060, reqLevel: 91, stats: { def: 591, maxHp: 3395 } },
+                { id: 'ac019', name: '스펙 증명서 뭉치', type: 'accessory', price: 4060, reqLevel: 91, stats: { maxHp: 6174, crt: 11 } },
+                { id: 'ac020', name: 'AI 면접 대비 이어폰', type: 'accessory', price: 4060, reqLevel: 91, stats: { eva: 14, acc: 11, maxHp: 2469 } },
+                { id: 'ow11', name: '기계식 키보드', type: 'weapon', price: 6520, reqLevel: 101, stats: { atk: 1605, crt: 10 } },
+                { id: 'oa11', name: '인체공학 의자', type: 'armor', price: 4520, reqLevel: 101, stats: { def: 913, eva: 6 } },
+                { id: 'oac11', name: '다이아 넥타이핀', type: 'accessory', price: 4520, reqLevel: 101, stats: { maxHp: 6860, crt: 10, acc: 8 } },
+                { id: 'w021', name: '정장 넥타이 채찍', type: 'weapon', price: 6520, reqLevel: 101, stats: { atk: 1605 } },
+                { id: 'w022', name: '자소서 만년필', type: 'weapon', price: 6520, reqLevel: 101, stats: { atk: 1316, crt: 16 } },
+                { id: 'a021', name: '인턴 사원증 목걸이', type: 'armor', price: 4520, reqLevel: 101, stats: { def: 913, eva: 5 } },
+                { id: 'a022', name: '면접용 정장', type: 'armor', price: 4520, reqLevel: 101, stats: { def: 657, maxHp: 3773 } },
+                { id: 'ac021', name: '합격 기원 부적', type: 'accessory', price: 4520, reqLevel: 101, stats: { maxHp: 6860, crt: 13 } },
+                { id: 'ac022', name: '스펙 증명서 뭉치', type: 'accessory', price: 4520, reqLevel: 101, stats: { eva: 16, acc: 13, maxHp: 2744 } },
+                { id: 'ow12', name: '무선 프레젠터', type: 'weapon', price: 7170, reqLevel: 111, stats: { atk: 1765, crt: 11 } },
+                { id: 'oa12', name: '전동 스탠딩데스크', type: 'armor', price: 4960, reqLevel: 111, stats: { def: 1004, eva: 6 } },
+                { id: 'oac12', name: '한정판 향수', type: 'accessory', price: 4960, reqLevel: 111, stats: { maxHp: 7546, crt: 11, acc: 8 } },
+                { id: 'w023', name: '이력서 프린터', type: 'weapon', price: 7170, reqLevel: 111, stats: { atk: 1765 } },
+                { id: 'w024', name: '정장 넥타이 채찍', type: 'weapon', price: 7170, reqLevel: 111, stats: { atk: 1447, crt: 17 } },
+                { id: 'a023', name: '멘탈 방어 슈트', type: 'armor', price: 4960, reqLevel: 111, stats: { def: 1004, eva: 5 } },
+                { id: 'a024', name: '인턴 사원증 목걸이', type: 'armor', price: 4960, reqLevel: 111, stats: { def: 722, maxHp: 4150 } },
+                { id: 'ac023', name: 'AI 면접 대비 이어폰', type: 'accessory', price: 4960, reqLevel: 111, stats: { maxHp: 7546, crt: 14 } },
+                { id: 'ac024', name: '합격 기원 부적', type: 'accessory', price: 4960, reqLevel: 111, stats: { eva: 17, acc: 14, maxHp: 3018 } },
+                { id: 'ow13', name: '레이저 포인터', type: 'weapon', price: 7820, reqLevel: 121, stats: { atk: 1925, crt: 12 } },
+                { id: 'oa13', name: '공기청정 마스크', type: 'armor', price: 5420, reqLevel: 121, stats: { def: 1095, eva: 7 } },
+                { id: 'oac13', name: '프리미엄 손목시계', type: 'accessory', price: 5420, reqLevel: 121, stats: { maxHp: 8232, crt: 12, acc: 9 } },
+                { id: 'w025', name: '3색 볼펜', type: 'weapon', price: 7820, reqLevel: 121, stats: { atk: 1925 } },
+                { id: 'w026', name: '스테이플러', type: 'weapon', price: 7820, reqLevel: 121, stats: { atk: 1578, crt: 18 } },
+                { id: 'a025', name: '사원증 갑옷', type: 'armor', price: 5420, reqLevel: 121, stats: { def: 1095, eva: 6 } },
+                { id: 'a026', name: '정장 슈트', type: 'armor', price: 5420, reqLevel: 121, stats: { def: 788, maxHp: 4527 } },
+                { id: 'ac025', name: '탕비실 커피믹스', type: 'accessory', price: 5420, reqLevel: 121, stats: { maxHp: 8232, crt: 15 } },
+                { id: 'ac026', name: '업무 알람 스마트워치', type: 'accessory', price: 5420, reqLevel: 121, stats: { eva: 18, acc: 15, maxHp: 3292 } },
+                { id: 'ow14', name: '최신형 태블릿', type: 'weapon', price: 8470, reqLevel: 131, stats: { atk: 2085, crt: 13 } },
+                { id: 'oa14', name: '보디캠 조끼', type: 'armor', price: 5860, reqLevel: 131, stats: { def: 1186, eva: 7 } },
+                { id: 'oac14', name: '맞춤 명함첩', type: 'accessory', price: 5860, reqLevel: 131, stats: { maxHp: 8918, crt: 13, acc: 10 } },
+                { id: 'w027', name: '화상회의 마이크', type: 'weapon', price: 8470, reqLevel: 131, stats: { atk: 2085 } },
+                { id: 'w028', name: '3색 볼펜', type: 'weapon', price: 8470, reqLevel: 131, stats: { atk: 1709, crt: 19 } },
+                { id: 'a027', name: '사무실 슬리퍼', type: 'armor', price: 5860, reqLevel: 131, stats: { def: 1186, eva: 6 } },
+                { id: 'a028', name: '사원증 갑옷', type: 'armor', price: 5860, reqLevel: 131, stats: { def: 853, maxHp: 4904 } },
+                { id: 'ac027', name: '회사 로고 볼펜', type: 'accessory', price: 5860, reqLevel: 131, stats: { maxHp: 8918, crt: 16 } },
+                { id: 'ac028', name: '탕비실 커피믹스', type: 'accessory', price: 5860, reqLevel: 131, stats: { eva: 19, acc: 16, maxHp: 3567 } },
+                { id: 'ow15', name: '듀얼 모니터암', type: 'weapon', price: 9120, reqLevel: 141, stats: { atk: 2245, crt: 14 } },
+                { id: 'oa15', name: '방탄 서류가방', type: 'armor', price: 6320, reqLevel: 141, stats: { def: 1277, eva: 8 } },
+                { id: 'oac15', name: '황금 열쇠고리', type: 'accessory', price: 6320, reqLevel: 141, stats: { maxHp: 9604, crt: 14, acc: 11 } },
+                { id: 'w029', name: '스테이플러', type: 'weapon', price: 9120, reqLevel: 141, stats: { atk: 2245 } },
+                { id: 'w030', name: '화상회의 마이크', type: 'weapon', price: 9120, reqLevel: 141, stats: { atk: 1840, crt: 21 } },
+                { id: 'a029', name: '정장 슈트', type: 'armor', price: 6320, reqLevel: 141, stats: { def: 1277, eva: 7 } },
+                { id: 'a030', name: '사무실 슬리퍼', type: 'armor', price: 6320, reqLevel: 141, stats: { def: 919, maxHp: 5282 } },
+                { id: 'ac029', name: '업무 알람 스마트워치', type: 'accessory', price: 6320, reqLevel: 141, stats: { maxHp: 9604, crt: 17 } },
+                { id: 'ac030', name: '회사 로고 볼펜', type: 'accessory', price: 6320, reqLevel: 141, stats: { eva: 21, acc: 17, maxHp: 3841 } },
+                { id: 'ow16', name: '화상회의 스피커폰', type: 'weapon', price: 9770, reqLevel: 151, stats: { atk: 2405, crt: 15 } },
+                { id: 'oa16', name: '3중 단열 텀블러 세트', type: 'armor', price: 6760, reqLevel: 151, stats: { def: 1368, eva: 9 } },
+                { id: 'oac16', name: 'VVIP 멤버십 카드', type: 'accessory', price: 6760, reqLevel: 151, stats: { maxHp: 10290, crt: 15, acc: 12 } },
+                { id: 'w031', name: '결재도장', type: 'weapon', price: 9770, reqLevel: 151, stats: { atk: 2405 } },
+                { id: 'w032', name: '접대용 골프채', type: 'weapon', price: 9770, reqLevel: 151, stats: { atk: 1972, crt: 22 } },
+                { id: 'a031', name: '팀장 완장', type: 'armor', price: 6760, reqLevel: 151, stats: { def: 1368, eva: 7 } },
+                { id: 'a032', name: '브랜드 슈트', type: 'armor', price: 6760, reqLevel: 151, stats: { def: 984, maxHp: 5659 } },
+                { id: 'ac031', name: '인사고과 서류철', type: 'accessory', price: 6760, reqLevel: 151, stats: { maxHp: 10290, crt: 18 } },
+                { id: 'ac032', name: '승진 사주풀이 부적', type: 'accessory', price: 6760, reqLevel: 151, stats: { eva: 22, acc: 18, maxHp: 4116 } },
+                { id: 'ow17', name: '임원용 만년필', type: 'weapon', price: 10420, reqLevel: 161, stats: { atk: 2565, crt: 16 } },
+                { id: 'oa17', name: '맞춤 정장', type: 'armor', price: 7220, reqLevel: 161, stats: { def: 1459, eva: 9 } },
+                { id: 'oac17', name: '전용 헬기 탑승권', type: 'accessory', price: 7220, reqLevel: 161, stats: { maxHp: 10976, crt: 16, acc: 12 } },
+                { id: 'w033', name: '법인카드', type: 'weapon', price: 10420, reqLevel: 161, stats: { atk: 2565 } },
+                { id: 'w034', name: '결재도장', type: 'weapon', price: 10420, reqLevel: 161, stats: { atk: 2103, crt: 23 } },
+                { id: 'a033', name: '회의실 프리패스 목걸이', type: 'armor', price: 7220, reqLevel: 161, stats: { def: 1459, eva: 8 } },
+                { id: 'a034', name: '팀장 완장', type: 'armor', price: 7220, reqLevel: 161, stats: { def: 1050, maxHp: 6036 } },
+                { id: 'ac033', name: '골드 넥타이핀', type: 'accessory', price: 7220, reqLevel: 161, stats: { maxHp: 10976, crt: 19 } },
+                { id: 'ac034', name: '인사고과 서류철', type: 'accessory', price: 7220, reqLevel: 161, stats: { eva: 23, acc: 19, maxHp: 4390 } },
+                { id: 'ow18', name: '황금 명함케이스', type: 'weapon', price: 11070, reqLevel: 171, stats: { atk: 2725, crt: 17 } },
+                { id: 'oa18', name: '임원 전용 안마의자', type: 'armor', price: 7660, reqLevel: 171, stats: { def: 1550, eva: 10 } },
+                { id: 'oac18', name: '프라이빗 제트 이용권', type: 'accessory', price: 7660, reqLevel: 171, stats: { maxHp: 11662, crt: 17, acc: 13 } },
+                { id: 'w035', name: '접대용 골프채', type: 'weapon', price: 11070, reqLevel: 171, stats: { atk: 2725 } },
+                { id: 'w036', name: '법인카드', type: 'weapon', price: 11070, reqLevel: 171, stats: { atk: 2234, crt: 25 } },
+                { id: 'a035', name: '브랜드 슈트', type: 'armor', price: 7660, reqLevel: 171, stats: { def: 1550, eva: 8 } },
+                { id: 'a036', name: '회의실 프리패스 목걸이', type: 'armor', price: 7660, reqLevel: 171, stats: { def: 1116, maxHp: 6414 } },
+                { id: 'ac035', name: '승진 사주풀이 부적', type: 'accessory', price: 7660, reqLevel: 171, stats: { maxHp: 11662, crt: 20 } },
+                { id: 'ac036', name: '골드 넥타이핀', type: 'accessory', price: 7660, reqLevel: 171, stats: { eva: 25, acc: 20, maxHp: 4664 } },
+                { id: 'ow19', name: '법인카드', type: 'weapon', price: 11720, reqLevel: 181, stats: { atk: 2885, crt: 18 } },
+                { id: 'oa19', name: '프라이빗 재킷', type: 'armor', price: 8120, reqLevel: 181, stats: { def: 1641, eva: 10 } },
+                { id: 'oac19', name: '글로벌 인맥 수첩', type: 'accessory', price: 8120, reqLevel: 181, stats: { maxHp: 12348, crt: 18, acc: 14 } },
+                { id: 'w037', name: '황금 만년필', type: 'weapon', price: 11720, reqLevel: 181, stats: { atk: 2885 } },
+                { id: 'w038', name: '대형 계약서 사인펜', type: 'weapon', price: 11720, reqLevel: 181, stats: { atk: 2365, crt: 26 } },
+                { id: 'a037', name: '임원 전용 방탄 슈트', type: 'armor', price: 8120, reqLevel: 181, stats: { def: 1641, eva: 9 } },
+                { id: 'a038', name: '회장님 자켓', type: 'armor', price: 8120, reqLevel: 181, stats: { def: 1181, maxHp: 6791 } },
+                { id: 'ac037', name: '다이아 커프스', type: 'accessory', price: 8120, reqLevel: 181, stats: { maxHp: 12348, crt: 21 } },
+                { id: 'ac038', name: '프라이빗 제트 탑승권', type: 'accessory', price: 8120, reqLevel: 181, stats: { eva: 26, acc: 21, maxHp: 4939 } },
+                { id: 'ow20', name: '전자결재 태블릿', type: 'weapon', price: 12370, reqLevel: 191, stats: { atk: 3045, crt: 19 } },
+                { id: 'oa20', name: '특수소재 코트', type: 'armor', price: 8560, reqLevel: 191, stats: { def: 1732, eva: 11 } },
+                { id: 'oac20', name: '차기 회장 지명서', type: 'accessory', price: 8560, reqLevel: 191, stats: { maxHp: 13034, crt: 19, acc: 15 } },
+                { id: 'w039', name: '헬기 리모컨', type: 'weapon', price: 12370, reqLevel: 191, stats: { atk: 3045 } },
+                { id: 'w040', name: '황금 만년필', type: 'weapon', price: 12370, reqLevel: 191, stats: { atk: 2496, crt: 27 } },
+                { id: 'a039', name: 'VIP 라운지 출입증 갑옷', type: 'armor', price: 8560, reqLevel: 191, stats: { def: 1732, eva: 9 } },
+                { id: 'a040', name: '임원 전용 방탄 슈트', type: 'armor', price: 8560, reqLevel: 191, stats: { def: 1247, maxHp: 7168 } },
+                { id: 'ac039', name: '재벌가 인맥 명함첩', type: 'accessory', price: 8560, reqLevel: 191, stats: { maxHp: 13034, crt: 22 } },
+                { id: 'ac040', name: '다이아 커프스', type: 'accessory', price: 8560, reqLevel: 191, stats: { eva: 27, acc: 22, maxHp: 5213 } },
+                { id: 'ow21', name: '화상 인식 도어락', type: 'weapon', price: 13020, reqLevel: 201, stats: { atk: 3205, crt: 20 } },
+                { id: 'oa21', name: '방진방수 슈트', type: 'armor', price: 9020, reqLevel: 201, stats: { def: 1823, eva: 12 } },
+                { id: 'oac21', name: '이사회 의결권', type: 'accessory', price: 9020, reqLevel: 201, stats: { maxHp: 13720, crt: 20, acc: 16 } },
+                { id: 'w041', name: '대형 계약서 사인펜', type: 'weapon', price: 13020, reqLevel: 201, stats: { atk: 3205 } },
+                { id: 'w042', name: '헬기 리모컨', type: 'weapon', price: 13020, reqLevel: 201, stats: { atk: 2628, crt: 29 } },
+                { id: 'a041', name: '회장님 자켓', type: 'armor', price: 9020, reqLevel: 201, stats: { def: 1823, eva: 10 } },
+                { id: 'a042', name: 'VIP 라운지 출입증 갑옷', type: 'armor', price: 9020, reqLevel: 201, stats: { def: 1312, maxHp: 7546 } },
+                { id: 'ac041', name: '프라이빗 제트 탑승권', type: 'accessory', price: 9020, reqLevel: 201, stats: { maxHp: 13720, crt: 24 } },
+                { id: 'ac042', name: '재벌가 인맥 명함첩', type: 'accessory', price: 9020, reqLevel: 201, stats: { eva: 29, acc: 24, maxHp: 5488 } },
+                { id: 'ow22', name: 'AI 비서 단말기', type: 'weapon', price: 13670, reqLevel: 211, stats: { atk: 3365, crt: 21 } },
+                { id: 'oa22', name: '나노 방호복', type: 'armor', price: 9460, reqLevel: 211, stats: { def: 1914, eva: 12 } },
+                { id: 'oac22', name: '그룹 상속 서류', type: 'accessory', price: 9460, reqLevel: 211, stats: { maxHp: 14406, crt: 21, acc: 16 } },
+                { id: 'w043', name: '등산 스틱', type: 'weapon', price: 13670, reqLevel: 211, stats: { atk: 3365 } },
+                { id: 'w044', name: '파크골프채', type: 'weapon', price: 13670, reqLevel: 211, stats: { atk: 2759, crt: 30 } },
+                { id: 'a043', name: '등산조끼', type: 'armor', price: 9460, reqLevel: 211, stats: { def: 1914, eva: 10 } },
+                { id: 'a044', name: '실버타운 가운', type: 'armor', price: 9460, reqLevel: 211, stats: { def: 1378, maxHp: 7923 } },
+                { id: 'ac043', name: '돋보기', type: 'accessory', price: 9460, reqLevel: 211, stats: { maxHp: 14406, crt: 25 } },
+                { id: 'ac044', name: '손주 용돈지갑', type: 'accessory', price: 9460, reqLevel: 211, stats: { eva: 30, acc: 25, maxHp: 5762 } },
+                { id: 'ow23', name: '블록체인 결재시스템', type: 'weapon', price: 14320, reqLevel: 221, stats: { atk: 3525, crt: 22 } },
+                { id: 'oa23', name: '경호용 아머슈트', type: 'armor', price: 9920, reqLevel: 221, stats: { def: 2005, eva: 13 } },
+                { id: 'oac23', name: '경영권 방어 부적', type: 'accessory', price: 9920, reqLevel: 221, stats: { maxHp: 15092, crt: 22, acc: 17 } },
+                { id: 'w045', name: '화투패', type: 'weapon', price: 14320, reqLevel: 221, stats: { atk: 3525 } },
+                { id: 'w046', name: '등산 스틱', type: 'weapon', price: 14320, reqLevel: 221, stats: { atk: 2890, crt: 31 } },
+                { id: 'a045', name: '효도 안마의자 등받이', type: 'armor', price: 9920, reqLevel: 221, stats: { def: 2005, eva: 11 } },
+                { id: 'a046', name: '등산조끼', type: 'armor', price: 9920, reqLevel: 221, stats: { def: 1443, maxHp: 8300 } },
+                { id: 'ac045', name: '인생 2막 자격증', type: 'accessory', price: 9920, reqLevel: 221, stats: { maxHp: 15092, crt: 26 } },
+                { id: 'ac046', name: '돋보기', type: 'accessory', price: 9920, reqLevel: 221, stats: { eva: 31, acc: 26, maxHp: 6036 } },
+                { id: 'ow24', name: '양자암호 USB', type: 'weapon', price: 14970, reqLevel: 231, stats: { atk: 3685, crt: 23 } },
+                { id: 'oa24', name: 'VIP 전용 리무진 시트', type: 'armor', price: 10360, reqLevel: 231, stats: { def: 2096, eva: 13 } },
+                { id: 'oac24', name: '전설의 사직서', type: 'accessory', price: 10360, reqLevel: 231, stats: { maxHp: 15778, crt: 23, acc: 18 } },
+                { id: 'w047', name: '파크골프채', type: 'weapon', price: 14970, reqLevel: 231, stats: { atk: 3685 } },
+                { id: 'w048', name: '화투패', type: 'weapon', price: 14970, reqLevel: 231, stats: { atk: 3021, crt: 32 } },
+                { id: 'a047', name: '실버타운 가운', type: 'armor', price: 10360, reqLevel: 231, stats: { def: 2096, eva: 11 } },
+                { id: 'a048', name: '효도 안마의자 등받이', type: 'armor', price: 10360, reqLevel: 231, stats: { def: 1509, maxHp: 8677 } },
+                { id: 'ac047', name: '손주 용돈지갑', type: 'accessory', price: 10360, reqLevel: 231, stats: { maxHp: 15778, crt: 27 } },
+                { id: 'ac048', name: '인생 2막 자격증', type: 'accessory', price: 10360, reqLevel: 231, stats: { eva: 32, acc: 27, maxHp: 6311 } },
+                { id: 'ow25', name: '인공지능 마검', type: 'weapon', price: 15620, reqLevel: 241, stats: { atk: 3845, crt: 24 } },
+                { id: 'oa25', name: '우주 방위 사령관 슈트', type: 'armor', price: 10820, reqLevel: 241, stats: { def: 2187, eva: 14 } },
+                { id: 'oac25', name: '초월자의 사원증', type: 'accessory', price: 10820, reqLevel: 241, stats: { maxHp: 16464, crt: 24, acc: 19 } },
+                { id: 'w049', name: '등산 스틱', type: 'weapon', price: 15620, reqLevel: 241, stats: { atk: 3845 } },
+                { id: 'w050', name: '파크골프채', type: 'weapon', price: 15620, reqLevel: 241, stats: { atk: 3152, crt: 34 } },
+                { id: 'a049', name: '등산조끼', type: 'armor', price: 10820, reqLevel: 241, stats: { def: 2187, eva: 12 } },
+                { id: 'a050', name: '실버타운 가운', type: 'armor', price: 10820, reqLevel: 241, stats: { def: 1574, maxHp: 9055 } },
+                { id: 'ac049', name: '돋보기', type: 'accessory', price: 10820, reqLevel: 241, stats: { maxHp: 16464, crt: 28 } },
+                { id: 'ac050', name: '손주 용돈지갑', type: 'accessory', price: 10820, reqLevel: 241, stats: { eva: 34, acc: 28, maxHp: 6585 } }
             ],
         
             monsters: [
-                { name: '하루살이', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.1, atkRate: 0.5, defRate: 0.1, eva: 38, rewardRate: 0.5 },
-                { name: '콩벌레', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.1, atkRate: 0.4, defRate: 1.4, eva: 0, rewardRate: 0.8 },
-                { name: '들개', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.7, atkRate: 1.2, defRate: 0.6, eva: 10, rewardRate: 0.9 },
-                { name: '잼민이', type: 'normal', minLv: 1, maxLv: 30, hpRate: 0.4, atkRate: 2.2, defRate: 0.2, eva: 15, rewardRate: 1.1 },
-                { name: '중삐리', type: 'normal', minLv: 3, maxLv: 30, hpRate: 0.9, atkRate: 0.9, defRate: 0.8, eva: 5, rewardRate: 1.0 },
-                { name: '파오후', type: 'normal', minLv: 5, maxLv: 30, hpRate: 1.8, atkRate: 0.6, defRate: 0.5, eva: -20, rewardRate: 1.2 },
-                { name: '고삐리', type: 'strong', minLv: 10, maxLv: 30, hpRate: 1.1, atkRate: 1.2, defRate: 0.9, eva: 5, rewardRate: 1.5 },
-                { name: '양키', type: 'strong', minLv: 15, maxLv: 30, hpRate: 1.0, atkRate: 1.4, defRate: 0.8, eva: 15, rewardRate: 1.8 },
-                { name: '일진', type: 'boss', minLv: 20, maxLv: 30, hpRate: 1.5, atkRate: 1.5, defRate: 1.0, eva: 10, rewardRate: 2.5 },
-                { name: '백수', type: 'normal', minLv: 20, maxLv: 50, hpRate: 1.5, atkRate: 0.5, defRate: 0.5, eva: 0, rewardRate: 0.9 },
-                { name: '재수생', type: 'normal', minLv: 20, maxLv: 50, hpRate: 0.8, atkRate: 1.1, defRate: 1.5, eva: 0, rewardRate: 1.0 },
-                { name: '미미짱', type: 'normal', minLv: 20, maxLv: 50, hpRate: 0.3, atkRate: 0.9, defRate: 0.4, eva: 50, rewardRate: 1.2 },
-                { name: '취준생', type: 'normal', minLv: 22, maxLv: 50, hpRate: 1.1, atkRate: 1.0, defRate: 0.9, eva: 5, rewardRate: 1.1 },
-                { name: '라면가이더', type: 'normal', minLv: 25, maxLv: 50, hpRate: 0.6, atkRate: 1.8, defRate: 0.5, eva: 25, rewardRate: 1.3 },
-                { name: '헬린이', type: 'strong', minLv: 30, maxLv: 50, hpRate: 2.5, atkRate: 1.2, defRate: 1.2, eva: -5, rewardRate: 1.8 },
-                { name: '야타족', type: 'strong', minLv: 35, maxLv: 50, hpRate: 0.9, atkRate: 1.5, defRate: 0.8, eva: 25, rewardRate: 2.0 },
-                { name: '조기축구 아저씨', type: 'boss', minLv: 40, maxLv: 50, hpRate: 1.8, atkRate: 1.4, defRate: 1.3, eva: 15, rewardRate: 3.0 },
-
-                // [버그 패치] maxLv을 999로 상향하여 100레벨 이후에도 다양한 몬스터가 출현하도록 조정
-                { name: '지각한 인턴', type: 'normal', minLv: 40, maxLv: 999, hpRate: 0.6, atkRate: 1.5, defRate: 0.4, eva: 30, rewardRate: 1.1 },
-                { name: '슬라임 사원', type: 'normal', minLv: 40, maxLv: 999, hpRate: 1.0, atkRate: 1.0, defRate: 1.0, eva: 0, rewardRate: 1.0 },
-                { name: '파견직 사원', type: 'normal', minLv: 42, maxLv: 999, hpRate: 1.1, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.2 },
-                { name: '까칠한 디자이너', type: 'normal', minLv: 45, maxLv: 999, hpRate: 0.8, atkRate: 1.3, defRate: 0.7, eva: 15, rewardRate: 1.4 },
-                { name: '불만많은 고객', type: 'normal', minLv: 48, maxLv: 999, hpRate: 1.3, atkRate: 1.1, defRate: 0.9, eva: 5, rewardRate: 1.5 },
-                { name: '늑대 대리', type: 'strong', minLv: 50, maxLv: 999, hpRate: 1.2, atkRate: 1.4, defRate: 1.0, eva: 15, rewardRate: 2.0 },
-                { name: '고블린 횡령범', type: 'strong', minLv: 55, maxLv: 999, hpRate: 0.9, atkRate: 1.8, defRate: 0.8, eva: 25, rewardRate: 2.3 },
-                { name: '오크 주임', type: 'strong', minLv: 60, maxLv: 999, hpRate: 1.8, atkRate: 1.2, defRate: 1.5, eva: 0, rewardRate: 2.2 },
-                { name: '보안팀장', type: 'boss', minLv: 65, maxLv: 999, hpRate: 2.0, atkRate: 1.3, defRate: 1.6, eva: 5, rewardRate: 3.5 },
-                { name: '광분한 차장', type: 'boss', minLv: 70, maxLv: 999, hpRate: 0.5, atkRate: 3.5, defRate: 0.5, eva: 10, rewardRate: 3.8 },
-                { name: '영업부 과장', type: 'boss', minLv: 75, maxLv: 999, hpRate: 1.5, atkRate: 1.6, defRate: 1.2, eva: 10, rewardRate: 3.0 },
-                { name: '스켈레톤 팀장', type: 'boss', minLv: 80, maxLv: 999, hpRate: 1.3, atkRate: 1.8, defRate: 1.1, eva: 20, rewardRate: 4.0 },
-                { name: '데스나이트 부장', type: 'boss', minLv: 85, maxLv: 999, hpRate: 2.2, atkRate: 1.8, defRate: 1.5, eva: 10, rewardRate: 5.0 },
-                { name: '감사팀 임원', type: 'boss', minLv: 90, maxLv: 999, hpRate: 3.0, atkRate: 2.0, defRate: 1.4, eva: 15, rewardRate: 7.0 },
-
-                { name: '낙하산 신입', type: 'normal', minLv: 95, maxLv: 999, hpRate: 2.5, atkRate: 1.5, defRate: 1.2, eva: 25, rewardRate: 5.0 },
-                { name: '분노한 주주', type: 'strong', minLv: 110, maxLv: 999, hpRate: 3.0, atkRate: 2.5, defRate: 1.5, eva: 10, rewardRate: 8.0 },
-                { name: '악성 콜센터 진상', type: 'strong', minLv: 130, maxLv: 999, hpRate: 2.8, atkRate: 3.0, defRate: 1.0, eva: 40, rewardRate: 12.0 },
-                { name: '사내 정치꾼', type: 'boss', minLv: 150, maxLv: 999, hpRate: 4.5, atkRate: 2.2, defRate: 2.5, eva: 30, rewardRate: 18.0 },
-                { name: '경쟁사 산업스파이', type: 'strong', minLv: 170, maxLv: 999, hpRate: 3.5, atkRate: 3.8, defRate: 1.8, eva: 50, rewardRate: 25.0 },
-                { name: '노조위원장', type: 'boss', minLv: 190, maxLv: 999, hpRate: 6.0, atkRate: 3.5, defRate: 3.0, eva: 20, rewardRate: 40.0 },
-                { name: '국세청 특별조사관', type: 'boss', minLv: 220, maxLv: 999, hpRate: 8.0, atkRate: 5.0, defRate: 4.5, eva: 35, rewardRate: 80.0 },
-                /* --- 신규 대량 추가 데이터 (중후반~극후반 몬스터) --- */
-                { name: '번아웃 좀비 인턴', type: 'normal', minLv: 120, maxLv: 180, hpRate: 2.5, atkRate: 1.2, defRate: 1.5, eva: 5, rewardRate: 5.0 },
-                { name: '오버클럭 워크스테이션', type: 'normal', minLv: 135, maxLv: 190, hpRate: 1.8, atkRate: 3.5, defRate: 2.0, eva: 15, rewardRate: 6.5 },
-                { name: '헬게이트 프로젝트', type: 'strong', minLv: 150, maxLv: 220, hpRate: 3.5, atkRate: 4.0, defRate: 2.5, eva: 20, rewardRate: 12.0 },
-                { name: '매드 사이언티스트 연구원', type: 'boss', minLv: 165, maxLv: 250, hpRate: 5.5, atkRate: 5.0, defRate: 3.0, eva: 30, rewardRate: 25.0 },
-                
-                { name: '크툴루 임원진', type: 'boss', minLv: 180, maxLv: 280, hpRate: 6.0, atkRate: 3.5, defRate: 2.5, eva: 30, rewardRate: 30.0 },
-                
-                { name: '심연의 회계감사', type: 'normal', minLv: 190, maxLv: 300, hpRate: 2.5, atkRate: 4.5, defRate: 4.0, eva: 40, rewardRate: 15.0 },
-                { name: '타락천사 이사', type: 'strong', minLv: 205, maxLv: 300, hpRate: 4.5, atkRate: 6.0, defRate: 3.5, eva: 45, rewardRate: 35.0 },
-                { name: '우주 국세청 특별조사관', type: 'boss', minLv: 220, maxLv: 300, hpRate: 8.0, atkRate: 5.0, defRate: 4.5, eva: 35, rewardRate: 60.0 },
-                
-                { name: '차원 침략자 대표이사', type: 'boss', minLv: 250, maxLv: 999, hpRate: 12.0, atkRate: 8.0, defRate: 6.0, eva: 50, rewardRate: 120.0 },
-                { name: '타임라인 파괴자 주주', type: 'boss', minLv: 280, maxLv: 999, hpRate: 18.0, atkRate: 12.0, defRate: 8.5, eva: 60, rewardRate: 250.0 }
+                { name: '하루살이', type: 'normal', minLv: 1, maxLv: 999, hpRate: 0.89, atkRate: 0.99, defRate: 0.55, eva: 17, rewardRate: 0.8 },
+                { name: '고삐리', type: 'strong', minLv: 1, maxLv: 999, hpRate: 1.37, atkRate: 1.25, defRate: 0.6, eva: 3, rewardRate: 1.5 },
+                { name: '일진', type: 'boss', minLv: 1, maxLv: 999, hpRate: 2.01, atkRate: 1.42, defRate: 0.69, eva: 6, rewardRate: 2.5 },
+                { name: '코흘리개', type: 'normal', minLv: 1, maxLv: 999, hpRate: 0.92, atkRate: 0.98, defRate: 0.47, eva: 3, rewardRate: 0.8 },
+                { name: '방과후 좀비', type: 'normal', minLv: 1, maxLv: 999, hpRate: 1.11, atkRate: 0.89, defRate: 0.42, eva: -3, rewardRate: 0.8 },
+                { name: '준비물 안 챙긴 죄책감', type: 'strong', minLv: 1, maxLv: 999, hpRate: 1.28, atkRate: 1.35, defRate: 0.54, eva: 16, rewardRate: 1.5 },
+                { name: '콩벌레', type: 'normal', minLv: 11, maxLv: 999, hpRate: 1.05, atkRate: 1.04, defRate: 0.44, eva: 2, rewardRate: 0.9 },
+                { name: '짝꿍 괴롭히는 반장', type: 'normal', minLv: 11, maxLv: 999, hpRate: 1.1, atkRate: 1.01, defRate: 0.41, eva: 9, rewardRate: 0.9 },
+                { name: '오락실 갤러그 함장', type: 'normal', minLv: 11, maxLv: 999, hpRate: 1.12, atkRate: 0.88, defRate: 0.55, eva: -5, rewardRate: 0.9 },
+                { name: '학교괴담 - 4층 화장실 귀신', type: 'boss', minLv: 11, maxLv: 999, hpRate: 1.85, atkRate: 1.64, defRate: 0.68, eva: 30, rewardRate: 2.85 },
+                { name: '들개', type: 'normal', minLv: 21, maxLv: 999, hpRate: 0.94, atkRate: 1.08, defRate: 0.44, eva: 0, rewardRate: 1.0 },
+                { name: '양키', type: 'strong', minLv: 21, maxLv: 999, hpRate: 1.29, atkRate: 1.42, defRate: 0.57, eva: 13, rewardRate: 1.86 },
+                { name: '급식충', type: 'normal', minLv: 21, maxLv: 999, hpRate: 1.12, atkRate: 1.04, defRate: 0.48, eva: 4, rewardRate: 1.0 },
+                { name: '태권도 관장님', type: 'strong', minLv: 21, maxLv: 999, hpRate: 1.5, atkRate: 1.32, defRate: 0.56, eva: 8, rewardRate: 1.86 },
+                { name: '놀이터의 전설, 회전무대', type: 'boss', minLv: 21, maxLv: 999, hpRate: 1.81, atkRate: 1.58, defRate: 0.72, eva: 7, rewardRate: 3.2 },
+                { name: '잼민이', type: 'normal', minLv: 31, maxLv: 999, hpRate: 1.14, atkRate: 0.91, defRate: 0.59, eva: 12, rewardRate: 1.1 },
+                { name: '조기축구 아저씨', type: 'boss', minLv: 31, maxLv: 999, hpRate: 1.91, atkRate: 1.64, defRate: 0.68, eva: 25, rewardRate: 3.55 },
+                { name: '야자 감독 선생님', type: 'normal', minLv: 31, maxLv: 999, hpRate: 1.01, atkRate: 1.05, defRate: 0.57, eva: 17, rewardRate: 1.1 },
+                { name: '단체채팅방 저격수', type: 'normal', minLv: 31, maxLv: 999, hpRate: 0.9, atkRate: 1.14, defRate: 0.55, eva: 12, rewardRate: 1.1 },
+                { name: '수능 D-100 카운트다운 정령', type: 'strong', minLv: 31, maxLv: 999, hpRate: 1.26, atkRate: 1.44, defRate: 0.62, eva: 8, rewardRate: 2.04 },
+                { name: '중삐리', type: 'normal', minLv: 41, maxLv: 999, hpRate: 1.04, atkRate: 0.9, defRate: 0.52, eva: -1, rewardRate: 1.2 },
+                { name: '헬린이', type: 'strong', minLv: 41, maxLv: 999, hpRate: 1.48, atkRate: 1.32, defRate: 0.54, eva: 0, rewardRate: 2.22 },
+                { name: '중간고사의 압박', type: 'normal', minLv: 41, maxLv: 999, hpRate: 1.0, atkRate: 1.01, defRate: 0.43, eva: 9, rewardRate: 1.2 },
+                { name: '일진 무리', type: 'strong', minLv: 41, maxLv: 999, hpRate: 1.37, atkRate: 1.32, defRate: 0.56, eva: 6, rewardRate: 2.22 },
+                { name: '기숙사 괴담 - 밤 12시의 방문자', type: 'boss', minLv: 41, maxLv: 999, hpRate: 2.06, atkRate: 1.65, defRate: 0.63, eva: 8, rewardRate: 3.9 },
+                { name: '파오후', type: 'normal', minLv: 51, maxLv: 999, hpRate: 1.12, atkRate: 0.92, defRate: 0.49, eva: 15, rewardRate: 1.3 },
+                { name: '급식실 진상 선배', type: 'normal', minLv: 51, maxLv: 999, hpRate: 0.93, atkRate: 1.05, defRate: 0.48, eva: 7, rewardRate: 1.3 },
+                { name: '사이버 폭력 트롤', type: 'strong', minLv: 51, maxLv: 999, hpRate: 1.55, atkRate: 1.45, defRate: 0.52, eva: 18, rewardRate: 2.4 },
+                { name: '전교 1등이라는 이름의 벽', type: 'boss', minLv: 51, maxLv: 999, hpRate: 2.12, atkRate: 1.59, defRate: 0.68, eva: 25, rewardRate: 4.25 },
+                { name: '백수', type: 'normal', minLv: 61, maxLv: 999, hpRate: 1.13, atkRate: 0.97, defRate: 0.52, eva: 19, rewardRate: 1.4 },
+                { name: '야타족', type: 'strong', minLv: 61, maxLv: 999, hpRate: 1.54, atkRate: 1.33, defRate: 0.64, eva: 24, rewardRate: 2.58 },
+                { name: '보안팀장', type: 'boss', minLv: 61, maxLv: 999, hpRate: 2.17, atkRate: 1.61, defRate: 0.74, eva: 15, rewardRate: 4.6 },
+                { name: '조모임 무임승차생', type: 'normal', minLv: 61, maxLv: 999, hpRate: 1.05, atkRate: 1.1, defRate: 0.48, eva: 9, rewardRate: 1.4 },
+                { name: '과제 마감 좀비', type: 'normal', minLv: 61, maxLv: 999, hpRate: 0.87, atkRate: 1.1, defRate: 0.46, eva: 13, rewardRate: 1.4 },
+                { name: '학사경고 저승사자', type: 'strong', minLv: 61, maxLv: 999, hpRate: 1.25, atkRate: 1.23, defRate: 0.57, eva: 20, rewardRate: 2.58 },
+                { name: '재수생', type: 'normal', minLv: 71, maxLv: 999, hpRate: 1.01, atkRate: 0.95, defRate: 0.57, eva: 6, rewardRate: 1.5 },
+                { name: '함정 시험 내는 교수님', type: 'normal', minLv: 71, maxLv: 999, hpRate: 0.95, atkRate: 1.05, defRate: 0.53, eva: 6, rewardRate: 1.5 },
+                { name: '등록금 고지서', type: 'strong', minLv: 71, maxLv: 999, hpRate: 1.5, atkRate: 1.3, defRate: 0.59, eva: 21, rewardRate: 2.76 },
+                { name: '도서관 자리맡기 귀신', type: 'boss', minLv: 71, maxLv: 999, hpRate: 1.99, atkRate: 1.44, defRate: 0.62, eva: 14, rewardRate: 4.95 },
+                { name: '취준생', type: 'normal', minLv: 81, maxLv: 999, hpRate: 1.15, atkRate: 0.97, defRate: 0.41, eva: -2, rewardRate: 1.6 },
+                { name: '고블린 횡령범', type: 'strong', minLv: 81, maxLv: 999, hpRate: 1.52, atkRate: 1.35, defRate: 0.55, eva: 22, rewardRate: 2.94 },
+                { name: '편의점 알바 진상손님', type: 'normal', minLv: 81, maxLv: 999, hpRate: 1.05, atkRate: 1.03, defRate: 0.41, eva: 20, rewardRate: 1.6 },
+                { name: '동아리 선배 갑질러', type: 'strong', minLv: 81, maxLv: 999, hpRate: 1.34, atkRate: 1.35, defRate: 0.64, eva: 12, rewardRate: 2.94 },
+                { name: '취업 스터디 왕따 압박감', type: 'boss', minLv: 81, maxLv: 999, hpRate: 1.91, atkRate: 1.53, defRate: 0.78, eva: 23, rewardRate: 5.3 },
+                { name: '지각한 인턴', type: 'normal', minLv: 91, maxLv: 999, hpRate: 1.06, atkRate: 1.08, defRate: 0.5, eva: 10, rewardRate: 1.7 },
+                { name: '감사팀 임원', type: 'boss', minLv: 91, maxLv: 999, hpRate: 2.16, atkRate: 1.48, defRate: 0.61, eva: 23, rewardRate: 5.65 },
+                { name: '광탈시키는 서류전형', type: 'normal', minLv: 91, maxLv: 999, hpRate: 0.98, atkRate: 0.9, defRate: 0.49, eva: 19, rewardRate: 1.7 },
+                { name: '인적성검사 미로', type: 'strong', minLv: 91, maxLv: 999, hpRate: 1.43, atkRate: 1.29, defRate: 0.61, eva: 17, rewardRate: 3.12 },
+                { name: '최종면접의 벽', type: 'boss', minLv: 91, maxLv: 999, hpRate: 2.1, atkRate: 1.63, defRate: 0.74, eva: 6, rewardRate: 5.65 },
+                { name: '슬라임 사원', type: 'normal', minLv: 101, maxLv: 999, hpRate: 1.11, atkRate: 0.9, defRate: 0.55, eva: 17, rewardRate: 1.8 },
+                { name: '오크 주임', type: 'strong', minLv: 101, maxLv: 999, hpRate: 1.46, atkRate: 1.37, defRate: 0.66, eva: 7, rewardRate: 3.3 },
+                { name: '압박면접관', type: 'normal', minLv: 101, maxLv: 999, hpRate: 0.87, atkRate: 0.88, defRate: 0.59, eva: 14, rewardRate: 1.8 },
+                { name: '탈락통보 메일 저승새', type: 'strong', minLv: 101, maxLv: 999, hpRate: 1.45, atkRate: 1.39, defRate: 0.51, eva: 6, rewardRate: 3.3 },
+                { name: '인턴 갑질 사수', type: 'boss', minLv: 101, maxLv: 999, hpRate: 2.13, atkRate: 1.6, defRate: 0.69, eva: 7, rewardRate: 6.0 },
+                { name: '파견직 사원', type: 'normal', minLv: 111, maxLv: 999, hpRate: 1.12, atkRate: 1.01, defRate: 0.44, eva: 20, rewardRate: 1.9 },
+                { name: '스펙 인플레이션 유령', type: 'normal', minLv: 111, maxLv: 999, hpRate: 1.07, atkRate: 1.03, defRate: 0.53, eva: -2, rewardRate: 1.9 },
+                { name: '열정페이 흡혈귀', type: 'strong', minLv: 111, maxLv: 999, hpRate: 1.52, atkRate: 1.19, defRate: 0.53, eva: 15, rewardRate: 3.48 },
+                { name: '까칠한 디자이너', type: 'normal', minLv: 121, maxLv: 999, hpRate: 1.07, atkRate: 1.02, defRate: 0.47, eva: -5, rewardRate: 2.0 },
+                { name: '늑대 대리', type: 'strong', minLv: 121, maxLv: 999, hpRate: 1.46, atkRate: 1.29, defRate: 0.66, eva: 3, rewardRate: 3.66 },
+                { name: '광분한 차장', type: 'boss', minLv: 121, maxLv: 999, hpRate: 2.09, atkRate: 1.46, defRate: 0.68, eva: 8, rewardRate: 6.7 },
+                { name: '야근 강요 부장', type: 'normal', minLv: 121, maxLv: 999, hpRate: 0.95, atkRate: 1.04, defRate: 0.54, eva: 11, rewardRate: 2.0 },
+                { name: '복사기 잼 요괴', type: 'normal', minLv: 121, maxLv: 999, hpRate: 0.94, atkRate: 0.93, defRate: 0.41, eva: 17, rewardRate: 2.0 },
+                { name: '프로젝트 데드라인 사신', type: 'strong', minLv: 121, maxLv: 999, hpRate: 1.37, atkRate: 1.35, defRate: 0.54, eva: 8, rewardRate: 3.66 },
+                { name: '불만많은 고객', type: 'normal', minLv: 131, maxLv: 999, hpRate: 0.97, atkRate: 1.06, defRate: 0.52, eva: 16, rewardRate: 2.1 },
+                { name: '칼퇴 방해 메신저', type: 'normal', minLv: 131, maxLv: 999, hpRate: 0.86, atkRate: 1.03, defRate: 0.41, eva: -3, rewardRate: 2.1 },
+                { name: '워라밸 파괴자', type: 'strong', minLv: 131, maxLv: 999, hpRate: 1.41, atkRate: 1.25, defRate: 0.54, eva: 24, rewardRate: 3.84 },
+                { name: '감정노동 블랙홀 고객', type: 'boss', minLv: 131, maxLv: 999, hpRate: 1.95, atkRate: 1.7, defRate: 0.7, eva: 14, rewardRate: 7.05 },
+                { name: '전화받는 상담원', type: 'normal', minLv: 141, maxLv: 999, hpRate: 1.04, atkRate: 1.13, defRate: 0.41, eva: 9, rewardRate: 2.2 },
+                { name: '진상 고객', type: 'strong', minLv: 141, maxLv: 999, hpRate: 1.3, atkRate: 1.39, defRate: 0.67, eva: 1, rewardRate: 4.02 },
+                { name: '회의만 하는 회의 좀비', type: 'normal', minLv: 141, maxLv: 999, hpRate: 1.13, atkRate: 0.9, defRate: 0.51, eva: 10, rewardRate: 2.2 },
+                { name: '사내정치 스파이', type: 'strong', minLv: 141, maxLv: 999, hpRate: 1.52, atkRate: 1.41, defRate: 0.55, eva: 18, rewardRate: 4.02 },
+                { name: '익명 커뮤니티 저격글', type: 'boss', minLv: 141, maxLv: 999, hpRate: 1.97, atkRate: 1.44, defRate: 0.6, eva: 25, rewardRate: 7.4 },
+                { name: '야근하는 대리', type: 'normal', minLv: 151, maxLv: 999, hpRate: 1.15, atkRate: 1.13, defRate: 0.43, eva: -4, rewardRate: 2.3 },
+                { name: '영업부 과장', type: 'boss', minLv: 151, maxLv: 999, hpRate: 1.86, atkRate: 1.59, defRate: 0.62, eva: 7, rewardRate: 7.75 },
+                { name: 'KPI 압박 정령', type: 'normal', minLv: 151, maxLv: 999, hpRate: 1.01, atkRate: 0.9, defRate: 0.48, eva: 7, rewardRate: 2.3 },
+                { name: '회식 강요 트롤', type: 'normal', minLv: 151, maxLv: 999, hpRate: 1.01, atkRate: 0.98, defRate: 0.55, eva: 11, rewardRate: 2.3 },
+                { name: '구조조정 낫을 든 사신', type: 'strong', minLv: 151, maxLv: 999, hpRate: 1.3, atkRate: 1.39, defRate: 0.66, eva: 18, rewardRate: 4.2 },
+                { name: '번아웃 사원', type: 'normal', minLv: 161, maxLv: 999, hpRate: 1.06, atkRate: 1.07, defRate: 0.41, eva: 8, rewardRate: 2.4 },
+                { name: '블랙컨슈머', type: 'strong', minLv: 161, maxLv: 999, hpRate: 1.39, atkRate: 1.25, defRate: 0.59, eva: 6, rewardRate: 4.38 },
+                { name: '꼰대 스킬 시전자', type: 'normal', minLv: 161, maxLv: 999, hpRate: 0.87, atkRate: 0.99, defRate: 0.4, eva: 3, rewardRate: 2.4 },
+                { name: '인사평가 저울', type: 'strong', minLv: 161, maxLv: 999, hpRate: 1.44, atkRate: 1.34, defRate: 0.55, eva: 23, rewardRate: 4.38 },
+                { name: '임원 눈도장 경쟁자', type: 'boss', minLv: 161, maxLv: 999, hpRate: 2.14, atkRate: 1.51, defRate: 0.64, eva: 19, rewardRate: 8.1 },
+                { name: '재택근무 유령', type: 'normal', minLv: 171, maxLv: 999, hpRate: 1.03, atkRate: 1.11, defRate: 0.48, eva: 1, rewardRate: 2.5 },
+                { name: 'MZ세대 눈치싸움러', type: 'normal', minLv: 171, maxLv: 999, hpRate: 0.91, atkRate: 0.97, defRate: 0.57, eva: 19, rewardRate: 2.5 },
+                { name: '라인 타기 정치몬', type: 'strong', minLv: 171, maxLv: 999, hpRate: 1.46, atkRate: 1.27, defRate: 0.57, eva: 10, rewardRate: 4.56 },
+                { name: '번아웃 심연', type: 'boss', minLv: 171, maxLv: 999, hpRate: 1.95, atkRate: 1.66, defRate: 0.76, eva: 24, rewardRate: 8.45 },
+                { name: '화상회의 좀비', type: 'normal', minLv: 181, maxLv: 999, hpRate: 1.1, atkRate: 0.87, defRate: 0.6, eva: 3, rewardRate: 2.6 },
+                { name: '악덕 하청업체', type: 'strong', minLv: 181, maxLv: 999, hpRate: 1.54, atkRate: 1.27, defRate: 0.55, eva: 22, rewardRate: 4.74 },
+                { name: '스켈레톤 팀장', type: 'boss', minLv: 181, maxLv: 999, hpRate: 1.84, atkRate: 1.47, defRate: 0.61, eva: 13, rewardRate: 8.8 },
+                { name: '주주총회 야유꾼', type: 'normal', minLv: 181, maxLv: 999, hpRate: 1.1, atkRate: 0.89, defRate: 0.56, eva: 10, rewardRate: 2.6 },
+                { name: '이사회의 벽', type: 'strong', minLv: 181, maxLv: 999, hpRate: 1.49, atkRate: 1.34, defRate: 0.57, eva: 16, rewardRate: 4.74 },
+                { name: '회장님 눈치게임', type: 'boss', minLv: 181, maxLv: 999, hpRate: 2.09, atkRate: 1.57, defRate: 0.7, eva: 26, rewardRate: 8.8 },
+                { name: '무한 회의체', type: 'normal', minLv: 191, maxLv: 999, hpRate: 0.85, atkRate: 1.09, defRate: 0.41, eva: -5, rewardRate: 2.7 },
+                { name: '언론 뭇매 폭풍', type: 'normal', minLv: 191, maxLv: 999, hpRate: 1.15, atkRate: 1.03, defRate: 0.5, eva: -1, rewardRate: 2.7 },
+                { name: '후계자 경쟁 라이벌', type: 'strong', minLv: 191, maxLv: 999, hpRate: 1.53, atkRate: 1.15, defRate: 0.65, eva: 21, rewardRate: 4.92 },
+                { name: '연차 반려남', type: 'normal', minLv: 201, maxLv: 999, hpRate: 1.15, atkRate: 1.02, defRate: 0.45, eva: -5, rewardRate: 2.8 },
+                { name: '경쟁사 스파이', type: 'strong', minLv: 201, maxLv: 999, hpRate: 1.45, atkRate: 1.22, defRate: 0.63, eva: 23, rewardRate: 5.1 },
+                { name: '내부고발자의 그림자', type: 'strong', minLv: 201, maxLv: 999, hpRate: 1.35, atkRate: 1.36, defRate: 0.63, eva: 14, rewardRate: 5.1 },
+                { name: '검찰 소환장 저승사자', type: 'boss', minLv: 201, maxLv: 999, hpRate: 2.1, atkRate: 1.44, defRate: 0.65, eva: 7, rewardRate: 9.5 },
+                { name: '정년퇴직 예정자', type: 'normal', minLv: 211, maxLv: 999, hpRate: 1.04, atkRate: 1.11, defRate: 0.56, eva: 6, rewardRate: 2.9 },
+                { name: '데스나이트 부장', type: 'boss', minLv: 211, maxLv: 999, hpRate: 1.93, atkRate: 1.67, defRate: 0.61, eva: 29, rewardRate: 9.85 },
+                { name: '국민연금 계산기', type: 'normal', minLv: 211, maxLv: 999, hpRate: 0.94, atkRate: 1.04, defRate: 0.53, eva: -3, rewardRate: 2.9 },
+                { name: '건강검진 결과지', type: 'strong', minLv: 211, maxLv: 999, hpRate: 1.44, atkRate: 1.16, defRate: 0.56, eva: 15, rewardRate: 5.28 },
+                { name: '사내정치 브로커', type: 'normal', minLv: 221, maxLv: 999, hpRate: 0.91, atkRate: 1.14, defRate: 0.4, eva: 14, rewardRate: 3.0 },
+                { name: '해고통보 담당관', type: 'strong', minLv: 221, maxLv: 999, hpRate: 1.51, atkRate: 1.4, defRate: 0.61, eva: 5, rewardRate: 5.46 },
+                { name: '황혼육아 손주', type: 'normal', minLv: 221, maxLv: 999, hpRate: 0.93, atkRate: 1.04, defRate: 0.55, eva: 18, rewardRate: 3.0 },
+                { name: '상속분쟁의 그림자', type: 'strong', minLv: 221, maxLv: 999, hpRate: 1.54, atkRate: 1.18, defRate: 0.63, eva: 5, rewardRate: 5.46 },
+                { name: '감사받는 팀장', type: 'normal', minLv: 231, maxLv: 999, hpRate: 1.12, atkRate: 0.85, defRate: 0.55, eva: 17, rewardRate: 3.1 },
+                { name: '등산모임 진상', type: 'normal', minLv: 231, maxLv: 999, hpRate: 0.94, atkRate: 0.91, defRate: 0.48, eva: 13, rewardRate: 3.1 },
+                { name: '인생 2막이라는 벽', type: 'boss', minLv: 231, maxLv: 999, hpRate: 1.92, atkRate: 1.51, defRate: 0.66, eva: 6, rewardRate: 10.55 },
+                { name: '은퇴한 임원', type: 'normal', minLv: 241, maxLv: 999, hpRate: 0.95, atkRate: 0.97, defRate: 0.48, eva: 18, rewardRate: 3.2 },
+                { name: '구조조정 컨설턴트', type: 'strong', minLv: 241, maxLv: 999, hpRate: 1.38, atkRate: 1.21, defRate: 0.53, eva: 18, rewardRate: 5.82 },
+                { name: '사내 정치꾼', type: 'boss', minLv: 241, maxLv: 999, hpRate: 2.02, atkRate: 1.48, defRate: 0.73, eva: 25, rewardRate: 10.9 },
+                { name: '보이스피싱범', type: 'strong', minLv: 241, maxLv: 999, hpRate: 1.54, atkRate: 1.15, defRate: 0.59, eva: 13, rewardRate: 5.82 },
+                { name: '시간의 흐름 그 자체', type: 'boss', minLv: 241, maxLv: 999, hpRate: 1.96, atkRate: 1.58, defRate: 0.69, eva: 27, rewardRate: 10.9 }
             ],
             currentMonster: null, logs: []
         };
+
 
         function setScreenMode(mode) {
             const body = document.getElementById('app-body');
@@ -496,6 +701,12 @@
                 total.skillPowerMult = 1.25; // 스킬 배율(피해/감소량 등)에 곱연산으로 적용
             }
 
+
+            // [긴급 수정] 크리티컬 확률/데미지에 상한이 없어 고레벨(특히 1클래스 이상)에서 CHA 스탯만으로도
+            // 크리티컬 확률이 100%를 훌쩍 넘고 데미지 배율도 400%를 넘어가며 밸런스가 완전히 무너지던 문제 수정.
+            total.crt = Math.min(100, total.crt);
+            total.crtDmg = Math.min(250, total.crtDmg);
+
             return total;
         }
 
@@ -511,9 +722,10 @@
         }
 
         function getRequiredExp(level, classTier = 0) {
-            // [신규] 1차/2차 전직 이후에는 필요 경험치가 다소 상승하도록 티어별 배율 적용
-            const tierMult = 1 + ((classTier || 0) * 0.35);
-            return Math.floor((10 + (level * 8) + Math.pow(level, 1.7)) * tierMult);
+            // [재설계] 고레벨 구간의 체감 승률이 완만해지며(=더 잘 이김) 레벨업이 급가속되는 것을 상쇄하기 위해
+            // 지수를 1.7→2.0으로, 티어 배율도 함께 상향하여 성장속도가 고르게(완만히) 느려지도록 조정.
+            const tierMult = 1 + ((classTier || 0) * 0.5);
+            return Math.floor((10 + (level * 10) + Math.pow(level, 2.0)) * tierMult);
         }
 
         function calculateCP(stats, isPlayer = true) {
@@ -837,21 +1049,39 @@
 
             const targetCP = pCP * cpRatio * 1.1;
             
+            const lvFactor = 1 + Math.min(0.9, lv * 0.009);
+
+            // [긴급 수정] 100전 0승 문제 원인: 몬스터 체력/공격력 계수가 지나치게 높았음(HP배율 7.0, 공격배율 0.45,
+            // 공격력 상한 0.36). 시뮬레이션으로 재계산한 값으로 교체 - Lv1 기준 약 50%, 레벨이 오르며 완만히 상승하도록 조정.
+            let mMaxHp = Math.floor(
+                pStats.atk *
+                Math.sqrt(targetTemplate.hpRate) *
+                cpRatio *
+                3.8 *
+                lvFactor
+            );
+
+            let mAtk = Math.floor(
+                pStats.maxHp *
+                Math.sqrt(targetTemplate.atkRate) *
+                cpRatio *
+                0.32 *
+                lvFactor
+            );
+
+            let mDef = Math.floor(
+                pStats.atk *
+                Math.sqrt(targetTemplate.defRate) *
+                cpRatio *
+                0.42 *
+                lvFactor
+            );
+
+            mDef = Math.min(mDef, Math.floor(pStats.atk * 0.55));
+            mAtk = Math.min(mAtk, Math.floor((pStats.maxHp + pStats.def) * 0.40));
             let rewardBuff = 1.0;
             if (lv <= 25) { rewardBuff = 1.30; }
             else if (lv <= 50) { rewardBuff = 1.15; }
-
-            // [밸런스 전면 재설계] 목표: 초보자(0티어) 약 30%대 / 1차전직 약 50%대 / Lv.100 고급장비 약 60~70%대 승률
-            // 1) hpRate/atkRate/defRate를 제곱근으로 완만하게 반영 -> 몬스터 종류간 승률 편차(일부는 90%+, 일부는 0%)를 크게 완화
-            // 2) 레벨이 오를수록 조우 난이도가 함께 상승하도록 레벨 보정계수 도입(상한 있음 - 과도한 고레벨 폭주 방지)
-            // 3) [안전장치] 방어력/공격력에 상한을 걸어, 어떤 defRate/atkRate 값이 들어와도 "이론상 격파 불가능"한 개체가
-            //    생기지 않도록 함. 향후 신규 몬스터 데이터를 추가해도 이 상한 덕분에 극단적으로 깨지지 않음.
-            const lvFactor = 1 + Math.min(0.9, lv * 0.009);
-            let mMaxHp = Math.floor(pStats.atk * Math.sqrt(targetTemplate.hpRate) * cpRatio * 10.0 * lvFactor);
-            let mAtk = Math.floor(pStats.maxHp * Math.sqrt(targetTemplate.atkRate) * cpRatio * 0.62 * lvFactor);
-            let mDef = Math.floor(pStats.atk * Math.sqrt(targetTemplate.defRate) * cpRatio * 0.73 * lvFactor);
-            mDef = Math.min(mDef, Math.floor(pStats.atk * 0.52));                       // 방어력 상한: 순수피해 최소 48% 관통 보장
-            mAtk = Math.min(mAtk, Math.floor((pStats.maxHp + pStats.def) * 0.36));      // 공격력 상한: 즉사(1~2턴 사망) 방지
 
             let baseRewardValue = (lv * 3) + 10;
             let tierMultiplier = 1 + (store.player.classTier * 1.5); 
@@ -984,6 +1214,14 @@
         function buyEquipment(id) {
             const p = store.player;
             const item = store.equipments.find(e => e.id === id);
+            if (!item) {
+                sysMsg("존재하지 않는 장비입니다.");
+                return;
+            }
+            if (p.level < item.reqLevel) {
+                sysMsg(`레벨 ${item.reqLevel} 이상부터 구매할 수 있습니다.`);
+                return;
+            }
             
             let refund = 0;
             if (p[item.type]) {
@@ -1234,7 +1472,10 @@
             types.forEach(t => {
                 html += `<h3>${t.label}</h3>`;
                 let hasItem = false;
-                store.equipments.filter(e => e.type === t.key).forEach(item => {
+                store.equipments
+                    .filter(e => e.type === t.key)
+                    .sort((a, b) => a.reqLevel - b.reqLevel)
+                    .forEach(item => {
                     if (store.player.level >= item.reqLevel) {
                         hasItem = true;
                         const stats = Object.entries(item.stats).map(([k, v]) => `${k.toUpperCase()}${v > 0 ? '+'+v : v}`).join(', ');
@@ -1399,7 +1640,8 @@
                 const isUnlocked = store.player.level >= s.reqLv;
                 // [버그 패치] 스킬 랭크업에 소모되는 실제 비용 산출 및 버튼 표기
                 let nextRank = currentRank + 1;
-                let requiredSp = Math.min(3, Math.ceil(nextRank / 2)); 
+                const skillSpCost = [0, 1, 1, 2, 2, 3, 3, 4];
+                let requiredSp = currentRank < 7 ? skillSpCost[nextRank] : 0; 
                 
                 html += `
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #ddd; background: #fff; margin-bottom: 5px; opacity: ${isUnlocked ? '1' : '0.5'}">
@@ -1420,7 +1662,8 @@
         function upgradeSkill(key) {
             const currentRank = store.player.skills[key] || 0;
             let nextRank = currentRank + 1;
-            let requiredSp = Math.min(3, Math.ceil(nextRank / 2)); 
+            const skillSpCost = [0, 1, 1, 2, 2, 3, 3, 4];
+            let requiredSp = currentRank < 7 ? skillSpCost[nextRank] : 0; 
 
             if (store.player.sp >= requiredSp && currentRank < 7) {
                 store.player.sp -= requiredSp; 
