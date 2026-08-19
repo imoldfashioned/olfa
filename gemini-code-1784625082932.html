@@ -155,7 +155,9 @@
 
             
             <div id="view-battle" class="view">
-                <h2>전투 로그 기록</h2>
+                <div style="margin-bottom:8px;">
+                    <h2 style="margin:0; padding:0 0 6px 0; border-bottom:1px solid #107c41;">전투 로그 기록 <span id="streak-display" style="font-weight:bold; font-size:13px;"></span></h2>
+                </div>
                 <div id="monster-status" style="margin-bottom: 10px; padding: 5px; background: #f3f2f1; border: 1px solid #ccc;"></div>
                 <div id="battle-log"></div>
                 <div class="row-buttons" style="margin-top:10px;">
@@ -275,7 +277,7 @@
             cooldownEnd: 0, 
             cdInterval: null,
             player: {
-                name: '용사', level: 1, hp: 60, 
+                name: '용사', level: 1, hp: 135, 
                 str: 5, int: 5, vit: 5, dex: 5, 
                 cha: 5, luk: 5, 
                 exp: 0, maxExp: 15, gold: 0, bank: 0,
@@ -1320,6 +1322,23 @@
             };
         }
 
+        function updateStreakDisplay() {
+            const el = document.getElementById('streak-display');
+            if (!el) return;
+            const p = store.player;
+            const win = p.winStreak || 0;
+            const lose = p.loseStreak || 0;
+            if (win >= 2) {
+                el.textContent = `| ${win}연승 중`;
+                el.style.color = '#107c41';
+            } else if (lose >= 2) {
+                el.textContent = `| ${lose}연패 중`;
+                el.style.color = '#d13441';
+            } else {
+                el.textContent = '';
+            }
+        }
+
         function winBattle(m, isBankBattle) {
             const p = store.player;
             const pStats = getPlayerTotalStats();
@@ -1334,6 +1353,9 @@
 
             p.battles.total++;
             p.battles.win++;
+            p.winStreak = (p.winStreak || 0) + 1;
+            p.loseStreak = 0;
+            updateStreakDisplay();
 
             const earnedExp = Math.floor(m.exp * (1 + pStats.lukBonus));
             const earnedGold = Math.floor(m.gold * (1 + pStats.lukBonus));
@@ -1403,6 +1425,9 @@
             if (!isBankBattle) { 
                 p.battles.total++; 
                 p.battles.lose++; 
+                p.loseStreak = (p.loseStreak || 0) + 1;
+                p.winStreak = 0;
+                updateStreakDisplay();
             }
             const lossRate = isBankBattle ? 0.3 : 0.2; 
             const lostGold = Math.floor(p.gold * lossRate);
@@ -1678,6 +1703,14 @@
             `;
         }
 
+        function scrollToShopSection(type) {
+            const container = document.getElementById('shop-container');
+            const target = document.getElementById('shop-section-' + type);
+            if (container && target) {
+                container.scrollTop = Math.max(0, target.offsetTop - container.offsetTop - 44);
+            }
+        }
+
         function renderShop() {
             const types = [
                 { key: 'weapon', label: '무기 (공격력 중심)' },
@@ -1685,9 +1718,17 @@
                 { key: 'accessory', label: '악세사리 (유틸리티)' }
             ];
             
-            let html = '';
+            let html = `
+                <div style="position:sticky; top:0; z-index:10; background:#fff; padding-bottom:8px; margin-bottom:5px; border-bottom:1px solid #ccc;">
+                    <div class="row-buttons" style="margin:0;">
+                        <button onclick="scrollToShopSection('weapon')" style="flex:1;">무기로 이동</button>
+                        <button onclick="scrollToShopSection('armor')" style="flex:1;">방어구로 이동</button>
+                        <button onclick="scrollToShopSection('accessory')" style="flex:1;">장신구로 이동</button>
+                    </div>
+                </div>
+            `;
             types.forEach(t => {
-                html += `<h3>${t.label}</h3>`;
+                html += `<h3 id="shop-section-${t.key}">${t.label}</h3>`;
                 let hasItem = false;
                 store.equipments
                     .filter(e => e.type === t.key)
@@ -1730,6 +1771,8 @@
             if (store.player.classTier === undefined) store.player.classTier = 0;
             if (store.player.job === undefined || store.player.job === '초보자') store.player.job = '인턴';
             if (store.player.battles === undefined) store.player.battles = { total: 0, win: 0, lose: 0 };
+            if (store.player.winStreak === undefined) store.player.winStreak = 0;
+            if (store.player.loseStreak === undefined) store.player.loseStreak = 0;
         }
 
         function openHome() {
@@ -1830,7 +1873,7 @@
                     const loadedData = JSON.parse(e.target.result);
                     if(loadedData && loadedData.level !== undefined) {
                         store.player = { ...store.player, ...loadedData };
-                        saveGame(); renderPlayerStatus(); changeView('main');
+                        saveGame(); renderPlayerStatus(); changeView('main'); updateStreakDisplay();
                         alert("성공적으로 데이터를 불러왔습니다!");
                     } else {
                         sysMsg("올바른 저장 파일 형식이 아닙니다.");
@@ -1842,7 +1885,7 @@
             reader.readAsText(file);
         }
 
-        loadGame(); renderPlayerStatus();
+        loadGame(); renderPlayerStatus(); updateStreakDisplay();
         const Ranks = ['미습득', 'F', 'E', 'D', 'C', 'B', 'A', 'S'];
 
         function openSkills() {
