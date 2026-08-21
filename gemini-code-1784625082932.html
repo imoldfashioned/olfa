@@ -747,7 +747,12 @@
                 { id: 'ac050', name: '손주 용돈지갑', type: 'accessory', price: 11440, reqLevel: 241, stats: { eva: 34, acc: 28, maxHp: 6585 } },
                 { id: 'oac25', name: '초월자의 사원증', type: 'accessory', price: 13440, reqLevel: 241, stats: { maxHp: 16464, crt: 24, acc: 19 } }
             ],
-        
+
+            // [v0.9.2 경제 밸런스] 기존 장비의 이름/능력치/착용레벨/종류는 유지하고
+            // 가격만 착용 레벨에 따라 비선형적으로 확대한다.
+            // 초반에는 가격 차이가 작고, 후반으로 갈수록 가격 상승폭이 커진다.
+            // 각 아이템의 기존 가격 비율은 유지한다.
+            // ※ 실제 적용은 loadGame() 이전에 한 번만 수행된다.
             monsters: [
                 { name: '하루살이', type: 'normal', minLv: 1, maxLv: 999, hpRate: 0.89, atkRate: 0.99, defRate: 0.55, eva: 17, rewardRate: 0.8 },
                 { name: '고삐리', type: 'strong', minLv: 1, maxLv: 999, hpRate: 1.37, atkRate: 1.25, defRate: 0.6, eva: 3, rewardRate: 1.5 },
@@ -868,6 +873,13 @@
             currentMonster: null, logs: []
         };
 
+        // [v0.9.2 경제 밸런스] 장비 가격 비선형 보정.
+        // reqLevel이 높아질수록 증가율 자체가 커지는 구조이며, 기존 장비 데이터는 수정하지 않는다.
+        store.equipments.forEach(item => {
+            const level = Math.max(1, Number(item.reqLevel) || 1);
+            const growth = 1 + (0.008 * Math.pow(level, 1.25));
+            item.price = Math.max(10, Math.round((item.price * growth) / 10) * 10);
+        });
 
         function setScreenMode(mode) {
             const body = document.getElementById('app-body');
@@ -1269,14 +1281,31 @@
             
             const lvFactor = 1 + Math.min(0.9, lv * 0.009);
 
-            // [긴급 수정] 100전 0승 문제 원인: 몬스터 체력/공격력 계수가 지나치게 높았음(HP배율 7.0, 공격배율 0.45,
-            // 공격력 상한 0.36). 시뮬레이션으로 재계산한 값으로 교체 - Lv1 기준 약 50%, 레벨이 오르며 완만히 상승하도록 조정.
+            // [v0.9.2 밸런스 재조정] 누계 승률이 아니라 각 레벨 구간의 실전 승률이
+            // 약 60%에 머물도록 레벨별 난이도 보정을 별도로 적용한다.
+            // 초반은 기존의 낮은 승률을 완화하고, 중후반은 급격한 100% 승률 진입을 억제한다.
+            // 전투 공식 자체는 유지하고 몬스터의 생성 능력치에만 보정한다.
+            let difficultyFactor;
+            if (lv <= 10) difficultyFactor = 0.82;
+            else if (lv <= 30) difficultyFactor = 0.86;
+            else if (lv <= 50) difficultyFactor = 0.91;
+            else if (lv <= 70) difficultyFactor = 0.97;
+            else if (lv <= 90) difficultyFactor = 1.06;
+            else if (lv <= 110) difficultyFactor = 1.13;
+            else if (lv <= 130) difficultyFactor = 1.20;
+            else if (lv <= 150) difficultyFactor = 1.27;
+            else if (lv <= 180) difficultyFactor = 1.34;
+            else if (lv <= 210) difficultyFactor = 1.41;
+            else if (lv <= 240) difficultyFactor = 1.48;
+            else difficultyFactor = 1.53;
+
             let mMaxHp = Math.floor(
                 pStats.atk *
                 Math.sqrt(targetTemplate.hpRate) *
                 cpRatio *
                 3.8 *
-                lvFactor
+                lvFactor *
+                difficultyFactor
             );
 
             let mAtk = Math.floor(
@@ -1284,7 +1313,8 @@
                 Math.sqrt(targetTemplate.atkRate) *
                 cpRatio *
                 0.32 *
-                lvFactor
+                lvFactor *
+                difficultyFactor
             );
 
             let mDef = Math.floor(
@@ -1292,11 +1322,12 @@
                 Math.sqrt(targetTemplate.defRate) *
                 cpRatio *
                 0.42 *
-                lvFactor
+                lvFactor *
+                difficultyFactor
             );
 
-            mDef = Math.min(mDef, Math.floor(pStats.atk * 0.55));
-            mAtk = Math.min(mAtk, Math.floor((pStats.maxHp + pStats.def) * 0.40));
+            mDef = Math.min(mDef, Math.floor(pStats.atk * 0.55 * difficultyFactor));
+            mAtk = Math.min(mAtk, Math.floor((pStats.maxHp + pStats.def) * 0.40 * difficultyFactor));
             let rewardBuff = 1.0;
             if (lv <= 25) { rewardBuff = 1.30; }
             else if (lv <= 50) { rewardBuff = 1.15; }
