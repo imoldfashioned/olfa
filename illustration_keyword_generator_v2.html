@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light" id="colorSchemeMeta">
+  <title>키워드 생성기 v2.0 | 일러스트 · 캐릭터 디자인</title>
+  <style>
+    :root {
+      --bg: #0b101b; --panel: #151d2b; --panel-2: #1c2637; --line: #2b3648;
+      --text: #eef2f8; --muted: #a3aec0; --faint: #75839b; --accent: #a8ecca;
+      --accent-deep: #173b35; --purple: #b4a7ff; --danger: #ffb2ae;
+      --radius: 19px; --shadow: 0 18px 44px rgba(0,0,0,.18);
+      font-family: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; background: radial-gradient(ellipse at 80% -10%, #1b2739 0, transparent 48%), var(--bg); color: var(--text); }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .app { max-width: 1860px; margin: 0 auto; padding: 32px 38px 60px; }
+    .global-nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin: 0 0 26px; padding: 0 0 14px; border-bottom: 1px solid var(--line); }
+    .generator-tabs { display: flex; align-items: stretch; gap: 9px; min-width: 0; }
+    .generator-tab { padding: 13px 21px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel-2); color: var(--muted); font-size: 14px; font-weight: 800; line-height: 1.5; }
+    .generator-tab:hover { border-color: var(--accent); }
+    .generator-tab[aria-selected="true"] { background: var(--accent-deep); border-color: var(--accent); color: var(--accent); }
+    .global-actions { flex-shrink: 0; display: flex; align-items: center; justify-content: flex-end; gap: 9px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 8px 0 25px; }
+    .brand-label, .eyebrow { color: var(--accent); font-size: 12px; letter-spacing: .17em; font-weight: 800; }
+    h1 { font-size: clamp(28px,2.35vw,43px); letter-spacing: -.055em; margin: 8px 0; line-height: 1.25; }
+    .subtitle { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.65; }
+    .primary { border: 0; border-radius: 15px; background: var(--accent); color: #0b1c18; font-weight: 900; box-shadow: 0 8px 26px rgba(95,231,165,.14); }
+    .primary:hover { background: #c0f8de; }
+    .generate { padding: 19px 34px; font-size: 17px; flex-shrink: 0; min-height: 60px; }
+    .generate span { margin-right: 9px; }
+    .header-actions { display: flex; align-items: flex-end; flex-shrink: 0; }
+    .theme-toggle { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .theme-toggle input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .switch-track { display: inline-flex; align-items: center; width: 39px; height: 22px; padding: 3px; border-radius: 999px; background: #384557; border: 1px solid #607088; transition: background .18s, border-color .18s; }
+    .switch-knob { display: block; width: 14px; height: 14px; border-radius: 50%; background: #eef3fa; box-shadow: 0 1px 4px rgba(0,0,0,.24); transition: transform .18s; }
+    .theme-toggle input:checked + .switch-track { background: var(--accent-deep); border-color: var(--accent); }
+    .theme-toggle input:checked + .switch-track .switch-knob { transform: translateX(17px); background: var(--accent); }
+    .theme-toggle input:focus-visible + .switch-track { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .clear-button { display: block; margin: 12px 0 0 auto; color: var(--danger); background: transparent; border: 1px solid var(--line); border-radius: 9px; padding: 8px 11px; font-size: 12px; font-weight: 700; }
+    .clear-button:hover { border-color: var(--danger); }
+    .workspace { display: grid; grid-template-columns: minmax(0,1fr) 400px; gap: 22px; align-items: start; }
+    .panel { background: rgba(21,29,43,.96); border: 1px solid var(--line); border-radius: 23px; box-shadow: var(--shadow); min-width: 0; }
+    .results-panel { padding: 28px; }
+    .panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+    h2 { font-size: 23px; margin: 7px 0 6px; letter-spacing: -.04em; }
+    .section-desc { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .stat-row { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 4px; }
+    .stat { background: #202d3d; border: 1px solid #344253; padding: 9px 12px; border-radius: 100px; color: #cad5e4; font-size: 12px; white-space: nowrap; }
+    .stat strong { color: var(--accent); }
+    .results-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 13px; }
+    .results-grid.design-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    .result-card { min-height: 217px; display: flex; flex-direction: column; background: linear-gradient(150deg,#1e2a3b,#192333); border: 1px solid #314052; border-radius: 17px; padding: 18px; transition: opacity .2s, border-color .2s; min-width: 0; }
+    .result-card.is-disabled { opacity: .49; }
+    .result-card.is-empty:not(.is-disabled) { border-color: #66543e; }
+    .card-top { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .card-no { color: var(--faint); font-size: 11px; font-weight: 800; }
+    .card-title { margin: 0; font-size: 15px; font-weight: 800; }
+    .check-label { display: flex; align-items: center; gap: 7px; margin-left: auto; font-size: 12px; color: var(--muted); cursor: pointer; white-space: nowrap; }
+    .check-label input { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; }
+    .keyword-output { display: flex; align-items: center; flex: 1; font-size: clamp(17px,1.3vw,23px); font-weight: 800; letter-spacing: -.04em; overflow-wrap: anywhere; line-height: 1.5; padding: 20px 0 13px; }
+    .keyword-output.placeholder { color: #8291a6; font-size: 16px; font-weight: 500; }
+    .card-foot { display: flex; align-items: center; justify-content: space-between; gap: 7px; border-top: 1px solid #344154; padding-top: 12px; }
+    .card-count { color: var(--faint); font-size: 12px; }
+    .text-button { border: 0; padding: 4px 0; color: var(--accent); background: transparent; font-size: 12px; font-weight: 750; }
+    .text-button:hover { text-decoration: underline; }
+    .combination { margin-top: 19px; background: #111b28; border: 1px solid #344254; border-radius: 16px; padding: 20px; }
+    .combo-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 10px; }
+    .combo-title { font-size: 13px; font-weight: 800; color: var(--accent); }
+    .combo-text { font-size: 14px; color: #dfe8f3; line-height: 1.9; min-height: 28px; word-break: keep-all; overflow-wrap: anywhere; margin: 0; }
+    .small-btn { border: 1px solid #3c4b5f; border-radius: 10px; background: #263246; color: #e7edf6; font-size: 12px; font-weight: 700; padding: 9px 12px; }
+    .small-btn:hover { border-color: var(--accent); }
+    .footnote { margin: 16px 0 0; color: var(--faint); font-size: 12px; line-height: 1.6; }
+    .manager { padding: 25px; }
+    .manager h2 { font-size: 22px; }
+    .category-picker { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 7px; margin: 19px 0 24px; }
+    .category-picker.design-picker { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    .category-tab { border: 1px solid #344255; background: #1c2839; border-radius: 11px; min-height: 45px; padding: 8px 4px; color: #c6d0de; font-size: 13px; font-weight: 750; }
+    .category-tab:hover { border-color: #7f948e; }
+    .category-tab[aria-pressed="true"] { background: var(--accent-deep); color: #b5f4d3; border-color: #66a68d; }
+    .divider { height: 1px; background: var(--line); margin: 21px 0; }
+    .manager-section-title { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 13px; }
+    h3 { font-size: 15px; margin: 0; }
+    .muted { color: var(--muted); font-size: 12px; }
+    textarea, input[type="text"], input[type="search"], select { border: 1px solid #3c4c61; border-radius: 10px; color: var(--text); background: #0f1826; outline: none; }
+    textarea:focus, input[type="text"]:focus, input[type="search"]:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(168,236,202,.11); }
+    textarea { display: block; width: 100%; min-height: 100px; max-height: 260px; padding: 12px 13px; resize: vertical; font-size: 13px; line-height: 1.7; }
+    textarea::placeholder, input::placeholder { color: #75859c; }
+    .input-hint { font-size: 12px; line-height: 1.5; color: var(--faint); margin: 8px 0 12px; }
+    .add-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; }
+    select { min-height: 42px; padding: 0 10px; font-size: 12px; width: 100%; }
+    .add-button { padding: 0 17px; min-height: 42px; font-size: 13px; }
+    .search { width: 100%; min-height: 42px; padding: 0 12px; font-size: 13px; margin-bottom: 10px; }
+    .keyword-list { max-height: 305px; min-height: 72px; overflow: auto; padding-right: 3px; }
+    .word-row { display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #2b3648; padding: 9px 0; min-width: 0; }
+    .word-row:last-child { border-bottom: 0; }
+    .word-name { flex: 1; font-size: 13px; line-height: 1.55; overflow-wrap: anywhere; min-width: 0; }
+    .icon-btn { color: #b5c3d5; background: transparent; border: 1px solid transparent; border-radius: 8px; font-size: 12px; padding: 7px 8px; white-space: nowrap; }
+    .icon-btn:hover { background: #2a3850; color: #fff; }
+    .icon-btn.danger:hover { color: var(--danger); }
+    .edit-input { flex: 1; min-width: 0; height: 35px; font-size: 13px; padding: 6px 8px; }
+    .empty-list { text-align: center; color: var(--faint); font-size: 13px; line-height: 1.8; padding: 21px 8px; }
+    .backup-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 14px; }
+    .backup-btn { padding: 12px 7px; }
+    .import-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 11px; }
+    .import-row label { white-space: nowrap; color: var(--muted); font-size: 12px; }
+    .import-row select { max-width: 180px; }
+    .storage-note { margin: 13px 0 0; color: var(--faint); font-size: 11px; line-height: 1.6; }
+    .toast { position: fixed; z-index: 30; left: 50%; bottom: 26px; transform: translateX(-50%); padding: 13px 19px; border-radius: 12px; background: #d3f5e4; color: #17372b; font-size: 13px; font-weight: 750; box-shadow: 0 13px 45px rgba(0,0,0,.35); opacity: 0; pointer-events: none; transition: opacity .18s; max-width: calc(100vw - 30px); text-align: center; }
+    .toast.show { opacity: 1; }
+    #storageAlert { color: var(--danger); display: none; }
+
+    /* 밝은 회색 계열 라이트 모드: 다크 모드의 원래 색상은 유지합니다. */
+    :root[data-theme="light"] {
+      --bg: #eff1f4; --panel: #ffffff; --panel-2: #f4f6f8; --line: #d5dbe3;
+      --text: #202733; --muted: #526073; --faint: #65748a; --accent: #435368;
+      --accent-deep: #dce2e9; --purple: #56657e; --danger: #a13d45;
+      --shadow: 0 12px 35px rgba(35,45,65,.07);
+      color-scheme: light;
+    }
+    :root[data-theme="light"] body { background: radial-gradient(ellipse at 80% -10%, #e0e5ed 0, transparent 48%), var(--bg); }
+    :root[data-theme="light"] .panel { background: rgba(255,255,255,.98); }
+    :root[data-theme="light"] .generator-tab { background: #f3f5f8; border-color: #d2dae4; color: #4a586b; }
+    :root[data-theme="light"] .generator-tab[aria-selected="true"] { background: #dce2e9; border-color: #8392a7; color: #273649; }
+    :root[data-theme="light"] .primary { background: #435368; color: #fff; box-shadow: 0 8px 24px rgba(55,70,92,.13); }
+    :root[data-theme="light"] .primary:hover { background: #344256; }
+    :root[data-theme="light"] .stat { background: #eef1f5; border-color: #dce1e7; color: #4a586b; }
+    :root[data-theme="light"] .result-card { background: linear-gradient(150deg,#fbfcfd,#f2f4f7); border-color: #d8dee7; }
+    :root[data-theme="light"] .result-card.is-empty:not(.is-disabled) { border-color: #c7cfd9; }
+    :root[data-theme="light"] .keyword-output.placeholder { color: #778397; }
+    :root[data-theme="light"] .card-foot { border-color: #dce1e9; }
+    :root[data-theme="light"] .combination { background: #f3f5f8; border-color: #d7dfe8; }
+    :root[data-theme="light"] .combo-text { color: #354153; }
+    :root[data-theme="light"] .small-btn { border-color: #cbd3dd; background: #eef1f5; color: #39475a; }
+    :root[data-theme="light"] .small-btn:hover { border-color: #435368; }
+    :root[data-theme="light"] .category-tab { border-color: #d2dae4; background: #f3f5f8; color: #4a586b; }
+    :root[data-theme="light"] .category-tab:hover { border-color: #8997a8; }
+    :root[data-theme="light"] .category-tab[aria-pressed="true"] { background: #dce2e9; color: #273649; border-color: #8392a7; }
+    :root[data-theme="light"] textarea,
+    :root[data-theme="light"] input[type="text"],
+    :root[data-theme="light"] input[type="search"],
+    :root[data-theme="light"] select { background: #fff; border-color: #c5ceda; color: var(--text); }
+    :root[data-theme="light"] textarea:focus,
+    :root[data-theme="light"] input[type="text"]:focus,
+    :root[data-theme="light"] input[type="search"]:focus,
+    :root[data-theme="light"] select:focus { box-shadow: 0 0 0 2px rgba(67,83,104,.12); }
+    :root[data-theme="light"] textarea::placeholder, :root[data-theme="light"] input::placeholder { color: #7c8797; }
+    :root[data-theme="light"] .word-row { border-color: #e0e5ec; }
+    :root[data-theme="light"] .icon-btn { color: #4b5b70; }
+    :root[data-theme="light"] .icon-btn:hover { background: #e5e9ef; color: #203044; }
+    :root[data-theme="light"] .switch-track { background: #aeb8c6; border-color: #8b97a7; }
+    :root[data-theme="light"] .switch-knob { background: #fff; }
+    :root[data-theme="light"] .theme-toggle input:checked + .switch-track { background: #435368; border-color: #435368; }
+    :root[data-theme="light"] .theme-toggle input:checked + .switch-track .switch-knob { background: #fff; }
+    :root[data-theme="light"] .toast { background: #343f4e; color: #fff; }
+
+    @media (max-width: 1500px) { .results-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .results-grid.design-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
+    @media (max-width: 1060px) { .app { padding: 25px 20px 45px; } .workspace { grid-template-columns: 1fr; } .results-grid { grid-template-columns: repeat(4,minmax(0,1fr)); } .results-grid.design-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } .manager { max-width: none; } .keyword-list { max-height: 340px; } }
+    @media (max-width: 800px) { .results-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .results-grid.design-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 560px) {
+      .app { padding: 17px 12px 35px; }
+      .global-nav { align-items: stretch; flex-direction: column-reverse; gap: 11px; margin-bottom: 17px; padding-bottom: 14px; }
+      .global-actions { align-self: flex-end; }
+      .generator-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+      .generator-tab { font-size: 12px; padding: 10px 8px; min-height: 53px; }
+      .topbar { flex-direction: column; gap: 14px; align-items: stretch; padding: 5px 2px 20px; }
+      .header-actions { justify-content: flex-end; }
+      h1 { font-size: 24px; }
+      .brand-label { font-size: 10px; }
+      .subtitle { font-size: 11px; }
+      .generate { padding: 12px 13px; min-height: 49px; font-size: 13px; border-radius: 11px; }
+      .generate span { margin-right: 2px; }
+      .header-actions { gap: 8px; }
+      .theme-toggle { font-size: 11px; gap: 6px; }
+      .switch-track { width: 35px; height: 20px; }
+      .switch-knob { width: 12px; height: 12px; }
+      .theme-toggle input:checked + .switch-track .switch-knob { transform: translateX(15px); }
+      .workspace { gap: 14px; }
+      .results-panel, .manager { padding: 16px; border-radius: 17px; }
+      .panel-heading { margin-bottom: 16px; }
+      h2 { font-size: 20px; }
+      .results-grid { gap: 9px; }
+      .result-card { min-height: 175px; padding: 12px; border-radius: 13px; }
+      .card-title { font-size: 13px; }
+      .card-no { font-size: 10px; }
+      .card-top { gap: 5px; }
+      .check-label { gap: 4px; font-size: 11px; }
+      .check-label input { width: 15px; height: 15px; }
+      .keyword-output { font-size: 16px; padding: 14px 0 9px; }
+      .keyword-output.placeholder { font-size: 13px; }
+      .card-foot { padding-top: 8px; }
+      .card-count, .text-button { font-size: 11px; }
+      .combination { padding: 14px; }
+      .category-picker { gap: 6px; }
+      .category-tab { font-size: 12px; }
+    }
+    @media (max-width: 355px) { .results-grid, .results-grid.design-grid { grid-template-columns: 1fr; } .result-card { min-height: 155px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <nav class="global-nav" aria-label="키워드 생성기 선택 및 테마 설정">
+      <div class="generator-tabs" role="tablist" aria-label="키워드 생성기 선택">
+        <button type="button" id="illustrationTab" class="generator-tab" role="tab" aria-selected="true" aria-controls="mainWorkspace">일러스트 키워드 생성기</button>
+        <button type="button" id="designTab" class="generator-tab" role="tab" aria-selected="false" aria-controls="mainWorkspace">캐릭터 디자인 키워드 생성기</button>
+      </div>
+      <div class="global-actions">
+        <label class="theme-toggle" for="themeToggle">
+          <span id="themeText">다크 모드</span>
+          <input type="checkbox" id="themeToggle" aria-label="라이트 모드와 다크 모드 전환" aria-describedby="themeText">
+          <span class="switch-track" aria-hidden="true"><span class="switch-knob"></span></span>
+        </label>
+      </div>
+    </nav>
+    <header class="topbar">
+      <div>
+        <div class="brand-label">ILLUSTRATION IDEA LAB / OFFLINE</div>
+        <h1 id="pageTitle">일러스트 키워드 생성기</h1>
+        <p class="subtitle" id="pageSubtitle">8가지 주제에서 무작위로 조합해, 오늘의 그림 주제를 찾아보세요.</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="primary generate" id="generateBtn" title="선택된 항목의 키워드를 새로 생성"><span aria-hidden="true">↻</span> 키워드 생성</button>
+      </div>
+    </header>
+
+    <main class="workspace" id="mainWorkspace" role="tabpanel" aria-labelledby="illustrationTab">
+      <section class="panel results-panel" aria-labelledby="resultsTitle">
+        <div class="panel-heading">
+          <div>
+            <div class="eyebrow">01 / RANDOM BOARD</div>
+            <h2 id="resultsTitle">오늘의 조합</h2>
+            <p class="section-desc">사용할 항목을 체크하고 상단의 생성 버튼을 누르세요.</p>
+          </div>
+          <div class="stat-row" aria-live="polite">
+            <div class="stat">활성 항목 <strong id="enabledCount">8 / 8</strong></div>
+            <div class="stat">저장된 키워드 <strong id="totalCount">0개</strong></div>
+          </div>
+        </div>
+        <div class="results-grid" id="resultsGrid"></div>
+        <div class="combination">
+          <div class="combo-head">
+            <span class="combo-title">COMBINATION / 조합 요약</span>
+            <button type="button" class="small-btn" id="copyBtn">조합 복사</button>
+          </div>
+          <p class="combo-text" id="combinationText" aria-live="polite">키워드 생성 버튼을 누르면 이곳에 조합이 표시됩니다.</p>
+        </div>
+        <p class="footnote">* 각 항목은 독립적으로 추첨합니다. 같은 키워드가 다른 생성 회차에 다시 나올 수 있습니다.</p>
+      </section>
+
+      <aside class="panel manager" id="manager" aria-labelledby="managerTitle">
+        <div class="eyebrow">02 / KEYWORD LIBRARY</div>
+        <h2 id="managerTitle">키워드 관리</h2>
+        <p class="section-desc">항목별 등록 · 검색 · 수정 · 삭제 · 백업</p>
+        <div class="category-picker" id="categoryPicker" aria-label="관리할 항목 선택"></div>
+
+        <div class="manager-section-title">
+          <h3 id="editingTitle">캐릭터 · 키워드 추가</h3>
+          <span class="muted" id="currentCount">0개 저장</span>
+        </div>
+        <textarea id="keywordInput" maxlength="30000" aria-label="추가할 키워드 입력" placeholder="키워드 1개 또는 여러 개를 입력하세요"></textarea>
+        <p class="input-hint" id="delimiterHint">쉼표(,)로 구분하면 여러 키워드를 한 번에 등록할 수 있습니다. Ctrl+Enter로도 추가할 수 있습니다.</p>
+        <div class="add-row">
+          <select id="delimiter" aria-label="여러 키워드 구분자 선택">
+            <option value=",">쉼표 ( , ) 구분</option>
+            <option value="/">슬래시 ( / ) 구분</option>
+            <option value="-">대시 ( - ) 구분</option>
+          </select>
+          <button type="button" class="primary add-button" id="addBtn">+ 키워드 저장</button>
+        </div>
+
+        <div class="divider"></div>
+        <div class="manager-section-title">
+          <h3>저장된 키워드</h3>
+          <span class="muted" id="filteredCount"></span>
+        </div>
+        <input type="search" id="keywordSearch" class="search" placeholder="키워드 검색" aria-label="저장된 키워드 검색">
+        <div class="keyword-list" id="keywordList" aria-live="polite"></div>
+
+        <div class="divider"></div>
+        <div class="manager-section-title"><h3>데이터 백업 및 이동</h3></div>
+        <p class="storage-note" id="backupScope">현재 선택한 일러스트 키워드 생성기 데이터만 내보내거나 불러옵니다.</p>
+        <div class="backup-buttons">
+          <button type="button" class="small-btn backup-btn" id="exportBtn">↓ JSON 내보내기</button>
+          <button type="button" class="small-btn backup-btn" id="importBtn">↑ JSON 불러오기</button>
+        </div>
+        <div class="import-row">
+          <label for="importMode">불러오기 방식</label>
+          <select id="importMode">
+            <option value="merge">합치기 (중복 제외)</option>
+            <option value="replace">전체 교체</option>
+          </select>
+        </div>
+        <button type="button" class="clear-button" id="clearBtn">현재 생성기 키워드 전체 비우기</button>
+        <input id="importFile" type="file" accept=".json,application/json" hidden>
+        <p class="storage-note">데이터는 현재 브라우저에만 자동 저장됩니다. 다른 PC·브라우저로 옮기거나 브라우저 데이터를 삭제하기 전에는 JSON 파일을 내보내세요. 인터넷 연결은 필요 없습니다.</p>
+        <p class="storage-note" id="storageAlert" role="alert">브라우저가 로컬 저장을 허용하지 않습니다. 현재 입력 내용은 종료 시 사라질 수 있으므로 JSON으로 백업하세요.</p>
+      </aside>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    'use strict';
+    (function () {
+      const MODES = {
+        illustration: {
+          title: '일러스트 키워드 생성기', subtitle: '8가지 주제에서 무작위로 조합해, 오늘의 그림 주제를 찾아보세요.',
+          categories: [['character','캐릭터'],['action','행동'],['emotion','감정'],['situation','상황'],['place','장소'],['time','시간'],['mood','분위기'],['composition','구도']],
+          storageKey: 'illustration_keyword_generator_v1' // v1.1 저장 키를 그대로 사용하여 기존 키워드 유지
+        },
+        design: {
+          title: '캐릭터 디자인 키워드 생성기', subtitle: '직업, 배경·장르, 종족을 조합해 새로운 캐릭터 디자인을 구상하세요.',
+          categories: [['job','직업'],['settingGenre','배경·장르'],['race','종족']],
+          storageKey: 'character_design_keyword_generator_v2'
+        }
+      };
+      const THEME_KEY = 'illustration_keyword_generator_theme';
+      const ACTIVE_TAB_KEY = 'keyword_generator_active_tab_v2';
+      const $ = id => document.getElementById(id);
+      const keysOf = type => MODES[type].categories.map(([key]) => key);
+      const blank = type => ({version: 1, keywords: Object.fromEntries(keysOf(type).map(k => [k, []])), enabled: Object.fromEntries(keysOf(type).map(k => [k, true]))});
+      const clean = value => value.replace(/\s+/g, ' ').trim();
+      const same = value => value.toLocaleLowerCase('ko-KR');
+      function unique(arr) {
+        const seen = new Set();
+        return arr.filter(v => { const key = same(v); if (seen.has(key)) return false; seen.add(key); return true; });
+      }
+      const states = Object.fromEntries(Object.keys(MODES).map(type => [type, {data: blank(type), category: keysOf(type)[0], outputs:{}, hasGenerated:false, storageAvailable:true}]));
+      let mode = 'illustration';
+      let toastTimer;
+      let CATEGORIES, KEYS, LABELS, data, category, outputs, hasGenerated;
+
+      function toast(message) {
+        const el = $('toast'); el.textContent = message; el.classList.add('show');
+        clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+      }
+      function element(tag, className, content) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (content !== undefined) node.textContent = content;
+        return node;
+      }
+      function applyTheme(theme) {
+        const light = theme === 'light';
+        document.documentElement.dataset.theme = light ? 'light' : 'dark';
+        $('themeToggle').checked = light;
+        $('themeText').textContent = light ? '라이트 모드' : '다크 모드';
+        $('colorSchemeMeta').content = light ? 'light' : 'dark';
+      }
+      try { applyTheme(localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark'); }
+      catch (e) { applyTheme('dark'); }
+
+      // 각 생성기는 저장 공간을 분리합니다. 잘못된 데이터가 있으면 덮어쓰지 않습니다.
+      Object.keys(MODES).forEach(type => {
+        const state = states[type];
+        try {
+          const stored = localStorage.getItem(MODES[type].storageKey);
+          if (stored === null) return;
+          const parsed = JSON.parse(stored);
+          if (!parsed || typeof parsed !== 'object' || !parsed.keywords || typeof parsed.keywords !== 'object' || Array.isArray(parsed.keywords)) throw Error('invalid');
+          const keys = keysOf(type);
+          state.data.keywords = Object.fromEntries(keys.map(k => [k, Array.isArray(parsed.keywords[k]) ? unique(parsed.keywords[k].filter(v => typeof v === 'string').map(clean).filter(Boolean)) : []]));
+          state.data.enabled = Object.fromEntries(keys.map(k => [k, parsed.enabled?.[k] !== false]));
+        } catch (e) { state.storageAvailable = false; }
+      });
+      function save() {
+        if (!states[mode].storageAvailable) return;
+        try { localStorage.setItem(MODES[mode].storageKey, JSON.stringify(data)); }
+        catch (e) { states[mode].storageAvailable = false; $('storageAlert').style.display = 'block'; toast('저장하지 못했습니다. JSON 파일로 백업하세요.'); }
+      }
+      function syncState() {
+        const current = states[mode];
+        current.category = category;
+        current.outputs = outputs;
+        current.hasGenerated = hasGenerated;
+      }
+      function switchMode(type) {
+        if (!MODES[type]) return;
+        if (CATEGORIES) syncState();
+        mode = type;
+        CATEGORIES = MODES[type].categories;
+        KEYS = keysOf(type);
+        LABELS = Object.fromEntries(CATEGORIES);
+        data = states[type].data;
+        category = states[type].category;
+        outputs = states[type].outputs;
+        hasGenerated = states[type].hasGenerated;
+        $('pageTitle').textContent = MODES[type].title;
+        $('pageSubtitle').textContent = MODES[type].subtitle;
+        document.title = MODES[type].title + ' | v2.0';
+        $('illustrationTab').setAttribute('aria-selected', String(type === 'illustration'));
+        $('designTab').setAttribute('aria-selected', String(type === 'design'));
+        $('mainWorkspace').setAttribute('aria-labelledby', type === 'illustration' ? 'illustrationTab' : 'designTab');
+        $('categoryPicker').classList.toggle('design-picker', type === 'design');
+        $('resultsGrid').classList.toggle('design-grid', type === 'design');
+        $('backupScope').textContent = '현재 선택한 ' + MODES[type].title + ' 데이터만 내보내거나 불러옵니다.';
+        $('clearBtn').textContent = '현재 생성기 키워드 전체 비우기';
+        $('storageAlert').style.display = states[type].storageAvailable ? 'none' : 'block';
+        $('keywordSearch').value = '';
+        $('keywordInput').value = '';
+        $('importFile').value = '';
+        renderTabs(); renderManager(); renderResults(); updateCombination();
+        try { localStorage.setItem(ACTIVE_TAB_KEY, type); } catch (e) { /* 선택 탭 유지 불가 시 기본 탭 사용 */ }
+      }
+      function renderTabs() {
+        const picker = $('categoryPicker'); picker.replaceChildren();
+        CATEGORIES.forEach(([key,label]) => {
+          const btn = element('button','category-tab',label);
+          btn.type = 'button'; btn.setAttribute('aria-pressed',String(key === category));
+          btn.addEventListener('click', () => {
+            category = key; states[mode].category = key;
+            $('keywordSearch').value = ''; $('keywordInput').value = '';
+            renderTabs(); renderManager();
+          });
+          picker.append(btn);
+        });
+      }
+      function renderResults() {
+        const grid = $('resultsGrid'); grid.replaceChildren();
+        $('enabledCount').textContent = KEYS.filter(k => data.enabled[k]).length + ' / ' + KEYS.length;
+        $('totalCount').textContent = KEYS.reduce((n,k) => n + data.keywords[k].length, 0) + '개';
+        CATEGORIES.forEach(([key,label],index) => {
+          const enabled = data.enabled[key], empty = !data.keywords[key].length;
+          const card = element('article','result-card' + (!enabled ? ' is-disabled' : '') + (empty ? ' is-empty' : ''));
+          const top = element('div','card-top');
+          top.append(element('span','card-no',String(index+1).padStart(2,'0')));
+          top.append(element('h3','card-title',label));
+          const checkboxLabel = element('label','check-label');
+          const checkbox = document.createElement('input'); checkbox.type='checkbox'; checkbox.checked=enabled; checkbox.setAttribute('aria-label',label+' 항목 사용');
+          checkbox.addEventListener('change', () => { data.enabled[key]=checkbox.checked; if (!checkbox.checked) delete outputs[key]; save(); renderResults(); updateCombination(); });
+          checkboxLabel.append(checkbox,document.createTextNode('사용')); top.append(checkboxLabel);
+          const word = element('div','keyword-output');
+          if (!enabled) { word.textContent='선택 해제'; word.classList.add('placeholder'); }
+          else if (empty) { word.textContent='키워드 미등록'; word.classList.add('placeholder'); }
+          else if (outputs[key] !== undefined) word.textContent=outputs[key];
+          else { word.textContent='생성 대기'; word.classList.add('placeholder'); }
+          const foot = element('div','card-foot');
+          foot.append(element('span','card-count',data.keywords[key].length+'개 등록'));
+          const edit = element('button','text-button','키워드 관리 →'); edit.type='button'; edit.setAttribute('aria-label',label+' 키워드 관리');
+          edit.addEventListener('click', () => {
+            category=key; states[mode].category=key; $('keywordSearch').value=''; renderTabs(); renderManager();
+            $('manager').scrollIntoView({behavior:'smooth',block:'start'});
+          });
+          foot.append(edit); card.append(top,word,foot); grid.append(card);
+        });
+      }
+      function updateCombination() {
+        const valid = CATEGORIES.filter(([k]) => data.enabled[k] && outputs[k] !== undefined);
+        const missing = CATEGORIES.filter(([k]) => data.enabled[k] && data.keywords[k].length === 0).map(([,name]) => name);
+        if (!hasGenerated) { $('combinationText').textContent='키워드 생성 버튼을 누르면 이곳에 조합이 표시됩니다.'; return; }
+        if (!KEYS.some(k => data.enabled[k])) { $('combinationText').textContent='활성화된 항목이 없습니다. 위의 체크박스에서 하나 이상 선택하세요.'; return; }
+        let result=valid.map(([k,label]) => label+': '+outputs[k]).join('  /  ');
+        if (missing.length) result+=(result?'\n':'')+'※ 키워드 미등록 항목: '+missing.join(', ');
+        $('combinationText').style.whiteSpace='pre-line';
+        $('combinationText').textContent=result||'등록된 키워드가 없습니다. 오른쪽 관리 화면에서 추가하세요.';
+      }
+      function renderManager() {
+        const all=data.keywords[category];
+        $('editingTitle').textContent=LABELS[category]+' · 키워드 추가';
+        $('currentCount').textContent=all.length+'개 저장';
+        const q=same(clean($('keywordSearch').value));
+        const filtered=all.map((value,index) => ({value,index})).filter(o => same(o.value).includes(q));
+        $('filteredCount').textContent=q ? `${filtered.length} / ${all.length}개 표시` : `${all.length}개`;
+        const list=$('keywordList'); list.replaceChildren();
+        if (!filtered.length) { list.append(element('div','empty-list',q?'검색 결과가 없습니다.':'등록된 키워드가 없습니다.')); return; }
+        filtered.forEach(({value,index}) => {
+          const row=element('div','word-row'); row.append(element('span','word-name',value));
+          const type=mode, key=category;
+          const edit=element('button','icon-btn','수정'); edit.type='button'; edit.setAttribute('aria-label',value+' 수정');
+          edit.addEventListener('click',() => beginEdit(row,key,index,value));
+          const remove=element('button','icon-btn danger','삭제'); remove.type='button'; remove.setAttribute('aria-label',value+' 삭제');
+          remove.addEventListener('click',() => {
+            if (!confirm('“'+value+'” 키워드를 삭제하시겠습니까?')) return;
+            states[type].data.keywords[key].splice(index,1);
+            if (states[type].outputs[key]===value) delete states[type].outputs[key];
+            save(); renderManager(); renderResults(); updateCombination(); toast('키워드를 삭제했습니다.');
+          });
+          row.append(edit,remove); list.append(row);
+        });
+      }
+      function beginEdit(row,key,index,oldValue) {
+        row.replaceChildren();
+        const field=element('input','edit-input'); field.type='text'; field.value=oldValue; field.maxLength=120; field.setAttribute('aria-label','키워드 수정 입력');
+        const saveBtn=element('button','icon-btn','저장'); saveBtn.type='button';
+        const cancelBtn=element('button','icon-btn','취소'); cancelBtn.type='button';
+        const apply=() => {
+          const next=clean(field.value);
+          if (!next) { toast('빈 키워드는 저장할 수 없습니다.'); field.focus(); return; }
+          if (data.keywords[key].some((item,i) => i!==index && same(item)===same(next))) { toast('이미 등록된 키워드입니다.'); field.focus(); return; }
+          data.keywords[key][index]=next;
+          if (outputs[key]===oldValue) outputs[key]=next;
+          save(); renderManager(); renderResults(); updateCombination(); toast('키워드를 수정했습니다.');
+        };
+        saveBtn.addEventListener('click',apply);
+        cancelBtn.addEventListener('click',renderManager);
+        field.addEventListener('keydown',e => { if (e.key==='Enter') { e.preventDefault(); apply(); } if (e.key==='Escape') renderManager(); });
+        row.append(field,saveBtn,cancelBtn); field.focus(); field.select();
+      }
+      function addKeywords() {
+        const raw=$('keywordInput').value, divider=$('delimiter').value;
+        const values=unique(raw.split(divider).map(clean).filter(Boolean));
+        if (!values.length) { toast('추가할 키워드를 입력하세요.'); $('keywordInput').focus(); return; }
+        if (values.some(v => v.length>120)) { toast('키워드 1개는 최대 120자까지 입력할 수 있습니다.'); return; }
+        const existing=new Set(data.keywords[category].map(same));
+        const newValues=values.filter(v => !existing.has(same(v)));
+        if (!newValues.length) { toast('모두 이미 등록된 키워드입니다.'); return; }
+        data.keywords[category].push(...newValues); $('keywordInput').value='';
+        save(); renderManager(); renderResults();
+        toast(newValues.length+'개 저장'+(newValues.length<values.length?' (중복 제외)':'')+'했습니다.');
+      }
+      function generate() {
+        hasGenerated=true; states[mode].hasGenerated=true;
+        CATEGORIES.forEach(([key]) => {
+          if (!data.enabled[key] || !data.keywords[key].length) { delete outputs[key]; return; }
+          const arr=data.keywords[key]; outputs[key]=arr[Math.floor(Math.random()*arr.length)];
+        });
+        renderResults(); updateCombination();
+        if (!KEYS.some(k => data.enabled[k])) toast('항목을 하나 이상 선택하세요.');
+      }
+      function exportData() {
+        // v1.1 일러스트 JSON 포맷을 유지하여 이전 파일과 교환 가능.
+        const payload={app:'illustration-keyword-generator',version:mode==='illustration'?1:2,
+          ...(mode==='design'?{generatorType:'design'}:{}),exportedAt:new Date().toISOString(),keywords:data.keywords,enabled:data.enabled};
+        const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});
+        const url=URL.createObjectURL(blob), anchor=document.createElement('a');
+        const stamp=new Date().toISOString().slice(0,10);
+        anchor.href=url; anchor.download=(mode==='illustration'?'일러스트':'캐릭터디자인')+'_키워드_백업_'+stamp+'.json';
+        document.body.append(anchor); anchor.click(); anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(url),5000);
+        toast('현재 생성기의 JSON 백업 파일을 내보냈습니다.');
+      }
+      async function importData(file) {
+        if (!file) return;
+        if (file.size>2*1024*1024) { toast('2MB 이하의 JSON 파일을 선택하세요.'); return; }
+        const importMode=mode; // 파일을 읽는 도중 탭이 바뀌어도 다른 생성기에 저장하지 않음
+        try {
+          const parsed=JSON.parse(await file.text());
+          if (!parsed || typeof parsed!=='object' || !parsed.keywords || typeof parsed.keywords!=='object' || Array.isArray(parsed.keywords)) throw new Error('키워드 데이터가 없는 파일입니다.');
+          if (parsed.app!==undefined && parsed.app!=='illustration-keyword-generator') throw new Error('지원하지 않는 앱의 백업 파일입니다.');
+          const valid=importMode==='illustration' ? parsed.version===undefined || parsed.version===1 : parsed.version===2 && parsed.generatorType==='design';
+          if (!valid || (importMode==='illustration' && parsed.generatorType==='design')) throw new Error('현재 탭과 다른 생성기의 백업 파일입니다. 올바른 탭에서 불러오세요.');
+          const keys=keysOf(importMode), labels=Object.fromEntries(MODES[importMode].categories);
+          const present=keys.filter(k => Object.prototype.hasOwnProperty.call(parsed.keywords,k));
+          if (!present.length) throw new Error('현재 생성기에 해당하는 항목이 없습니다.');
+          const incoming={};
+          present.forEach(k => {
+            const entries=parsed.keywords[k];
+            if (!Array.isArray(entries) || entries.length>3000 || entries.some(v => typeof v!=='string' || clean(v).length>120)) throw new Error(labels[k]+' 항목에 유효하지 않은 데이터가 있습니다.');
+            incoming[k]=unique(entries.map(clean).filter(Boolean));
+          });
+          const action=$('importMode').value;
+          if (action==='replace' && !confirm('현재 생성기('+MODES[importMode].title+')의 키워드 전체를 백업 파일 내용으로 교체합니다. 다른 탭의 키워드는 유지됩니다. 계속하시겠습니까?')) return;
+          const target=states[importMode], targetData=target.data;
+          let count=0;
+          keys.forEach(k => {
+            const before=targetData.keywords[k].length;
+            if (action==='replace') targetData.keywords[k]=incoming[k]||[];
+            else targetData.keywords[k]=unique([...targetData.keywords[k],...(incoming[k]||[])]);
+            count+=action==='replace'?targetData.keywords[k].length:targetData.keywords[k].length-before;
+            if (target.outputs[k] && !targetData.keywords[k].includes(target.outputs[k])) delete target.outputs[k];
+          });
+          if (action==='replace' && parsed.enabled && typeof parsed.enabled==='object') keys.forEach(k => targetData.enabled[k]=parsed.enabled[k]!==false);
+          try { localStorage.setItem(MODES[importMode].storageKey,JSON.stringify(targetData)); }
+          catch (e) { target.storageAvailable=false; toast('브라우저 저장 실패. JSON 백업이 필요합니다.'); }
+          if (mode===importMode) { renderTabs(); renderManager(); renderResults(); updateCombination(); $('storageAlert').style.display=target.storageAvailable?'none':'block'; }
+          toast(action==='replace'?'현재 생성기 데이터를 교체했습니다. 총 '+count+'개 키워드':count+'개 새 키워드를 합쳤습니다.');
+        } catch (e) { toast('불러오기 실패: '+e.message); }
+      }
+      async function copySummary() {
+        const output=$('combinationText').textContent;
+        if (!hasGenerated || !Object.keys(outputs).some(k => data.enabled[k])) { toast('먼저 키워드를 생성하세요.'); return; }
+        try {
+          if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(output);
+          else {
+            const temp=document.createElement('textarea'); temp.value=output;
+            temp.style.position='fixed'; temp.style.opacity='0'; document.body.append(temp);
+            temp.select(); const ok=document.execCommand('copy'); temp.remove();
+            if (!ok) throw new Error('copy unavailable');
+          }
+          toast('조합 내용을 복사했습니다.');
+        } catch (e) { toast('브라우저에서 복사가 차단되었습니다. 조합 텍스트를 직접 선택해 복사하세요.'); }
+      }
+      $('themeToggle').addEventListener('change',e => {
+        const theme=e.target.checked?'light':'dark'; applyTheme(theme);
+        try { localStorage.setItem(THEME_KEY,theme); }
+        catch (err) { toast('테마 설정을 저장할 수 없습니다. 다음 실행 시 초기화될 수 있습니다.'); }
+      });
+      $('illustrationTab').addEventListener('click',() => switchMode('illustration'));
+      $('designTab').addEventListener('click',() => switchMode('design'));
+      $('clearBtn').addEventListener('click',() => {
+        const count=KEYS.reduce((sum,k) => sum+data.keywords[k].length,0);
+        if (!count) { toast('비울 키워드가 없습니다.'); return; }
+        if (!confirm('현재 생성기('+MODES[mode].title+')의 키워드 '+count+'개를 삭제합니다. 다른 탭의 키워드는 유지됩니다. 계속하시겠습니까? (필요하면 먼저 JSON으로 백업하세요.)')) return;
+        KEYS.forEach(k => { data.keywords[k]=[]; delete outputs[k]; });
+        hasGenerated=false; states[mode].hasGenerated=false;
+        save(); renderManager(); renderResults(); updateCombination(); toast('현재 생성기의 키워드를 모두 비웠습니다.');
+      });
+      $('generateBtn').addEventListener('click',generate);
+      $('addBtn').addEventListener('click',addKeywords);
+      $('keywordInput').addEventListener('keydown',e => { if (e.ctrlKey && e.key==='Enter') { e.preventDefault(); addKeywords(); } });
+      $('keywordSearch').addEventListener('input',renderManager);
+      $('delimiter').addEventListener('change',() => {
+        const desc={',':'쉼표(,)', '/':'슬래시(/)', '-':'대시(-)'}[$('delimiter').value];
+        $('delimiterHint').textContent=desc+'로 구분하면 여러 키워드를 한 번에 등록할 수 있습니다. Ctrl+Enter로도 추가할 수 있습니다.';
+      });
+      $('exportBtn').addEventListener('click',exportData);
+      $('importBtn').addEventListener('click',() => $('importFile').click());
+      $('importFile').addEventListener('change',async e => { const file=e.target.files?.[0]; await importData(file); e.target.value=''; });
+      $('copyBtn').addEventListener('click',copySummary);
+      let initialMode='illustration';
+      try { if (localStorage.getItem(ACTIVE_TAB_KEY)==='design') initialMode='design'; } catch (e) { /* 기본 탭 */ }
+      switchMode(initialMode);
+    })();
+  </script>
+</body>
+</html>
